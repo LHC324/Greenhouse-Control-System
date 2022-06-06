@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<ProjectWorkspace xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="project_mpw.xsd">
+
+  <SchemaVersion>1.0</SchemaVersion>
+
+  <Header>### uVision Project, (C) Keil Software</Header>
+
+  <WorkspaceName>WorkSpace</WorkspaceName>
+
+  <project>
+    <PathAndName>.\Analog input\MDK-ARM\Analog input.uvprojx</PathAndName>
+  </project>
+
+  <project>
+    <PathAndName>.\Analog output\MDK-ARM\Analog output.uvprojx</PathAndName>
+  </project>
+
+  <project>
+    <PathAndName>.\communication\MDK-ARM\communication.uvprojx</PathAndName>
+  </project>
+
+  <project>
+    <PathAndName>.\Digital input\MDK-ARM\Digital input.uvprojx</PathAndName>
+  </project>
+
+  <project>
+    <PathAndName>.\Digital output\MDK-ARM\Digital output.uvprojx</PathAndName>
+  </project>
+
+  <project>
+    <PathAndName>.\Master\MDK-ARM\Master.uvprojx</PathAndName>
+    <NodeIsActive>1</NodeIsActive>
+  </project>
+
+</ProjectWorkspace>

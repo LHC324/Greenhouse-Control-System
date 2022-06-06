@@ -1,0 +1,11 @@
+{
+    "files.associations": {
+        "io_signal.h": "c",
+        "modbus.h": "c",
+        "main.h": "c",
+        "adc.h": "c",
+        "tool.h": "c",
+        "tim.h": "c",
+        "usart.h": "c"
+    }
+}

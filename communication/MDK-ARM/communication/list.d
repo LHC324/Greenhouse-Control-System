@@ -1,0 +1,12 @@
+.\communication\list.o: ../Middlewares/Third_Party/FreeRTOS/Source/list.c
+.\communication\list.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
+.\communication\list.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
+.\communication\list.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stddef.h
+.\communication\list.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+.\communication\list.o: ../Core/Inc/FreeRTOSConfig.h
+.\communication\list.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h
+.\communication\list.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h
+.\communication\list.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/deprecated_definitions.h
+.\communication\list.o: ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM0/portmacro.h
+.\communication\list.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/mpu_wrappers.h
+.\communication\list.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h

@@ -1,0 +1,13 @@
+{
+    "files.associations": {
+        "modbusslave.h": "c",
+        "modbus.h": "c",
+        "usart.h": "c",
+        "tim.h": "c",
+        "main.h": "c",
+        "io_uart.h": "c",
+        "stdio.h": "c",
+        "string": "c",
+        "tool.h": "c"
+    }
+}

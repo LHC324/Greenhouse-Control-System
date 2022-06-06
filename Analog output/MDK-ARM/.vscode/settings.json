@@ -1,0 +1,9 @@
+{
+    "files.associations": {
+        "io_signal.h": "c",
+        "tool.h": "c",
+        "modbus.h": "c",
+        "mcp4822.h": "c",
+        "main.h": "c"
+    }
+}
