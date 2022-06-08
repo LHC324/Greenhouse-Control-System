@@ -100,8 +100,8 @@ void Write_Digital_IO(void)
 void Read_Analog_Io(void)
 {
 #define MAX_RANGE 0.1F
-#define CP 0.005378F
-#define CQ 0.375224F
+#define CP 0.00888554F
+#define CQ 0.487198795F
     static bool first_flag = false;
     pModbusHandle pd = Modbus_Object;
 /*滤波结构需要不断迭代，否则滤波器无法正常工作*/
@@ -147,6 +147,9 @@ void Read_Analog_Io(void)
     for (uint16_t ch = 0; ch < ADC_DMA_CHANNEL; ch++)
     { /*获取DAC值*/
         pdata[ch] = CP * Get_AdcValue(ch) + CQ;
+#if defined(USING_DEBUG)
+        Debug("ch[%d]= %d.\r\n", ch, Get_AdcValue(ch));
+#endif
         pdata[ch] = (pdata[ch] <= CQ) ? 0 : pdata[ch];
         /*滤波处理*/
 #if defined(KALMAN)
@@ -161,8 +164,9 @@ void Read_Analog_Io(void)
 #if defined(USING_DEBUG)
             Debug("ch[%d]= %.3f.\r\n", ch, pdata[ch]);
 #endif
+            back_data[ch] = pdata[ch];
         }
-        back_data[ch] = pdata[ch];
+        // back_data[ch] = pdata[ch];
         // pdata[0] = 12.5F;
         // /*大小端转换*/
         // Endian_Swap((uint8_t *)&pdata[ch], 0U, sizeof(float));

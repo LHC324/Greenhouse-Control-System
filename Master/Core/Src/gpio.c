@@ -61,24 +61,24 @@ void MX_GPIO_Init(void)
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOI, CARD6_Pin|CARD7_Pin|CARD8_Pin|CARD9_Pin
-                          |CARD1_Pin|CARD2_Pin|CARD3_Pin|CARD4_Pin
-                          |CARD5_Pin, GPIO_PIN_RESET);
+                          |CARD0_Pin|CARD1_Pin|CARD2_Pin|CARD3_Pin
+                          |CARD4_Pin|CARD5_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, LTE_RESET_Pin|LTE_RELOAD_Pin|USB_EN_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, LTE_RESET_Pin|LTE_RELOAD_Pin, GPIO_PIN_SET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(USB_EN_GPIO_Port, USB_EN_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, LED_Pin|WIFI_RELOAD_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(WIFI_RESET_GPIO_Port, WIFI_RESET_Pin, GPIO_PIN_RESET);
-
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(CARD0_GPIO_Port, CARD0_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(WIFI_RESET_GPIO_Port, WIFI_RESET_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOG, CARD10_Pin|CARD11_Pin|CARD12_Pin|CARD13_Pin
-                          |CARD14_Pin|CARD15_Pin, GPIO_PIN_RESET);
+                          |CARD14_Pin|CARD15_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pins : PIPin PIPin PIPin PIPin
                            PIPin PIPin PIPin PIPin

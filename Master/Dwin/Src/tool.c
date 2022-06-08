@@ -332,7 +332,8 @@ IRQ_Code *Find_TargetSlave_AdoptType(Slave_IRQTableTypeDef *irq, IRQ_Code *p_cur
     IRQ_Code *p_target = NULL;
     bool first_flag = false;
 
-    for (IRQ_Code *p = irq->pIRQ; p < irq->pIRQ + irq->TableCount; p++)
+    // for (IRQ_Code *p = irq->pIRQ; p < irq->pIRQ + irq->TableCount; p++)
+    for (IRQ_Code *p = irq->pIRQ; p < p_current; p++)
     {
         if (p->TypeCoding == p_current->TypeCoding)
         {
@@ -403,11 +404,13 @@ bool Save_TargetSlave_Id(Slave_IRQTableTypeDef *irq, Card_Tyte type, R_TargetTyp
 void IRQ_Coding(Slave_IRQTableTypeDef *irq, uint8_t code)
 {
     IRQ_Code *p_current = &irq->pIRQ[irq->TableCount];
+    // IRQ_Code *p_current = NULL;
     uint8_t temp_slaveid = code & 0x0F;
     Card_Tyte temp_typecoding = (Card_Tyte)(code & 0xF0);
 
     if (irq->TableCount < CARD_NUM_MAX)
     {
+        // p_current = &irq->pIRQ[temp_slaveid];
         if (Find_SameId(irq, temp_slaveid))
         {
 #if defined(USING_DEBUG)
@@ -439,6 +442,13 @@ void IRQ_Coding(Slave_IRQTableTypeDef *irq, uint8_t code)
                 // p->Number = p_current->Number;
                 SWAP(uint16_t, p_target->Number, p_current->Number);
             }
+            // else
+            // { /*从机id有序时，再次检测编号是否对应*/
+            //     if (p_target->Number > p_current->Number)
+            //     {
+            //         SWAP(uint16_t, p_target->Number, p_current->Number);
+            //     }
+            // }
         }
         /*首次加入*/
         else
@@ -451,7 +461,7 @@ void IRQ_Coding(Slave_IRQTableTypeDef *irq, uint8_t code)
 #endif
         }
         /*有效板卡数加一*/
-        irq->TableCount++;
+        // irq->TableCount++;
 
         /*有效板卡数加一*/
         // irq->TableCount++;
@@ -492,7 +502,7 @@ void IRQ_Coding(Slave_IRQTableTypeDef *irq, uint8_t code)
             Add_ListItem(irq->LReady, p_current->Priority);
         }
 #endif
-        if (irq->pIRQ && (irq->TableCount > 1))
+        if (irq->pIRQ && (irq->TableCount++ > 1))
         {
             // Quick_Sort(irq->pIRQ, irq->TableCount);
             Quick_Sort_Id(irq->pIRQ, irq->TableCount);

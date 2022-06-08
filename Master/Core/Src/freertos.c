@@ -358,7 +358,7 @@ static uint8_t Read_ATx_State(void)
     bit = (uint32_t)(pGPIOx->IDR & GPIO_Pinx) ? 0U : 1U;
     /*The 1.8V level of link and net of 4G module matches
     with the 3.3 level of MCU, resulting in effective level reversal*/
-    bit = i > 2U ? bit : !bit;
+    bit = i > 2U ? !bit : bit;
     status |= (uint8_t)(bit << i);
   }
 #if defined(USING_DEBUG)
@@ -518,7 +518,7 @@ void MX_FREERTOS_Init(void)
   UserQueueHandle = osMessageCreate(osMessageQ(UserQueue), NULL);
 
   /* definition and creation of SureQueue */
-  osMessageQDef(SureQueue, 16, uint16_t);
+  osMessageQDef(SureQueue, 16, IRQ_Request);
   SureQueueHandle = osMessageCreate(osMessageQ(SureQueue), NULL);
 
   /* USER CODE BEGIN RTOS_QUEUES */
@@ -552,19 +552,19 @@ void MX_FREERTOS_Init(void)
 
   /* definition and creation of Interrupt */
   osThreadDef(Interrupt, IRQ_Task, osPriorityRealtime, 0, 256);
-  InterruptHandle = osThreadCreate(osThread(Interrupt), NULL);
+  InterruptHandle = osThreadCreate(osThread(Interrupt), (void *)&IRQ_Table);
 
   /* definition and creation of control */
   osThreadDef(control, Control_Task, osPriorityNormal, 0, 512);
-  controlHandle = osThreadCreate(osThread(control), NULL);
+  controlHandle = osThreadCreate(osThread(control), (void *)&Save_Flash);
 
   /* definition and creation of Transimt */
   osThreadDef(Transimt, Transimt_Task, osPriorityHigh, 0, 512);
-  TransimtHandle = osThreadCreate(osThread(Transimt), NULL);
+  TransimtHandle = osThreadCreate(osThread(Transimt), (void *)&IRQ_Table);
 
   /* definition and creation of Treport */
   osThreadDef(Treport, Report_Task, osPriorityIdle, 0, 512);
-  TreportHandle = osThreadCreate(osThread(Treport), NULL);
+  TreportHandle = osThreadCreate(osThread(Treport), (void *)&Save_Flash);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -752,16 +752,16 @@ void Master_Task(void const *argument)
       //   pMaster->uartId = 0x01;
       //   pMaster->portRTUMasterHandle(pMaster, (mdU8)target_slave_id);
       // }
-      osThreadSuspend(InterruptHandle);
-      osThreadSuspend(TransimtHandle);
+      // osThreadSuspend(InterruptHandle);
+      // osThreadSuspend(TransimtHandle);
       pMaster->uartId = 0x01;
       pMaster->portRTUMasterHandle(pMaster, (mdU8)target_slave_id);
-      osThreadResume(InterruptHandle);
-      osThreadResume(TransimtHandle);
-      // xTaskNotifyWait(0x00,             /* Don't clear any notification bits on entry. */
-      //                 ULONG_MAX,        /* Reset the notification value to 0 on exit. */
-      //                 &target_slave_id, /* Notified value pass out in ulNotifiedValue. */
-      //                 osWaitForever);   /* Block indefinitely. */
+      // osThreadResume(InterruptHandle);
+      // osThreadResume(TransimtHandle);
+      xTaskNotifyWait(0x00,             /* Don't clear any notification bits on entry. */
+                      ULONG_MAX,        /* Reset the notification value to 0 on exit. */
+                      &target_slave_id, /* Notified value pass out in ulNotifiedValue. */
+                      osWaitForever);   /* Block indefinitely. */
     }
   }
   /* USER CODE END Master_Task */
@@ -797,8 +797,8 @@ void IRQ_Task(void const *argument)
 {
   /* USER CODE BEGIN IRQ_Task */
   uint16_t interrupt_id;
-  static Slave_IRQTableTypeDef *sp_irq = &IRQ_Table;
-  static IRQ_Request *p_current = NULL;
+  Slave_IRQTableTypeDef *sp_irq = (Slave_IRQTableTypeDef *)argument;
+  IRQ_Request *p_current = NULL;
   /* Infinite loop */
   for (;;)
   {
@@ -810,9 +810,11 @@ void IRQ_Task(void const *argument)
       // shellPrint(Shell_Object, "Note: Generate an interrupt: 0x%x.\r\n", interrupt_id);
 #endif
       /*Separate the interrupt number and count the interrupt source*/
-      while ((interrupt_id) && (sp_irq->SiteCount < CARD_NUM_MAX) &&
-             /*Ensure that the previous round of interrupt has been handled correctly*/
-             (!p_current->flag))
+      // while ((interrupt_id) && (sp_irq->SiteCount < CARD_NUM_MAX) &&
+      //        /*Ensure that the previous round of interrupt has been handled correctly*/
+      //        (!p_current->flag))
+      while ((interrupt_id) && (sp_irq->SiteCount++ < CARD_NUM_MAX))
+      /*Ensure that the previous round of interrupt has been handled correctly*/
       {
         p_current->site = interrupt_id;
         interrupt_id &= interrupt_id - 1U;
@@ -834,7 +836,8 @@ void IRQ_Task(void const *argument)
 #if defined(USING_DEBUG)
         // shellPrint(Shell_Object, "Note: re_irq[%d]_id = 0x%x.\r\n", sp_irq->SiteCount, p_current->site);
 #endif
-        p_current = &sp_irq->pReIRQ[++sp_irq->SiteCount];
+        // p_current = &sp_irq->pReIRQ[++sp_irq->SiteCount];
+        p_current++;
       }
       /*Record in the interrupt list. When the board sends an
       interrupt request for the second time, it will be prioritized*/
@@ -842,6 +845,11 @@ void IRQ_Task(void const *argument)
       {
         Quick_Sort(sp_irq->pReIRQ, sp_irq->SiteCount);
       }
+      for (uint16_t i = 0; i < sp_irq->SiteCount; i++)
+      {
+        xQueueSend(SureQueueHandle, &sp_irq->pReIRQ[i], 10);
+      }
+      sp_irq->SiteCount = 0;
     }
   }
   /* USER CODE END IRQ_Task */
@@ -900,7 +908,7 @@ void Control_Task(void const *argument)
       {.counts = 0, .flag = false},
       {.counts = 0, .flag = false},
   };
-  Save_HandleTypeDef *ps = &Save_Flash;
+  Save_HandleTypeDef *ps = (Save_HandleTypeDef *)argument;
   Save_User usinfo;
   static bool mutex_flag = false;
   static uint8_t state = 1;
@@ -942,7 +950,7 @@ void Control_Task(void const *argument)
 #if defined(USING_DEBUG)
       // shellPrint(Shell_Object, "R_Current[0x%X] = %.3f\r\n", p, *p);
 #endif
-      Endian_Swap((uint8_t *)p, 0U, sizeof(float));
+      // Endian_Swap((uint8_t *)p, 0U, sizeof(float));
       /*User sensor access error check*/
 #define ERROR_CHECK
       {
@@ -1205,49 +1213,6 @@ void Control_Task(void const *argument)
       shellPrint(Shell_Object, "write failed!\r\n");
 #endif
     }
-    /*Check whether the status of each switch changes*/
-    // memcpy(copy_wbit, wbit, VX_SIZE);
-    // if (Check_Vx_State(wbit, copy_wbit, VX_SIZE))
-    // if (sp_irq->TableCount && record_type.p_id)
-    // {
-    //   record_type.count = 0;
-    //   // uint8_t *q = record_type.p_id;
-    //   // // /*Find target board*/
-    //   // for (IRQ_Code *p = sp_irq->pIRQ; p < sp_irq->pIRQ + sp_irq->TableCount; p++)
-    //   // {
-    //   //   if (p->TypeCoding == Card_DigitalOutput)
-    //   //   {
-    //   //     if (record_type.count++ < TARGET_BOARD_NUM)
-    //   //     {
-    //   //       *q++ = p->SlaveId;
-    //   //     }
-    //   //   }
-    //   // }
-    //   if (Save_TargetSlave_Id(sp_irq, Card_DigitalOutput, &record_type))
-    //   {
-    //     /*Set data transmission target channel*/
-    //     MASTER_OBJECT->uartId = 0x01;
-    //     for (uint8_t num = 0; num < TARGET_BOARD_NUM; num++)
-    //     {
-    //       /*Integrated signal source*/
-    //       uint8_t target_value = 0;
-    //       for (uint8_t bit = 0; bit < CARD_SIGNAL_MAX; bit++)
-    //       {
-    //         target_value |= wbit[bit + num * CARD_SIGNAL_MAX] << bit;
-    //         // target_value = 0xFF;
-    //       }
-    //       if (num < record_type.count)
-    //       {
-    //         mdRTU_Master_Codex(MASTER_OBJECT, MODBUS_CODE_15, record_type.p_id[num], &target_value, 0);
-    //         if (xTaskNotify(MasterHandle, record_type.p_id[num], eSetValueWithoutOverwrite) == pdPASS)
-    //         {
-    //           osDelay(DELAY_TIMES);
-    //         }
-    //         // osDelay(1000);
-    //       }
-    //     }
-    //   }
-    // }
   __exit:
     osDelay(1000);
   }
@@ -1285,7 +1250,7 @@ void Transimt_Task(void const *argument)
   // static IRQ_Request *rp_irq = NULL;
   // rp_irq = sp_irq->pReIRQ;
   uint16_t interrupt_record = 0xFFFF, first_interrupt;
-  Slave_IRQTableTypeDef *sp_irq = &IRQ_Table;
+  Slave_IRQTableTypeDef *sp_irq = (Slave_IRQTableTypeDef *)argument;
   IRQ_Code *tp_irq = sp_irq->pIRQ;
   IRQ_Request *rp_irq = sp_irq->pReIRQ;
   uint8_t slave_id = 0x00;
@@ -1301,13 +1266,15 @@ void Transimt_Task(void const *argument)
   for (;;)
   {
     /*Interrupt request count is not empty*/
-    // if ((sp_irq->SiteCount) && (rp_irq < rp_irq + sp_irq->SiteCount))
-    if ((sp_irq->SiteCount) && (rp_irq < sp_irq->pReIRQ + sp_irq->SiteCount))
+    if (xQueueReceive(SureQueueHandle, rp_irq, 0) == pdPASS)
+    // if ((sp_irq->SiteCount) && (rp_irq < sp_irq->pReIRQ + sp_irq->SiteCount))
     {
       /*Suspend interrupt processing task*/
-      osThreadSuspend(InterruptHandle);
+      // osThreadSuspend(InterruptHandle);
+      // sp_irq->SiteCount = sp_irq->SiteCount ? (sp_irq->SiteCount - 1U) : 0;
       /*Check if the interrupt source is valid*/
-      if ((rp_irq->site) && (rp_irq->flag))
+      // if ((rp_irq->site) && (rp_irq->flag))
+      if (rp_irq && rp_irq->site)
       {
         /*Get the slave ID according to the interrupt number*/
         // slave_id = rp_irq->site - 1U;
@@ -1329,7 +1296,7 @@ void Transimt_Task(void const *argument)
           { /*Look for known slaves in the interrupt table*/
             tp_irq = Find_TargetSlave_AdoptId(sp_irq, slave_id);
 
-            /*如果是sp_irq->SiteCount >1,则需要按优先级排序（�??????????????????????个周期仅排序�??????????????????????次），否则直接根据板卡类型处�??????????????????????*/
+            /*如果是sp_irq->SiteCount >1,则需要按优先级排序（�???????????????????????个周期仅排序�???????????????????????次），否则直接根据板卡类型处�???????????????????????*/
             /*Interrupt priority sorting is performed when the board is read back*/
             // switch (sp_irq->pIRQ->TypeCoding)
             switch (tp_irq->TypeCoding)
@@ -1350,14 +1317,14 @@ void Transimt_Task(void const *argument)
               /*Read card type*/
               // MASTER_OBJECT->mdRTU_MasterCodex(MASTER_OBJECT, MODBUS_CODE_17, slave_id, NULL, 0);
               mdRTU_Master_Codex(MASTER_OBJECT, MODBUS_CODE_17, slave_id, NULL, 0);
-              INCREMENT_COUNT();
+              // INCREMENT_COUNT();
             }
             break;
             }
           }
         }
         /*Clear the flag after the slave responds correctly*/
-        // if (xTaskNotify(MasterHandle, slave_id, eSetValueWithoutOverwrite) == pdPASS)
+        if (xTaskNotify(MasterHandle, slave_id, eSetValueWithoutOverwrite) == pdPASS)
         // if (xQueueSend(SureQueueHandle, &slave_id, 10) == pdPASS)
         {
           if (first_interrupt)
@@ -1366,33 +1333,24 @@ void Transimt_Task(void const *argument)
             interrupt_record &= ~rp_irq->site;
           }
           /*Process the next interrupt in the interrupt table*/
-          // else
-          // {
-          //   tp_irq++;
-          // }
-          /*Clear the current interrupt request bit and reduce the number of remaining
-           unprocessed interrupts*/
-          // rp_irq->flag = false;
-          // sp_irq->SiteCount = sp_irq->SiteCount ? (sp_irq->SiteCount - 1U) : 0;
-          // rp_irq++;
-          INCREMENT_COUNT();
+          // INCREMENT_COUNT();
         }
         /*no response from slave*/
-        //         else
-        //         {
-        //           INCREMENT_COUNT();
-        //           /*Read card type*/
-        //           // MASTER_OBJECT->mdRTU_MasterCodex(MASTER_OBJECT, MODBUS_CODE_17, slave_id);
-        //           // INCREMENT_COUNT();
-        // #if defined(USING_DEBUG)
-        //           // shellPrint(Shell_Object, "Error: Interrupt Slave 0x%02x No Answer!"__INFORMATION(),
-        //           //            slave_id);
-        //           shellPrint(Shell_Object, "Error: Interrupt Slave 0x%02x No Answer!\r\n",
-        //                      slave_id);
-        // #endif
-        //         }
+        else
+        {
+          // INCREMENT_COUNT();
+          /*Read card type*/
+          // MASTER_OBJECT->mdRTU_MasterCodex(MASTER_OBJECT, MODBUS_CODE_17, slave_id);
+          // INCREMENT_COUNT();
+#if defined(USING_DEBUG)
+          // shellPrint(Shell_Object, "Error: Interrupt Slave 0x%02x No Answer!"__INFORMATION(),
+          //            slave_id);
+          shellPrint(Shell_Object, "Error: Interrupt Slave 0x%02x No Answer!\r\n",
+                     slave_id);
+#endif
+        }
         /*Task notification delay leads to decrease in recognition success rate*/
-        osDelay(100);
+        osDelay(20);
       }
       else
       {
@@ -1401,23 +1359,20 @@ void Transimt_Task(void const *argument)
         // shellPrint(Shell_Object, "Error: Invalid interrupt source: 0x%x."__INFORMATION(),
         //            sp_irq->pReIRQ[sp_irq->SiteCount].site);
         shellPrint(Shell_Object, "Error: Invalid interrupt source: 0x%x, table_site :0x%p\r\n.",
-                   sp_irq->pReIRQ[sp_irq->SiteCount].site, rp_irq);
+                   rp_irq->site, rp_irq);
 #endif
         // RESET_POINTER();
-        INCREMENT_COUNT();
+        // INCREMENT_COUNT();
         // rp_irq->flag = true;
       }
       /*Resume interrupt processing task*/
-      osThreadResume(InterruptHandle);
+      // osThreadResume(InterruptHandle);
       // osDelay(100);
     }
     /*One cycle processing completed*/
     else
     {
-      // rp_irq = sp_irq->pReIRQ;
-      // // sp_irq->pIRQ = sp_irq->pIRQ;
-      // tp_irq = sp_irq->pIRQ;
-      RESET_POINTER();
+      // RESET_POINTER();
 
       ret = mdRTU_ReadCoils(Slave1_Object, OUT_DIGITAL_START_ADDR, VX_SIZE, wbit);
       if (ret == mdFALSE)
@@ -1428,8 +1383,8 @@ void Transimt_Task(void const *argument)
       }
       else
       {
-        // if (Check_Vx_State(&wbit[0], &copy_wbit[0], VX_SIZE) && sp_irq->TableCount && record_type.p_id)
-        if (sp_irq->TableCount && record_type.p_id)
+        if (Check_Vx_State(&wbit[0], &copy_wbit[0], VX_SIZE) && sp_irq->TableCount && record_type.p_id)
+        // if (sp_irq->TableCount && record_type.p_id)
         {
           record_type.count = 0;
           if (Save_TargetSlave_Id(sp_irq, Card_DigitalOutput, &record_type))
@@ -1442,31 +1397,31 @@ void Transimt_Task(void const *argument)
               uint8_t target_value = 0;
               for (uint8_t bit = 0; bit < CARD_SIGNAL_MAX; bit++)
               {
-                target_value |= wbit[bit + num * CARD_SIGNAL_MAX] << bit;
+                target_value |= (uint8_t)wbit[bit + num * CARD_SIGNAL_MAX] << bit;
                 // target_value = 0xFF;
               }
               if (num < record_type.count)
               {
                 mdRTU_Master_Codex(MASTER_OBJECT, MODBUS_CODE_15, record_type.p_id[num], &target_value, 0);
                 // // if (xTaskNotify(MasterHandle, record_type.p_id[num], eSetValueWithoutOverwrite) == pdPASS)
-                if (xTaskNotify(MasterHandle, record_type.p_id[num], eSetValueWithOverwrite) == pdPASS)
-                {
-                  osDelay(100);
-                }
-                // osDelay(50);
+                // if (xTaskNotify(MasterHandle, record_type.p_id[num], eSetValueWithOverwrite) == pdPASS)
+                // {
+                // osDelay(10);
+                // }
+                xTaskNotify(MasterHandle, record_type.p_id[num], eSetValueWithOverwrite);
+                osDelay(50);
                 // xQueueSend(SureQueueHandle, &slave_id, 10);
               }
             }
-            osDelay(500);
+            // osDelay(200);
           }
         }
-        // osDelay(500);
       }
     }
     // /*Resume interrupt processing task*/
     // osThreadResume(InterruptHandle);
 
-    // osDelay(100);
+    osDelay(1);
   }
   /* USER CODE END Transimt_Task */
 }
@@ -1491,9 +1446,8 @@ void Report_Task(void const *argument)
   // mdSTATUS ret = mdFALSE;
   uint16_t value = 0x0000;
   static bool first_flag = false;
-  Save_HandleTypeDef *ps = &Save_Flash;
+  Save_HandleTypeDef *ps = (Save_HandleTypeDef *)argument;
   Save_User urinfo;
-  Slave_IRQTableTypeDef *p_irq = &IRQ_Table;
   // osEvent user_event = {
   //     .status = osOK,
   //     .value.p = &urinfo,
@@ -1529,10 +1483,10 @@ void Report_Task(void const *argument)
     // Dwin_Object->Dw_Write(Dwin_Object, DIGITAL_OUTPUT_ADDR, (uint8_t *)&wbit, sizeof(wbit));
     // osDelay(DELAY_TIMES);
     /*Report the status of at module*/
-    at_state = Read_ATx_State() << 8U;
+    at_state = Read_ATx_State();
     Dwin_Object->Dw_Write(Dwin_Object, ATX_STATE_ADDR, (uint8_t *)&at_state, sizeof(at_state));
     osDelay(DELAY_TIMES);
-    if (xQueueReceive(UserQueueHandle, (void *)&urinfo, osWaitForever) != pdPASS)
+    if (xQueueReceive(UserQueueHandle, &urinfo, 0) != pdPASS)
     // user_event = osMailGet(UserQueueHandle, osWaitForever);
     // if (user_event.status == osOK)
     {
@@ -1540,42 +1494,17 @@ void Report_Task(void const *argument)
       shellPrint(Shell_Object, "Error: Failed to receive user parameters!\r\n");
 #endif
     }
-    for (float *puser = &urinfo.Ptank; puser < &urinfo.Ptank + BX_SIZE; puser++)
+    else
     {
-#if defined(USING_DEBUG)
-      // shellPrint(Shell_Object, "Value[%d] = %.3fMpa/M3\r\n", i, temp_data[i]);
-#endif
-      Endian_Swap((uint8_t *)puser, 0U, sizeof(float));
-    }
-    Dwin_Object->Dw_Write(Dwin_Object, PRESSURE_OUT_ADDR, (uint8_t *)&urinfo, BX_SIZE * sizeof(float));
-    osDelay(DELAY_TIMES);
-
-    if (p_irq->TableCount)
-    {
-#define BOARD_REPORT_SIZE (sizeof(uint16_t) * CARD_NUM_MAX)
-#if defined(USING_FREERTOS)
-      uint16_t *pBoard = (uint16_t *)CUSTOM_MALLOC(BOARD_REPORT_SIZE);
-      if (pBoard)
+      for (float *puser = &urinfo.Ptank; puser < &urinfo.Ptank + BX_SIZE; puser++)
       {
-#endif
-        memset(pBoard, 0x00, BOARD_REPORT_SIZE);
-        for (IRQ_Code *p = p_irq->pIRQ; p < p_irq->pIRQ + p_irq->TableCount; p++)
-        {
-          if (p->SlaveId < BOARD_REPORT_SIZE)
-          {
-            pBoard[p->SlaveId] = (uint16_t)Get_Board_Icon((uint8_t)p->TypeCoding) << 8U;
 #if defined(USING_DEBUG)
-            // shellPrint(Shell_Object, "pBoard[%d] = %d\r\n", p->SlaveId, pBoard[p->SlaveId]);
+        // shellPrint(Shell_Object, "Value[%d] = %.3fMpa/M3\r\n", i, temp_data[i]);
 #endif
-          }
-        }
-        /*Report board type*/
-        Dwin_Object->Dw_Write(Dwin_Object, BOARD_TYPE_ADDR, (uint8_t *)pBoard, BOARD_REPORT_SIZE);
-        osDelay(DELAY_TIMES);
-#if defined(USING_FREERTOS)
+        Endian_Swap((uint8_t *)puser, 0U, sizeof(float));
       }
-      CUSTOM_FREE(pBoard);
-#endif
+      Dwin_Object->Dw_Write(Dwin_Object, PRESSURE_OUT_ADDR, (uint8_t *)&urinfo, BX_SIZE * sizeof(float));
+      osDelay(DELAY_TIMES);
     }
 
     /*Analog input*/
@@ -1614,7 +1543,7 @@ void Report_Task(void const *argument)
     // __exit:
     // CUSTOM_FREE(pdata);
 #endif
-    osDelay(500);
+    osDelay(1000);
   }
   /* USER CODE END Report_Task */
 }
@@ -1623,9 +1552,40 @@ void Report_Task(void const *argument)
 void Report_Callback(void const *argument)
 {
   /* USER CODE BEGIN Report_Callback */
+  /*Special attention should be paid here:
+  the parameter transfer in the timer is only the timer identifier
+  and cannot be used for other parameter pointer transfer*/
 #if defined(USING_DEBUG)
   // shellPrint(Shell_Object, "Report_Callback !\r\n");
 #endif
+  Slave_IRQTableTypeDef *p_irq = &IRQ_Table;
+
+  if (p_irq && p_irq->TableCount)
+  {
+#define BOARD_REPORT_SIZE (sizeof(uint16_t) * CARD_NUM_MAX)
+#if defined(USING_FREERTOS)
+    uint16_t *pBoard = (uint16_t *)CUSTOM_MALLOC(BOARD_REPORT_SIZE);
+    if (pBoard)
+    {
+#endif
+      memset(pBoard, 0x00, BOARD_REPORT_SIZE);
+      for (IRQ_Code *p = p_irq->pIRQ; p < p_irq->pIRQ + p_irq->TableCount; p++)
+      {
+        if (p->SlaveId < BOARD_REPORT_SIZE)
+        {
+          pBoard[p->SlaveId] = (uint16_t)Get_Board_Icon((uint8_t)p->TypeCoding) << 8U;
+#if defined(USING_DEBUG)
+          // shellPrint(Shell_Object, "pBoard[%d] = %d\r\n", p->SlaveId, pBoard[p->SlaveId]);
+#endif
+        }
+      }
+      /*Report board type*/
+      Dwin_Object->Dw_Write(Dwin_Object, BOARD_TYPE_ADDR, (uint8_t *)pBoard, BOARD_REPORT_SIZE);
+#if defined(USING_FREERTOS)
+    }
+    CUSTOM_FREE(pBoard);
+#endif
+  }
   /* USER CODE END Report_Callback */
 }
 

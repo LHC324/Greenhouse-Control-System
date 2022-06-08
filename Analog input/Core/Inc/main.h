@@ -43,7 +43,7 @@ extern "C" {
 
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
-//#define USING_DEBUG
+// #define USING_DEBUG
 #define CUSTOM_MALLOC malloc
 #define CUSTOM_FREE free
 /* USER CODE END ET */

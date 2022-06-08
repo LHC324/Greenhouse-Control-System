@@ -22,28 +22,26 @@ Dialog DLL:      TCM.DLL V1.36.1.0
  
 <h2>Project:</h2>
 G:\STM32_Workers\STM32H7\Greenhouse_Control_System\Master\MDK-ARM\Master.uvprojx
-Project File Date:  06/05/2022
+Project File Date:  06/06/2022
 
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 6 (build 750)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'Master'
 compiling freertos.c...
-../Core/Src/freertos.c(1294): warning:  #177-D: variable "copy_wbit"  was declared but never referenced
-    mdBit wbit[VX_SIZE], copy_wbit[VX_SIZE];
-../Core/Src/freertos.c(1490): warning:  #177-D: variable "bit"  was declared but never referenced
+../Core/Src/freertos.c(1445): warning:  #177-D: variable "bit"  was declared but never referenced
     uint8_t bit = 0;
-../Core/Src/freertos.c(1492): warning:  #177-D: variable "value"  was declared but never referenced
+../Core/Src/freertos.c(1447): warning:  #177-D: variable "value"  was declared but never referenced
     uint16_t value = 0x0000;
-../Core/Src/freertos.c(1493): warning:  #177-D: variable "first_flag"  was declared but never referenced
+../Core/Src/freertos.c(1448): warning:  #177-D: variable "first_flag"  was declared but never referenced
     static bool first_flag = false;
-../Core/Src/freertos.c(1494): warning:  #177-D: variable "ps"  was declared but never referenced
-    Save_HandleTypeDef *ps = &Save_Flash;
-../Core/Src/freertos.c: 5 warnings, 0 errors
+../Core/Src/freertos.c(1449): warning:  #177-D: variable "ps"  was declared but never referenced
+    Save_HandleTypeDef *ps = (Save_HandleTypeDef *)argument;
+../Core/Src/freertos.c: 4 warnings, 0 errors
 linking...
-Program Size: Code=92768 RO-data=4128 RW-data=2120 ZI-data=274864  
+Program Size: Code=92868 RO-data=4132 RW-data=2112 ZI-data=274864  
 FromELF: creating hex file...
 After Build - User command #1: fromelf --bin --output "Master.bin"  "G:\STM32_Workers\STM32H7\Greenhouse_Control_System\Master\MDK-ARM\Master\Master.axf"
-".\Master\Master.axf" - 0 Error(s), 5 Warning(s).
+".\Master\Master.axf" - 0 Error(s), 4 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -67,7 +65,7 @@ Package Vendor: Keil
 
    * Component: ARM::CMSIS:CORE:5.5.0
       Include file:  CMSIS\Core\Include\tz_context.h
-Build Time Elapsed:  00:00:06
+Build Time Elapsed:  00:00:05
 </pre>
 </body>
 </html>

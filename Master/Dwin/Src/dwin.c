@@ -494,7 +494,7 @@ static void Password_Handle(pDwinHandle pd, uint8_t *pSite)
 {
 #define USER_NAMES 0x07E6
 #define USER_PASSWORD 0x0522
-#define PAGE_NUMBER 0x09
+#define PAGE_NUMBER 0x016
 	uint16_t data = Get_Data(pd, 7U, pd->Uart.pRbuf[6U]);
 	uint16_t addr = pd->Slave.pMap[*pSite].addr;
 	static uint16_t user_name = 0x0000, user_code = 0x0000, error = 0x0000;

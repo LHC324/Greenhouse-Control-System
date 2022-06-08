@@ -666,11 +666,11 @@ static mdVOID portRtuMasterHandle(ModbusRTUSlaveHandler handler, uint8_t target_
         handler->mdRTUError(handler, ERROR3);
         return;
     }
-    // if (p->pRbuf[0U] != target_slaveid)
-    // {
-    //     handler->mdRTUError(handler, ERROR4);
-    //     return;
-    // }
+    if (p->pRbuf[0U] != target_slaveid)
+    {
+        handler->mdRTUError(handler, ERROR4);
+        return;
+    }
 
     //     if (ptable->TableCount)
     //     {
