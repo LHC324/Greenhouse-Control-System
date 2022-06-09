@@ -120,6 +120,7 @@
         <SetRegEntry>
           <Number>0</Number>
           <Key>DLGUARM</Key>
+          <Name>@'?`甔w@'?`甔w@'?</Name>
         </SetRegEntry>
         <SetRegEntry>
           <Number>0</Number>
@@ -314,12 +315,17 @@
           <WinNumber>1</WinNumber>
           <ItemText>slave_id</ItemText>
         </Ww>
+        <Ww>
+          <count>32</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>WIFI_LINK_GPIO_Port</ItemText>
+        </Ww>
       </WatchWindow1>
       <MemoryWindow1>
         <Mm>
           <WinNumber>1</WinNumber>
           <SubType>0</SubType>
-          <ItemText>0x24000844</ItemText>
+          <ItemText>0x081E0000</ItemText>
           <AccSizeX>0</AccSizeX>
         </Mm>
       </MemoryWindow1>

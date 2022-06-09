@@ -2,7 +2,7 @@
 #define __MDTYPE_H__
 
 typedef void                mdVOID;
-typedef int                 mdBit;
+typedef unsigned char       mdBit;
 typedef unsigned char       mdBOOL;
 typedef int                 mdSTATUS;
 typedef unsigned char       mdU8;

@@ -1,8 +1,8 @@
 Dependencies for Project 'Master', Target 'Master': (DO NOT MODIFY !)
 F (startup_stm32h743xx.s)(0x629DFBE9)(--cpu Cortex-M7.fp.dp -g --apcs=interwork -I ..\Core\Inc-I.\RTE\_Master-IC:\Users\Administrator\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include-IC:\Users\Administrator\AppData\Local\Arm\Packs\Keil\STM32H7xx_DFP\2.7.0\Drivers\CMSIS\Device\ST\STM32H7xx\Include--pd "__UVISION_VERSION SETA 527" --pd "_RTE_ SETA 1" --pd "STM32H743xx SETA 1"--list .\master\startup_stm32h743xx.lst --xref -o .\master\startup_stm32h743xx.o --depend .\master\startup_stm32h743xx.d)
 F (..\Dwin\Src\dwin.c)(0x629F0FAF)(--c99 --gnu -c --cpu Cortex-M7.fp.dp -g -O0 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H7xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I ../Dwin/Inc -I ../FreeModBus/Inc -I ../Letter_Shell/Inc -I ../Stm32_Flash/Inc -I ../SFUD/sfud/inc -I ../USB_DEVICE/App -I ../USB_DEVICE/Target -I ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc -I ../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc-I.\RTE\_Master-IC:\Users\Administrator\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include-IC:\Users\Administrator\AppData\Local\Arm\Packs\Keil\STM32H7xx_DFP\2.7.0\Drivers\CMSIS\Device\ST\STM32H7xx\Include-D__UVISION_VERSION="527" -D_RTE_ -DSTM32H743xx -DUSE_HAL_DRIVER -DSTM32H743xx -DUSING_FREERTOS -DUSING_DEBUG-o .\master\dwin.o --omf_browse .\master\dwin.crf --depend .\master\dwin.d)
-I (../Dwin/Inc/dwin.h)(0x629AD386)
-I (../Dwin/Inc/tool.h)(0x629F4C12)
+I (../Dwin/Inc/dwin.h)(0x62A0393F)
+I (../Dwin/Inc/tool.h)(0x62A1A20E)
 I (../Core/Inc/main.h)(0x62906B5D)
 I (../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h)(0x6268BD61)
 I (../Core/Inc/stm32h7xx_hal_conf.h)(0x629DFBE5)
@@ -68,13 +68,13 @@ I (../Letter_Shell/Inc/shell_port.h)(0x6261030E)
 I (../Letter_Shell/Inc/shell.h)(0x62159816)
 I (../Letter_Shell/Inc/shell_cfg.h)(0x629C277E)
 I (../Stm32_Flash/Inc/Flash.h)(0x628CD8C3)
-I (../FreeModBus/Inc/mdrtuslave.h)(0x629ECCBB)
-I (../FreeModBus/Inc/mdtype.h)(0x6246AAD5)
+I (../FreeModBus/Inc/mdrtuslave.h)(0x62A18A30)
+I (../FreeModBus/Inc/mdtype.h)(0x62A03F01)
 I (../FreeModBus/Inc/mdconfig.h)(0x628C5A01)
 I (../FreeModBus/Inc/mdregpool.h)(0x611377CB)
 I (../FreeModBus/Inc/mdrecbuffer.h)(0x611377AB)
 F (..\Dwin\Src\tool.c)(0x629F1131)(--c99 --gnu -c --cpu Cortex-M7.fp.dp -g -O0 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H7xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I ../Dwin/Inc -I ../FreeModBus/Inc -I ../Letter_Shell/Inc -I ../Stm32_Flash/Inc -I ../SFUD/sfud/inc -I ../USB_DEVICE/App -I ../USB_DEVICE/Target -I ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc -I ../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc-I.\RTE\_Master-IC:\Users\Administrator\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include-IC:\Users\Administrator\AppData\Local\Arm\Packs\Keil\STM32H7xx_DFP\2.7.0\Drivers\CMSIS\Device\ST\STM32H7xx\Include-D__UVISION_VERSION="527" -D_RTE_ -DSTM32H743xx -DUSE_HAL_DRIVER -DSTM32H743xx -DUSING_FREERTOS -DUSING_DEBUG-o .\master\tool.o --omf_browse .\master\tool.crf --depend .\master\tool.d)
-I (../Dwin/Inc/tool.h)(0x629F4C12)
+I (../Dwin/Inc/tool.h)(0x62A1A20E)
 I (../Core/Inc/main.h)(0x62906B5D)
 I (../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h)(0x6268BD61)
 I (../Core/Inc/stm32h7xx_hal_conf.h)(0x629DFBE5)
@@ -140,23 +140,23 @@ I (../Letter_Shell/Inc/shell.h)(0x62159816)
 I (../Letter_Shell/Inc/shell_cfg.h)(0x629C277E)
 F (..\FreeModBus\Src\mdcrc16.c)(0x623ADB19)(--c99 --gnu -c --cpu Cortex-M7.fp.dp -g -O0 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H7xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I ../Dwin/Inc -I ../FreeModBus/Inc -I ../Letter_Shell/Inc -I ../Stm32_Flash/Inc -I ../SFUD/sfud/inc -I ../USB_DEVICE/App -I ../USB_DEVICE/Target -I ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc -I ../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc-I.\RTE\_Master-IC:\Users\Administrator\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include-IC:\Users\Administrator\AppData\Local\Arm\Packs\Keil\STM32H7xx_DFP\2.7.0\Drivers\CMSIS\Device\ST\STM32H7xx\Include-D__UVISION_VERSION="527" -D_RTE_ -DSTM32H743xx -DUSE_HAL_DRIVER -DSTM32H743xx -DUSING_FREERTOS -DUSING_DEBUG-o .\master\mdcrc16.o --omf_browse .\master\mdcrc16.crf --depend .\master\mdcrc16.d)
 I (../FreeModBus/Inc/mdcrc16.h)(0x623ADB6B)
-I (../FreeModBus/Inc/mdtype.h)(0x6246AAD5)
+I (../FreeModBus/Inc/mdtype.h)(0x62A03F01)
 I (../FreeModBus/Inc/mdconfig.h)(0x628C5A01)
 F (..\FreeModBus\Src\mdrecbuffer.c)(0x623AE09E)(--c99 --gnu -c --cpu Cortex-M7.fp.dp -g -O0 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H7xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I ../Dwin/Inc -I ../FreeModBus/Inc -I ../Letter_Shell/Inc -I ../Stm32_Flash/Inc -I ../SFUD/sfud/inc -I ../USB_DEVICE/App -I ../USB_DEVICE/Target -I ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc -I ../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc-I.\RTE\_Master-IC:\Users\Administrator\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include-IC:\Users\Administrator\AppData\Local\Arm\Packs\Keil\STM32H7xx_DFP\2.7.0\Drivers\CMSIS\Device\ST\STM32H7xx\Include-D__UVISION_VERSION="527" -D_RTE_ -DSTM32H743xx -DUSE_HAL_DRIVER -DSTM32H743xx -DUSING_FREERTOS -DUSING_DEBUG-o .\master\mdrecbuffer.o --omf_browse .\master\mdrecbuffer.crf --depend .\master\mdrecbuffer.d)
 I (../FreeModBus/Inc/mdrecbuffer.h)(0x611377AB)
-I (../FreeModBus/Inc/mdtype.h)(0x6246AAD5)
+I (../FreeModBus/Inc/mdtype.h)(0x62A03F01)
 I (../FreeModBus/Inc/mdconfig.h)(0x628C5A01)
 I (C:\Keil_v5\ARM\ARMCC\include\stdlib.h)(0x599ECD2C)
 I (C:\Keil_v5\ARM\ARMCC\include\string.h)(0x599ECD2C)
 F (..\FreeModBus\Src\mdregpool.c)(0x62427476)(--c99 --gnu -c --cpu Cortex-M7.fp.dp -g -O0 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H7xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I ../Dwin/Inc -I ../FreeModBus/Inc -I ../Letter_Shell/Inc -I ../Stm32_Flash/Inc -I ../SFUD/sfud/inc -I ../USB_DEVICE/App -I ../USB_DEVICE/Target -I ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc -I ../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc-I.\RTE\_Master-IC:\Users\Administrator\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include-IC:\Users\Administrator\AppData\Local\Arm\Packs\Keil\STM32H7xx_DFP\2.7.0\Drivers\CMSIS\Device\ST\STM32H7xx\Include-D__UVISION_VERSION="527" -D_RTE_ -DSTM32H743xx -DUSE_HAL_DRIVER -DSTM32H743xx -DUSING_FREERTOS -DUSING_DEBUG-o .\master\mdregpool.o --omf_browse .\master\mdregpool.crf --depend .\master\mdregpool.d)
 I (../FreeModBus/Inc/mdregpool.h)(0x611377CB)
-I (../FreeModBus/Inc/mdtype.h)(0x6246AAD5)
+I (../FreeModBus/Inc/mdtype.h)(0x62A03F01)
 I (../FreeModBus/Inc/mdconfig.h)(0x628C5A01)
 I (C:\Keil_v5\ARM\ARMCC\include\stdlib.h)(0x599ECD2C)
-F (..\FreeModBus\Src\mdrtuslave.c)(0x629ECA45)(--c99 --gnu -c --cpu Cortex-M7.fp.dp -g -O0 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H7xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I ../Dwin/Inc -I ../FreeModBus/Inc -I ../Letter_Shell/Inc -I ../Stm32_Flash/Inc -I ../SFUD/sfud/inc -I ../USB_DEVICE/App -I ../USB_DEVICE/Target -I ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc -I ../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc-I.\RTE\_Master-IC:\Users\Administrator\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include-IC:\Users\Administrator\AppData\Local\Arm\Packs\Keil\STM32H7xx_DFP\2.7.0\Drivers\CMSIS\Device\ST\STM32H7xx\Include-D__UVISION_VERSION="527" -D_RTE_ -DSTM32H743xx -DUSE_HAL_DRIVER -DSTM32H743xx -DUSING_FREERTOS -DUSING_DEBUG-o .\master\mdrtuslave.o --omf_browse .\master\mdrtuslave.crf --depend .\master\mdrtuslave.d)
+F (..\FreeModBus\Src\mdrtuslave.c)(0x62A18C2A)(--c99 --gnu -c --cpu Cortex-M7.fp.dp -g -O0 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H7xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I ../Dwin/Inc -I ../FreeModBus/Inc -I ../Letter_Shell/Inc -I ../Stm32_Flash/Inc -I ../SFUD/sfud/inc -I ../USB_DEVICE/App -I ../USB_DEVICE/Target -I ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc -I ../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc-I.\RTE\_Master-IC:\Users\Administrator\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include-IC:\Users\Administrator\AppData\Local\Arm\Packs\Keil\STM32H7xx_DFP\2.7.0\Drivers\CMSIS\Device\ST\STM32H7xx\Include-D__UVISION_VERSION="527" -D_RTE_ -DSTM32H743xx -DUSE_HAL_DRIVER -DSTM32H743xx -DUSING_FREERTOS -DUSING_DEBUG-o .\master\mdrtuslave.o --omf_browse .\master\mdrtuslave.crf --depend .\master\mdrtuslave.d)
 I (C:\Keil_v5\ARM\ARMCC\include\stdlib.h)(0x599ECD2C)
-I (../FreeModBus/Inc/mdrtuslave.h)(0x629ECCBB)
-I (../FreeModBus/Inc/mdtype.h)(0x6246AAD5)
+I (../FreeModBus/Inc/mdrtuslave.h)(0x62A18A30)
+I (../FreeModBus/Inc/mdtype.h)(0x62A03F01)
 I (../FreeModBus/Inc/mdconfig.h)(0x628C5A01)
 I (../FreeModBus/Inc/mdregpool.h)(0x611377CB)
 I (../FreeModBus/Inc/mdrecbuffer.h)(0x611377AB)
@@ -211,7 +211,7 @@ I (C:\Keil_v5\ARM\ARMCC\include\stdarg.h)(0x599ECD2A)
 I (../Letter_Shell/Inc/shell_port.h)(0x6261030E)
 I (../Letter_Shell/Inc/shell.h)(0x62159816)
 I (../Letter_Shell/Inc/shell_cfg.h)(0x629C277E)
-I (../Dwin/Inc/tool.h)(0x629F4C12)
+I (../Dwin/Inc/tool.h)(0x62A1A20E)
 I (../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.h)(0x6268BD63)
 I (../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h)(0x6268BD63)
 I (../Core/Inc/FreeRTOSConfig.h)(0x629340BD)
@@ -226,6 +226,7 @@ I (../Middlewares/Third_Party/FreeRTOS/Source/include/timers.h)(0x6268BD63)
 I (../Middlewares/Third_Party/FreeRTOS/Source/include/queue.h)(0x6268BD63)
 I (../Middlewares/Third_Party/FreeRTOS/Source/include/semphr.h)(0x6268BD63)
 I (../Middlewares/Third_Party/FreeRTOS/Source/include/event_groups.h)(0x6268BD63)
+I (../Dwin/Inc/dwin.h)(0x62A0393F)
 F (..\Letter_Shell\Src\shell.c)(0x6260FDBD)(--c99 --gnu -c --cpu Cortex-M7.fp.dp -g -O0 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H7xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I ../Dwin/Inc -I ../FreeModBus/Inc -I ../Letter_Shell/Inc -I ../Stm32_Flash/Inc -I ../SFUD/sfud/inc -I ../USB_DEVICE/App -I ../USB_DEVICE/Target -I ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc -I ../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc-I.\RTE\_Master-IC:\Users\Administrator\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include-IC:\Users\Administrator\AppData\Local\Arm\Packs\Keil\STM32H7xx_DFP\2.7.0\Drivers\CMSIS\Device\ST\STM32H7xx\Include-D__UVISION_VERSION="527" -D_RTE_ -DSTM32H743xx -DUSE_HAL_DRIVER -DSTM32H743xx -DUSING_FREERTOS -DUSING_DEBUG-o .\master\shell.o --omf_browse .\master\shell.crf --depend .\master\shell.d)
 I (../Letter_Shell/Inc/shell.h)(0x62159816)
 I (../Letter_Shell/Inc/shell_cfg.h)(0x629C277E)
@@ -435,7 +436,7 @@ I (../Middlewares/Third_Party/FreeRTOS/Source/include/timers.h)(0x6268BD63)
 I (../Middlewares/Third_Party/FreeRTOS/Source/include/queue.h)(0x6268BD63)
 I (../Middlewares/Third_Party/FreeRTOS/Source/include/semphr.h)(0x6268BD63)
 I (../Middlewares/Third_Party/FreeRTOS/Source/include/event_groups.h)(0x6268BD63)
-F (../Core/Src/main.c)(0x629EEBF2)(--c99 --gnu -c --cpu Cortex-M7.fp.dp -g -O0 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H7xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I ../Dwin/Inc -I ../FreeModBus/Inc -I ../Letter_Shell/Inc -I ../Stm32_Flash/Inc -I ../SFUD/sfud/inc -I ../USB_DEVICE/App -I ../USB_DEVICE/Target -I ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc -I ../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc-I.\RTE\_Master-IC:\Users\Administrator\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include-IC:\Users\Administrator\AppData\Local\Arm\Packs\Keil\STM32H7xx_DFP\2.7.0\Drivers\CMSIS\Device\ST\STM32H7xx\Include-D__UVISION_VERSION="527" -D_RTE_ -DSTM32H743xx -DUSE_HAL_DRIVER -DSTM32H743xx -DUSING_FREERTOS -DUSING_DEBUG-o .\master\main.o --omf_browse .\master\main.crf --depend .\master\main.d)
+F (../Core/Src/main.c)(0x62A16A7B)(--c99 --gnu -c --cpu Cortex-M7.fp.dp -g -O0 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H7xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I ../Dwin/Inc -I ../FreeModBus/Inc -I ../Letter_Shell/Inc -I ../Stm32_Flash/Inc -I ../SFUD/sfud/inc -I ../USB_DEVICE/App -I ../USB_DEVICE/Target -I ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc -I ../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc-I.\RTE\_Master-IC:\Users\Administrator\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include-IC:\Users\Administrator\AppData\Local\Arm\Packs\Keil\STM32H7xx_DFP\2.7.0\Drivers\CMSIS\Device\ST\STM32H7xx\Include-D__UVISION_VERSION="527" -D_RTE_ -DSTM32H743xx -DUSE_HAL_DRIVER -DSTM32H743xx -DUSING_FREERTOS -DUSING_DEBUG-o .\master\main.o --omf_browse .\master\main.crf --depend .\master\main.d)
 I (../Core/Inc/main.h)(0x62906B5D)
 I (../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h)(0x6268BD61)
 I (../Core/Inc/stm32h7xx_hal_conf.h)(0x629DFBE5)
@@ -508,7 +509,7 @@ I (../Core/Inc/fmc.h)(0x62871280)
 I (../Letter_Shell/Inc/shell_port.h)(0x6261030E)
 I (../Letter_Shell/Inc/shell.h)(0x62159816)
 I (../Letter_Shell/Inc/shell_cfg.h)(0x629C277E)
-F (../Core/Src/gpio.c)(0x629DFBDB)(--c99 --gnu -c --cpu Cortex-M7.fp.dp -g -O0 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H7xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I ../Dwin/Inc -I ../FreeModBus/Inc -I ../Letter_Shell/Inc -I ../Stm32_Flash/Inc -I ../SFUD/sfud/inc -I ../USB_DEVICE/App -I ../USB_DEVICE/Target -I ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc -I ../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc-I.\RTE\_Master-IC:\Users\Administrator\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include-IC:\Users\Administrator\AppData\Local\Arm\Packs\Keil\STM32H7xx_DFP\2.7.0\Drivers\CMSIS\Device\ST\STM32H7xx\Include-D__UVISION_VERSION="527" -D_RTE_ -DSTM32H743xx -DUSE_HAL_DRIVER -DSTM32H743xx -DUSING_FREERTOS -DUSING_DEBUG-o .\master\gpio.o --omf_browse .\master\gpio.crf --depend .\master\gpio.d)
+F (../Core/Src/gpio.c)(0x62A05FB4)(--c99 --gnu -c --cpu Cortex-M7.fp.dp -g -O0 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H7xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I ../Dwin/Inc -I ../FreeModBus/Inc -I ../Letter_Shell/Inc -I ../Stm32_Flash/Inc -I ../SFUD/sfud/inc -I ../USB_DEVICE/App -I ../USB_DEVICE/Target -I ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc -I ../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc-I.\RTE\_Master-IC:\Users\Administrator\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include-IC:\Users\Administrator\AppData\Local\Arm\Packs\Keil\STM32H7xx_DFP\2.7.0\Drivers\CMSIS\Device\ST\STM32H7xx\Include-D__UVISION_VERSION="527" -D_RTE_ -DSTM32H743xx -DUSE_HAL_DRIVER -DSTM32H743xx -DUSING_FREERTOS -DUSING_DEBUG-o .\master\gpio.o --omf_browse .\master\gpio.crf --depend .\master\gpio.d)
 I (../Core/Inc/gpio.h)(0x6268BDA3)
 I (../Core/Inc/main.h)(0x62906B5D)
 I (../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h)(0x6268BD61)
@@ -556,7 +557,7 @@ I (C:\Keil_v5\ARM\ARMCC\include\stdbool.h)(0x599ECD2E)
 I (C:\Keil_v5\ARM\ARMCC\include\string.h)(0x599ECD2C)
 I (C:\Keil_v5\ARM\ARMCC\include\stdio.h)(0x599ECD2C)
 I (C:\Keil_v5\ARM\ARMCC\include\stdarg.h)(0x599ECD2A)
-F (../Core/Src/freertos.c)(0x62A00B9E)(--c99 --gnu -c --cpu Cortex-M7.fp.dp -g -O0 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H7xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I ../Dwin/Inc -I ../FreeModBus/Inc -I ../Letter_Shell/Inc -I ../Stm32_Flash/Inc -I ../SFUD/sfud/inc -I ../USB_DEVICE/App -I ../USB_DEVICE/Target -I ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc -I ../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc-I.\RTE\_Master-IC:\Users\Administrator\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include-IC:\Users\Administrator\AppData\Local\Arm\Packs\Keil\STM32H7xx_DFP\2.7.0\Drivers\CMSIS\Device\ST\STM32H7xx\Include-D__UVISION_VERSION="527" -D_RTE_ -DSTM32H743xx -DUSE_HAL_DRIVER -DSTM32H743xx -DUSING_FREERTOS -DUSING_DEBUG-o .\master\freertos.o --omf_browse .\master\freertos.crf --depend .\master\freertos.d)
+F (../Core/Src/freertos.c)(0x62A1B506)(--c99 --gnu -c --cpu Cortex-M7.fp.dp -g -O0 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H7xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I ../Dwin/Inc -I ../FreeModBus/Inc -I ../Letter_Shell/Inc -I ../Stm32_Flash/Inc -I ../SFUD/sfud/inc -I ../USB_DEVICE/App -I ../USB_DEVICE/Target -I ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc -I ../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc-I.\RTE\_Master-IC:\Users\Administrator\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include-IC:\Users\Administrator\AppData\Local\Arm\Packs\Keil\STM32H7xx_DFP\2.7.0\Drivers\CMSIS\Device\ST\STM32H7xx\Include-D__UVISION_VERSION="527" -D_RTE_ -DSTM32H743xx -DUSE_HAL_DRIVER -DSTM32H743xx -DUSING_FREERTOS -DUSING_DEBUG-o .\master\freertos.o --omf_browse .\master\freertos.crf --depend .\master\freertos.d)
 I (../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h)(0x6268BD63)
 I (C:\Keil_v5\ARM\ARMCC\include\stddef.h)(0x599ECD2C)
 I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x599ECD2E)
@@ -633,13 +634,13 @@ I (../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ctlreq.h)(0x6268BD62
 I (../Letter_Shell/Inc/shell_port.h)(0x6261030E)
 I (../Letter_Shell/Inc/shell.h)(0x62159816)
 I (../Letter_Shell/Inc/shell_cfg.h)(0x629C277E)
-I (../FreeModBus/Inc/mdrtuslave.h)(0x629ECCBB)
-I (../FreeModBus/Inc/mdtype.h)(0x6246AAD5)
+I (../FreeModBus/Inc/mdrtuslave.h)(0x62A18A30)
+I (../FreeModBus/Inc/mdtype.h)(0x62A03F01)
 I (../FreeModBus/Inc/mdconfig.h)(0x628C5A01)
 I (../FreeModBus/Inc/mdregpool.h)(0x611377CB)
 I (../FreeModBus/Inc/mdrecbuffer.h)(0x611377AB)
-I (../Dwin/Inc/dwin.h)(0x629AD386)
-I (../Dwin/Inc/tool.h)(0x629F4C12)
+I (../Dwin/Inc/dwin.h)(0x62A0393F)
+I (../Dwin/Inc/tool.h)(0x62A1A20E)
 I (../Stm32_Flash/Inc/Flash.h)(0x628CD8C3)
 I (../Core/Inc/lte.h)(0x62878DD9)
 F (../Core/Src/dma.c)(0x629C78DB)(--c99 --gnu -c --cpu Cortex-M7.fp.dp -g -O0 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H7xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I ../Dwin/Inc -I ../FreeModBus/Inc -I ../Letter_Shell/Inc -I ../Stm32_Flash/Inc -I ../SFUD/sfud/inc -I ../USB_DEVICE/App -I ../USB_DEVICE/Target -I ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc -I ../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc-I.\RTE\_Master-IC:\Users\Administrator\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include-IC:\Users\Administrator\AppData\Local\Arm\Packs\Keil\STM32H7xx_DFP\2.7.0\Drivers\CMSIS\Device\ST\STM32H7xx\Include-D__UVISION_VERSION="527" -D_RTE_ -DSTM32H743xx -DUSE_HAL_DRIVER -DSTM32H743xx -DUSING_FREERTOS -DUSING_DEBUG-o .\master\dma.o --omf_browse .\master\dma.crf --depend .\master\dma.d)
@@ -896,13 +897,13 @@ I (../Middlewares/Third_Party/FreeRTOS/Source/include/timers.h)(0x6268BD63)
 I (../Middlewares/Third_Party/FreeRTOS/Source/include/queue.h)(0x6268BD63)
 I (../Middlewares/Third_Party/FreeRTOS/Source/include/semphr.h)(0x6268BD63)
 I (../Middlewares/Third_Party/FreeRTOS/Source/include/event_groups.h)(0x6268BD63)
-I (../FreeModBus/Inc/mdrtuslave.h)(0x629ECCBB)
-I (../FreeModBus/Inc/mdtype.h)(0x6246AAD5)
+I (../FreeModBus/Inc/mdrtuslave.h)(0x62A18A30)
+I (../FreeModBus/Inc/mdtype.h)(0x62A03F01)
 I (../FreeModBus/Inc/mdconfig.h)(0x628C5A01)
 I (../FreeModBus/Inc/mdregpool.h)(0x611377CB)
 I (../FreeModBus/Inc/mdrecbuffer.h)(0x611377AB)
-I (../Dwin/Inc/dwin.h)(0x629AD386)
-I (../Dwin/Inc/tool.h)(0x629F4C12)
+I (../Dwin/Inc/dwin.h)(0x62A0393F)
+I (../Dwin/Inc/tool.h)(0x62A1A20E)
 F (../Core/Src/stm32h7xx_hal_msp.c)(0x62906B5C)(--c99 --gnu -c --cpu Cortex-M7.fp.dp -g -O0 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H7xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I ../Dwin/Inc -I ../FreeModBus/Inc -I ../Letter_Shell/Inc -I ../Stm32_Flash/Inc -I ../SFUD/sfud/inc -I ../USB_DEVICE/App -I ../USB_DEVICE/Target -I ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc -I ../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc-I.\RTE\_Master-IC:\Users\Administrator\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include-IC:\Users\Administrator\AppData\Local\Arm\Packs\Keil\STM32H7xx_DFP\2.7.0\Drivers\CMSIS\Device\ST\STM32H7xx\Include-D__UVISION_VERSION="527" -D_RTE_ -DSTM32H743xx -DUSE_HAL_DRIVER -DSTM32H743xx -DUSING_FREERTOS -DUSING_DEBUG-o .\master\stm32h7xx_hal_msp.o --omf_browse .\master\stm32h7xx_hal_msp.crf --depend .\master\stm32h7xx_hal_msp.d)
 I (../Core/Inc/main.h)(0x62906B5D)
 I (../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h)(0x6268BD61)
@@ -992,7 +993,7 @@ I (../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_uart_ex.h)(0x6268BD61)
 I (../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_pcd.h)(0x6268BD61)
 I (../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_usb.h)(0x6268BD61)
 I (../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_pcd_ex.h)(0x6268BD61)
-F (..\Stm32_Flash\Src\Flash.c)(0x628F30FB)(--c99 --gnu -c --cpu Cortex-M7.fp.dp -g -O0 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H7xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I ../Dwin/Inc -I ../FreeModBus/Inc -I ../Letter_Shell/Inc -I ../Stm32_Flash/Inc -I ../SFUD/sfud/inc -I ../USB_DEVICE/App -I ../USB_DEVICE/Target -I ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc -I ../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc-I.\RTE\_Master-IC:\Users\Administrator\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include-IC:\Users\Administrator\AppData\Local\Arm\Packs\Keil\STM32H7xx_DFP\2.7.0\Drivers\CMSIS\Device\ST\STM32H7xx\Include-D__UVISION_VERSION="527" -D_RTE_ -DSTM32H743xx -DUSE_HAL_DRIVER -DSTM32H743xx -DUSING_FREERTOS -DUSING_DEBUG-o .\master\flash.o --omf_browse .\master\flash.crf --depend .\master\flash.d)
+F (..\Stm32_Flash\Src\Flash.c)(0x62A18E93)(--c99 --gnu -c --cpu Cortex-M7.fp.dp -g -O0 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H7xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I ../Dwin/Inc -I ../FreeModBus/Inc -I ../Letter_Shell/Inc -I ../Stm32_Flash/Inc -I ../SFUD/sfud/inc -I ../USB_DEVICE/App -I ../USB_DEVICE/Target -I ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc -I ../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc-I.\RTE\_Master-IC:\Users\Administrator\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include-IC:\Users\Administrator\AppData\Local\Arm\Packs\Keil\STM32H7xx_DFP\2.7.0\Drivers\CMSIS\Device\ST\STM32H7xx\Include-D__UVISION_VERSION="527" -D_RTE_ -DSTM32H743xx -DUSE_HAL_DRIVER -DSTM32H743xx -DUSING_FREERTOS -DUSING_DEBUG-o .\master\flash.o --omf_browse .\master\flash.crf --depend .\master\flash.d)
 I (../Stm32_Flash/Inc/Flash.h)(0x628CD8C3)
 I (../Core/Inc/main.h)(0x62906B5D)
 I (../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h)(0x6268BD61)

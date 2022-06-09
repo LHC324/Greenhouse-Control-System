@@ -80,9 +80,10 @@ struct ModbusRTUSlave
     mdU8 slaveId;
     mdU32 usartBaudRate;
     mdU32 stopTime, invalidTime;
-    mdBOOL uartId;
+    mdU8 uartId;
     ReceiveBufferHandle receiveBuffer;
     RegisterPoolHandle registerPool;
+    mdVOID (*mdRTUHook)(ModbusRTUSlaveHandler, mdU16);
     mdVOID (*mdRTUPopChar)(ModbusRTUSlaveHandler handler, mdU8 *data, mdU32 length);
     mdVOID (*mdRTUCenterProcessor)(ModbusRTUSlaveHandler handler);
     mdVOID (*mdRTUError)(ModbusRTUSlaveHandler handler, mdU8 error);
@@ -159,7 +160,7 @@ mdAPI mdVOID MX_ModbusInit(void);
 /*输出模拟信号量在内存中初始地址*/
 #define OUT_ANALOG_START_ADDR 0x00
 /*手动模式有效信号地址*/
-#define M_MODE_ADDR 0x0E
+#define M_MODE_ADDR 0x0010
 #endif
 
 #endif

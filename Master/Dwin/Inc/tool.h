@@ -88,9 +88,9 @@ extern float sidefilter(SideParm *side, float input);
 #define INACTIVE_SITE 0x00
 
 #define START_SIGNAL_MAX 10U
-#define OFFSET 4U
+#define USER_COIL_OFFSET 4U
 #define BX_SIZE 4U
-#define VX_SIZE 14U // 5U
+#define VX_SIZE 16U // 5U
 #define STIMES 10U
 #define CURRENT_UPPER 16.0F
 #define CURRENT_LOWER 4.0F

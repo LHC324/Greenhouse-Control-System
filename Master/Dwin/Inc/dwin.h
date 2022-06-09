@@ -49,7 +49,9 @@
 #define PRESSURE_OUT_ADDR 0x1060   //压力输出地址
 #define DIGITAL_INPUT_ADDR 0x1005  //数字量输入地址
 #define DIGITAL_OUTPUT_ADDR 0x1006 //数字量输出地址
+#define SS_SIGNAL_ADDR 0x1008	   //启停信号地址
 #define ATX_STATE_ADDR 0x1009	   // AT模块状态地址
+#define USER_TAP_ADDR 0x100A	   //用户阀地址
 #define ANALOG_INPUT_ADDR 0x100E   //模拟量输入地址
 #define ANALOG_OUTPUT_ADDR 0x1020  //模拟量输出地址
 #define PARAM_SETTING_ADDR 0x1030  //迪文屏幕后台参数设定地址

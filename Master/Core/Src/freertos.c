@@ -216,32 +216,21 @@ void Param_WriteBack(Save_HandleTypeDef *ps)
 {
   uint16_t len = sizeof(Save_Param) - sizeof(uint32_t) - sizeof(ps->Param.crc16);
   /*Parameters are written to the mdbus hold register*/
-  float *pdata = (float *)CUSTOM_MALLOC(len);
-  if (pdata && ps)
+  mdSTATUS ret = mdRTU_WriteHoldRegs(Slave1_Object, PARAM_MD_ADDR, len, (mdU16 *)&ps->Param);
+  /*Write user name and password*/
+  ret = mdRTU_WriteHoldRegs(Slave1_Object, MDUSER_NAME_ADDR, 2U, (mdU16 *)&ps->Param.User_Name);
+  mdU16 temp_data[2U] = {(mdU16)CURRENT_SOFT_VERSION, (mdU16)((uint32_t)((*(__IO uint32_t *)UPDATE_SAVE_ADDRESS) >> 16U))};
+#if defined(USING_DEBUG)
+  shellPrint(Shell_Object, "version:%d, flag:%d.\r\n", temp_data[0], temp_data[1]);
+#endif
+  /*Write software version number and status*/
+  ret = mdRTU_WriteHoldRegs(Slave1_Object, SOFT_VERSION_ADDR, 2U, temp_data);
+  if (ret == mdFALSE)
   {
-    memset(pdata, 0x00, len);
-    memcpy(pdata, &ps->Param, len);
-    for (uint8_t i = 0; i < len / sizeof(float); i++)
-    {
-      Endian_Swap((uint8_t *)&pdata[i], 0U, sizeof(float));
-    }
-    mdSTATUS ret = mdRTU_WriteHoldRegs(Slave1_Object, PARAM_MD_ADDR, len, (mdU16 *)pdata);
-    /*Write user name and password*/
-    ret = mdRTU_WriteHoldRegs(Slave1_Object, MDUSER_NAME_ADDR, 2U, (mdU16 *)&ps->Param.User_Name);
-    mdU16 temp_data[2U] = {(mdU16)CURRENT_SOFT_VERSION, (mdU16)((uint32_t)((*(__IO uint32_t *)UPDATE_SAVE_ADDRESS) >> 16U))};
 #if defined(USING_DEBUG)
-    shellPrint(Shell_Object, "version:%d, flag:%d.\r\n", temp_data[0], temp_data[1]);
+    shellPrint(Shell_Object, "Parameter write to hold register failed!\r\n");
 #endif
-    /*Write software version number and status*/
-    ret = mdRTU_WriteHoldRegs(Slave1_Object, SOFT_VERSION_ADDR, 2U, temp_data);
-    if (ret == mdFALSE)
-    {
-#if defined(USING_DEBUG)
-      shellPrint(Shell_Object, "Parameter write to hold register failed!\r\n");
-#endif
-    }
   }
-  CUSTOM_FREE(pdata);
 }
 
 /**
@@ -306,7 +295,7 @@ void OTA_Update(ModbusRTUSlaveHandler handler)
     /*Switch to the upgrade page*/
     if (Dwin_Object)
     {
-#define Update_Page 0x0F
+#define Update_Page 0x11
       Dwin_Object->Dw_Page(Dwin_Object, Update_Page);
     }
 
@@ -348,17 +337,15 @@ static uint8_t Read_ATx_State(void)
 #define PINX_NUM 5U
   GPIO_TypeDef *pGPIOx;
   uint16_t GPIO_Pinx;
-  uint16_t status = 0U;
-  uint8_t bit = 0;
+  uint8_t status = 0, bit = 0;
 
   for (uint8_t i = 0; i < PINX_NUM; i++)
   {
-    pGPIOx = i > 2U ? WIFI_LINK_GPIO_Port : LTE_LINK_GPIO_Port;
-    GPIO_Pinx = i > 1U ? (i < 3U ? LTE_LINK_Pin : (i < 4U ? WIFI_READY_Pin : WIFI_LINK_Pin)) : LTE_NET_Pin;
-    bit = (uint32_t)(pGPIOx->IDR & GPIO_Pinx) ? 0U : 1U;
+    pGPIOx = i <= 2U ? LTE_LINK_GPIO_Port : WIFI_LINK_GPIO_Port;
+    GPIO_Pinx = i > 1U ? (i == 2U ? LTE_LINK_Pin : (i == 3U ? WIFI_READY_Pin : WIFI_LINK_Pin)) : LTE_NET_Pin;
     /*The 1.8V level of link and net of 4G module matches
-    with the 3.3 level of MCU, resulting in effective level reversal*/
-    bit = i > 2U ? !bit : bit;
+    with the 3.3 level of MCU, resulting in effective level reversal.*/
+    bit = (uint32_t)(pGPIOx->IDR & GPIO_Pinx) ? 0U : 1U;
     status |= (uint8_t)(bit << i);
   }
 #if defined(USING_DEBUG)
@@ -486,6 +473,8 @@ void MX_FREERTOS_Init(void)
       Wifi_Object->Free_AtObject(&Wifi_Object);
     }
   }
+  /*Parameters are stored in the holding register*/
+  Param_WriteBack(ps);
   /*Turn off the global interrupt in bootloader, and turn it on here*/
   // __set_FAULTMASK(0);
   /*Solve the problem that the background data cannot be received due to the unstable power supply when the Devon screen is turned on*/
@@ -504,7 +493,9 @@ void MX_FREERTOS_Init(void)
 
   /* USER CODE BEGIN RTOS_TIMERS */
   /* start timers, add new ones, ... */
-  osTimerStart(ReportHandle, 1000U);
+
+#define REPORRT_TIMERS 800U
+  osTimerStart(ReportHandle, REPORRT_TIMERS);
   osTimerStart(ModbusHandle, 1000U);
   /* USER CODE END RTOS_TIMERS */
 
@@ -635,7 +626,7 @@ void Screen_Task(void const *argument)
       /*Resume reporting task*/
       osThreadResume(TreportHandle);
       // xTimerReset(ReportHandle, 1U);
-      osTimerStart(ReportHandle, 1000U);
+      osTimerStart(ReportHandle, REPORRT_TIMERS);
 #if defined(USING_DEBUG)
       // shellPrint(Shell_Object, "Screen received a packet of data .\r\n");
 #endif
@@ -717,6 +708,7 @@ void C4G_Task(void const *argument)
     if ((osOK == osSemaphoreWait(Recive_LteHandle, osWaitForever)) && pSlave)
     {
       pSlave->uartId = 0x02;
+      // mdRTU_Handler(Slave1_Object);
       OTA_Update(pSlave);
 #if defined(USING_DEBUG)
       shellPrint(Shell_Object, "4G received a packet of data .\r\n");
@@ -863,27 +855,28 @@ void IRQ_Task(void const *argument)
  * @param  size  Detection length
  * @retval true/false
  */
-__inline bool Check_Vx_State(mdBit *p_current, mdBit *p_last, uint8_t size)
+bool Check_Vx_State(mdBit *p_current, mdBit *p_last, uint8_t size)
 {
   bool ret = false;
   if (p_current && p_last && size)
   {
-    // for (uint8_t i = 0; i < size; i++)
-    // {
-    //   if (p_current[i] != p_last[i])
-    //   {
-    //     p_last[i] = p_current[i];
-    //     ret = true;
-    //   }
-    // }
-    for (mdBit *p = p_current; p < p_current + size; p++)
+    for (uint8_t i = 0; i < size; i++)
     {
-      if (*p != *p_last)
+      if (p_current[i] != p_last[i])
       {
-        *p_last++ = *p;
+        p_last[i] = p_current[i];
         ret = true;
       }
     }
+
+    // for (mdBit *p = p_current, *q = p_last; p < p_current + size; p++, q++)
+    // {
+    //   if (*p != *q)
+    //   {
+    //     *q = *p;
+    //     ret = true;
+    //   }
+    // }
   }
   return ret;
 }
@@ -929,6 +922,7 @@ void Control_Task(void const *argument)
     /*Initialize WBIT*/
     memset(wbit, false, VX_SIZE);
     // memset(copy_wbit, false, VX_SIZE);
+    sbit = mdLow;
 
     uint16_t error_code = 0;
 
@@ -967,7 +961,7 @@ void Control_Task(void const *argument)
     }
     ps->Param.Error_Code = error_code;
     // taskEXIT_CRITICAL();
-    if (xQueueSend(UserQueueHandle, &usinfo, 10) != pdPASS)
+    if (xQueueSend(UserQueueHandle, &usinfo, 2) != pdPASS)
     // if (osMailPut(UserQueueHandle, &usinfo) != osOK)
     {
 #if defined(USING_DEBUG)
@@ -982,9 +976,13 @@ void Control_Task(void const *argument)
     /*Read start signal:0-N,As long as one start signal is valid, it is valid*/
     for (uint8_t i = 0; i < START_SIGNAL_MAX; i++)
     {
-      ret = mdRTU_ReadInputCoil(Slave1_Object, INPUT_DIGITAL_START_ADDR, bitx);
+      ret = mdRTU_ReadInputCoil(Slave1_Object, INPUT_DIGITAL_START_ADDR + i, bitx);
       sbit += bitx;
-      wbit[OFFSET] = bitx;
+      /*When the start signal is valid, the corresponding user valve is also valid.*/
+#define __OPEN_USER_VALVE
+      {
+        wbit[USER_COIL_OFFSET + i] = bitx;
+      }
       if (ret == mdFALSE)
       {
 #if defined(USING_DEBUG)
@@ -1201,11 +1199,11 @@ void Control_Task(void const *argument)
     }
 #endif
     // memset(wbit, 0x01, VX_SIZE);
-    state ^= 1;
-    for (uint8_t i = 0; i < VX_SIZE; i++)
-    {
-      wbit[i] = state;
-    }
+    // state ^= 1;
+    // for (uint8_t i = 0; i < VX_SIZE; i++)
+    // {
+    //   wbit[i] = state;
+    // }
     ret = mdRTU_WriteCoils(Slave1_Object, OUT_DIGITAL_START_ADDR, VX_SIZE, wbit);
     if (ret == mdFALSE)
     {
@@ -1383,7 +1381,7 @@ void Transimt_Task(void const *argument)
       }
       else
       {
-        if (Check_Vx_State(&wbit[0], &copy_wbit[0], VX_SIZE) && sp_irq->TableCount && record_type.p_id)
+        if (Check_Vx_State(wbit, copy_wbit, VX_SIZE) && sp_irq->TableCount && record_type.p_id)
         // if (sp_irq->TableCount && record_type.p_id)
         {
           record_type.count = 0;
@@ -1421,7 +1419,7 @@ void Transimt_Task(void const *argument)
     // /*Resume interrupt processing task*/
     // osThreadResume(InterruptHandle);
 
-    osDelay(1);
+    osDelay(10);
   }
   /* USER CODE END Transimt_Task */
 }
@@ -1440,10 +1438,10 @@ void Report_Task(void const *argument)
 {
   /* USER CODE BEGIN Report_Task */
 
-  // mdU16 rbit = mdLow, wbit = mdLow;
+  mdSTATUS ret = mdFALSE;
+  mdU16 crbit = mdLow, cwbit = mdLow;
   mdU16 at_state = mdLow;
-  uint8_t bit = 0;
-  // mdSTATUS ret = mdFALSE;
+  mdBit bit = mdLow;
   uint16_t value = 0x0000;
   static bool first_flag = false;
   Save_HandleTypeDef *ps = (Save_HandleTypeDef *)argument;
@@ -1463,27 +1461,40 @@ void Report_Task(void const *argument)
     //   float pdata[ADC_DMA_CHANNEL];
     // #endif
     //   memset(pdata, 0x00, sizeof(float) * ADC_DMA_CHANNEL);
-
-    // for (uint16_t i = 0; i < EXTERN_DIGITALIN_MAX; i++)
-    // {
-    //   mdRTU_ReadInputCoil(Slave1_Object, INPUT_DIGITAL_START_ADDR + i, bit);
-    //   rbit |= bit << (i + 8U);
-    //   mdRTU_ReadCoil(Slave1_Object, OUT_DIGITAL_START_ADDR + i, bit);
-    //   wbit |= bit << (i + 8U);
-    // }
-    /*Read 4G module status*/
-    // rbit |= Read_LTE_State();
+    //     ret = mdRTU_ReadInputCoils(Slave1_Object, INPUT_DIGITAL_START_ADDR, VX_SIZE, rbit);
+    //     // ret = mdRTU_ReadCoils(Slave1_Object, OUT_DIGITAL_START_ADDR, VX_SIZE, wbit);
+    //     if (ret == mdFALSE)
+    //     {
+    // #if defined(USING_DEBUG)
+    //       shellPrint(Shell_Object, "Error: Modbus register read failed!\r\n");
+    // #endif
+    //     }
+    /*Clear last status*/
+    crbit = cwbit = 0;
+    for (uint16_t i = 0; i < VX_SIZE; i++)
+    {
+      ret = mdRTU_ReadInputCoil(Slave1_Object, INPUT_DIGITAL_START_ADDR + i, bit);
+      crbit |= i > (CARD_SIGNAL_MAX - 1U) ? (mdU8)(bit << (i - CARD_SIGNAL_MAX)) : (mdU16)(bit << ((i % CARD_SIGNAL_MAX) + CARD_SIGNAL_MAX));
+      ret = mdRTU_ReadCoil(Slave1_Object, OUT_DIGITAL_START_ADDR + i, bit);
+      cwbit |= i > (CARD_SIGNAL_MAX - 1U) ? (mdU8)(bit << (i - CARD_SIGNAL_MAX)) : (mdU16)(bit << ((i % CARD_SIGNAL_MAX) + CARD_SIGNAL_MAX));
+      if (ret == mdFALSE)
+      {
+#if defined(USING_DEBUG)
+        shellPrint(Shell_Object, "Error: Modbus register read failed!" __INFORMATION());
+#endif
+      }
+    }
 #if defined(USING_DEBUG)
     // shellPrint(Shell_Object, "rbit = 0x%02x.\r\n", rbit);
 #endif
-    /*Digital input*/
-    // Dwin_Object->Dw_Write(Dwin_Object, DIGITAL_INPUT_ADDR, (uint8_t *)&rbit, sizeof(rbit));
-    // osDelay(DELAY_TIMES);
-    /*Digital output*/
-    // Dwin_Object->Dw_Write(Dwin_Object, DIGITAL_OUTPUT_ADDR, (uint8_t *)&wbit, sizeof(wbit));
-    // osDelay(DELAY_TIMES);
+    /*Start signal*/
+    Dwin_Object->Dw_Write(Dwin_Object, SS_SIGNAL_ADDR, (uint8_t *)&crbit, sizeof(crbit));
+    osDelay(DELAY_TIMES);
+    /*User valve*/
+    Dwin_Object->Dw_Write(Dwin_Object, USER_TAP_ADDR, (uint8_t *)&cwbit, sizeof(cwbit));
+    osDelay(DELAY_TIMES);
     /*Report the status of at module*/
-    at_state = Read_ATx_State();
+    at_state = Read_ATx_State() << 8U;
     Dwin_Object->Dw_Write(Dwin_Object, ATX_STATE_ADDR, (uint8_t *)&at_state, sizeof(at_state));
     osDelay(DELAY_TIMES);
     if (xQueueReceive(UserQueueHandle, &urinfo, 0) != pdPASS)
@@ -1506,15 +1517,6 @@ void Report_Task(void const *argument)
       Dwin_Object->Dw_Write(Dwin_Object, PRESSURE_OUT_ADDR, (uint8_t *)&urinfo, BX_SIZE * sizeof(float));
       osDelay(DELAY_TIMES);
     }
-
-    /*Analog input*/
-    // mdRTU_ReadInputRegisters(Slave1_Object, INPUT_ANALOG_START_ADDR, ADC_DMA_CHANNEL * 2U, (mdU16 *)pdata);
-    // Dwin_Object->Dw_Write(Dwin_Object, ANALOG_INPUT_ADDR, (uint8_t *)pdata, ADC_DMA_CHANNEL * sizeof(float));
-    // osDelay(DELAY_TIMES);
-    /*Analog output*/
-    // mdRTU_ReadHoldRegisters(Slave1_Object, OUT_ANALOG_START_ADDR, EXTERN_ANALOGOUT_MAX * 2U, (mdU16 *)pdata);
-    // Dwin_Object->Dw_Write(Dwin_Object, ANALOG_OUTPUT_ADDR, (uint8_t *)pdata, EXTERN_ANALOGOUT_MAX * sizeof(float));
-    // osDelay(DELAY_TIMES);
     /*Report error code*/
 //     if (ps->Param.Error_Code)
 //     {

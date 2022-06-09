@@ -170,7 +170,8 @@ uint32_t FLASH_Write(uint32_t Address, const uint32_t *pBuf, uint32_t Size)
 	/*2、擦除FLASH*/
 	pEraseInit.TypeErase = FLASH_TYPEERASE_SECTORS;
 	pEraseInit.Sector = FirstSector;
-	pEraseInit.NbSectors = FLASH_If_GetSectorNumber(USER_FLASH_LAST_PAGE_ADDRESS) - FirstSector + 1; // 8 - FirstSector;
+	// pEraseInit.NbSectors = FLASH_If_GetSectorNumber(USER_FLASH_LAST_PAGE_ADDRESS) - FirstSector + 1; // 8 - FirstSector;
+	pEraseInit.NbSectors = 1;
 	pEraseInit.VoltageRange = FLASH_VOLTAGE_RANGE_3;
 	/*清除flash标志位*/
 	__HAL_FLASH_CLEAR_FLAG(FLASH_FLAG_EOP | FLASH_FLAG_OPERR | FLASH_FLAG_WRPERR |

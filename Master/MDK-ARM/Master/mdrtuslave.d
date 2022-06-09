@@ -72,3 +72,4 @@
 .\master\mdrtuslave.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/queue.h
 .\master\mdrtuslave.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/semphr.h
 .\master\mdrtuslave.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/event_groups.h
+.\master\mdrtuslave.o: ../Dwin/Inc/dwin.h

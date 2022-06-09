@@ -4,6 +4,7 @@
 #include "usart.h"
 #include "shell_port.h"
 #include "tool.h"
+#include "dwin.h"
 
 #if (USER_MODBUS_LIB)
 /*Modbus作为主站时，缓冲区数据结构*/
@@ -88,6 +89,101 @@ DmaHandle Modbus_Rs485 = {
     .pRecive_FinishFlag = NULL,
 #endif
 };
+
+/**
+ * @brief	modbus钩子函数
+ * @details
+ * @param   @handler 句柄
+ * @param	@addr 当前寄存器地址
+ * @retval	None
+ */
+static mdVOID mdRTUHook(ModbusRTUSlaveHandler handler, mdU16 addr)
+{
+    pDwinHandle pd = Dwin_Object;
+    Save_HandleTypeDef *ps = &Save_Flash;
+    extern uint32_t FLASH_Write(uint32_t Address, const uint16_t *pBuf, uint32_t Size);
+    bool save_flag = false;
+
+    /*处于后台参数区*/
+    if ((addr >= PARAM_MD_ADDR) && (addr < MDUSER_NAME_ADDR))
+    {
+        uint8_t site = (addr - PARAM_MD_ADDR) / 2U;
+        float data = 0, temp_data = 0;
+
+        mdSTATUS ret = mdRTU_ReadHoldRegisters(handler, addr, 2U, (mdU16 *)&data);
+        if (ret == mdFALSE)
+        {
+#if defined(USING_DEBUG)
+            shellPrint(Shell_Object, "Holding register addr[0x%x], Read: %.3f failed!\r\n", addr, data);
+#endif
+        }
+        else
+        {
+            float *pdata = (float *)pd->Slave.pHandle;
+            /*保留迪文屏幕值*/
+            temp_data = data;
+            Endian_Swap((uint8_t *)&temp_data, 0U, sizeof(float));
+            if ((data >= pd->Slave.pMap[site].lower) && (data <= pd->Slave.pMap[site].upper))
+            {
+                /*确认数据回传到屏幕*/
+                pd->Dw_Write(pd, pd->Slave.pMap[site].addr, (uint8_t *)&temp_data, sizeof(float));
+                if (site < pd->Slave.Events_Size)
+                {
+                    pdata[site] = data;
+                    /*存储标志*/
+                    save_flag = true;
+                }
+            }
+        }
+#if defined(USING_DEBUG)
+        shellPrint(Shell_Object, "Modbus[0x%x] received a data: %.3f.\r\n", addr, data);
+#endif
+    }
+    /*用户名和密码处理*/
+    else if (addr >= MDUSER_NAME_ADDR)
+    {
+        uint16_t data = 0;
+        mdSTATUS ret = mdRTU_ReadHoldRegisters(handler, addr, 2U, (mdU16 *)&data);
+        if (ret == mdFALSE)
+        {
+#if defined(USING_DEBUG)
+            shellPrint(Shell_Object, "Holding register addr[0x%x], Read: 0x%x failed!\r\n", addr, data);
+#endif
+        }
+        else
+        {
+#define NUMBER_USER_MAX 9999U
+            uint8_t site = addr - PARAM_MD_ADDR;
+            uint16_t *puser = (uint16_t *)pd->Slave.pHandle;
+            if (data <= NUMBER_USER_MAX)
+            {
+                puser[site] = data;
+                /*存储标志*/
+                save_flag = true;
+            }
+        }
+#if defined(USING_DEBUG)
+        shellPrint(Shell_Object, "Modbus[0x%x] received a data: %d.\r\n", addr, data);
+#endif
+    }
+    if (save_flag)
+    {
+        save_flag = false;
+#if defined(USING_FREERTOS)
+        taskENTER_CRITICAL();
+#endif
+        /*计算crc校验码*/
+        ps->Param.crc16 = Get_Crc16((uint8_t *)&ps->Param, sizeof(Save_Param) - sizeof(ps->Param.crc16), 0xFFFF);
+        /*参数保存到Flash*/
+        FLASH_Write(PARAM_SAVE_ADDRESS, (uint16_t *)&Save_Flash.Param, sizeof(Save_Param));
+#if defined(USING_FREERTOS)
+        taskEXIT_CRITICAL();
+#endif
+#if defined(USING_DEBUG)
+        shellPrint(Shell_Object, "Save parameters...\r\n");
+#endif
+    }
+}
 
 /**
  * @brief	获取目标uart
@@ -849,12 +945,16 @@ static mdVOID mdRTUCenterProcessor(ModbusRTUSlaveHandler handler)
         break;
     case MODBUS_CODE_6:
         handler->mdRTUHandleCode6(handler);
+        /*更改用户名和密码*/
+        handler->mdRTUHook(handler, ToU16(recbuf[2], recbuf[3]));
         break;
     case MODBUS_CODE_15:
         handler->mdRTUHandleCode15(handler);
         break;
     case MODBUS_CODE_16:
         handler->mdRTUHandleCode16(handler);
+        /*更新屏幕后台参数*/
+        handler->mdRTUHook(handler, ToU16(recbuf[2], recbuf[3]));
         break;
     default:
         handler->mdRTUError(handler, ERROR5);
@@ -883,6 +983,7 @@ mdSTATUS mdCreateModbusRTUSlave(ModbusRTUSlaveHandler *handler, struct ModbusRTU
 #endif
     if ((*handler) != NULL)
     {
+        (*handler)->mdRTUHook = mdRTUHook;
         (*handler)->mdRTUPopChar = info.mdRTUPopChar;
         (*handler)->mdRTUCenterProcessor = mdRTUCenterProcessor;
         (*handler)->mdRTUError = mdRTUError;
