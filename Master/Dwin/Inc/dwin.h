@@ -21,6 +21,17 @@
 #define PAGE_CHANGE_CMD 0x84 //页面切换
 #define TOUCH_CMD 0xD4		 //触摸动作
 
+/*迪文屏幕页面*/
+#define MAIN_PAGE 0x03
+#define DIGITAL_INPUT_PAGE 0x04
+#define DIFITAL_OUTPUT_PAGE 0x05
+#define ANALOG_INPUT_PAGE 0x06
+#define ANALOG_OUTPUT_PAGE 0x07
+#define NONE_PAGE 0x08
+#define COMMUNICATION_PAGE 0x0F
+#define ERROR_PAGE 0x10
+#define RESET_POEWR_NOTE_PAGE 28U
+
 #define USER_NAME_ADDR 0x1000	  //用户名地址
 #define USER_PASSWORD_ADDR 0x1001 //用户密码
 #define LOGIN_SURE_ADDR 0x1002	  //登录确认地址
@@ -46,15 +57,17 @@
 #define ANALOG_OUTPUT7_ADDR 0x102C //模拟量7输出地址
 #define ANALOG_OUTPUT8_ADDR 0x102E //模拟量8输出地址
 /*参数存储区*/
-#define PRESSURE_OUT_ADDR 0x1060   //压力输出地址
-#define DIGITAL_INPUT_ADDR 0x1005  //数字量输入地址
-#define DIGITAL_OUTPUT_ADDR 0x1006 //数字量输出地址
-#define SS_SIGNAL_ADDR 0x1008	   //启停信号地址
-#define ATX_STATE_ADDR 0x1009	   // AT模块状态地址
-#define USER_TAP_ADDR 0x100A	   //用户阀地址
-#define ANALOG_INPUT_ADDR 0x100E   //模拟量输入地址
-#define ANALOG_OUTPUT_ADDR 0x1020  //模拟量输出地址
-#define PARAM_SETTING_ADDR 0x1030  //迪文屏幕后台参数设定地址
+#define PRESSURE_OUT_ADDR 0x1060	//压力输出地址
+#define DIGITAL_INPUT_ADDR 0x1005	//数字量输入地址
+#define DIGITAL_OUTPUT_ADDR 0x1006	//数字量输出地址
+#define SS_SIGNAL_ADDR 0x1008		//启停信号地址
+#define ATX_STATE_ADDR 0x1009		// AT模块状态地址
+#define USER_TAP_ADDR 0x100A		//用户阀地址
+#define RESET_CARD_INFO_ADDR 0x100B //复位板卡信息地址
+#define SURE_CARD_INFO_ADDR 0x100C	//确认板卡信息地址
+#define ANALOG_INPUT_ADDR 0x100E	//模拟量输入地址
+#define ANALOG_OUTPUT_ADDR 0x1020	//模拟量输出地址
+#define PARAM_SETTING_ADDR 0x1030	//迪文屏幕后台参数设定地址
 /*阈值设定界面*/
 #define PTANK_MAX_ADDR 0x1030	//储槽压力上限地址
 #define PTANK_MIN_ADDR 0x1032	//储槽压力下限地址

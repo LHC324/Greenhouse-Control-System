@@ -14,8 +14,8 @@ extern "C"
     "Line: %d,  Date: %s, Time: %s, Name: %s\r\n", \
         __LINE__, __DATE__, __TIME__, __FILE__
 
-/*使用就绪列表*/
-#define USING_FREERTOS_LIST 0
+// /*使用就绪列表*/
+// #define USING_FREERTOS_LIST 0
 /*交换任意类型数据*/
 #define USING_SWAP_ANY 1
 
@@ -75,7 +75,7 @@ extern float sidefilter(SideParm *side, float input);
     } __attribute__((aligned(4)));
 
 /*硬件支持的板卡数*/
-#define CARD_NUM_MAX 0x10
+// #define CARD_NUM_MAX 0x10
 /*板卡类型数*/
 #define CARD_TYPE_MAX 0x08
 /*每块板卡的信号数*/
@@ -105,46 +105,46 @@ extern float sidefilter(SideParm *side, float input);
 #define Close_Vx(__x) ((__x) <= VX_SIZE ? wbit[__x - 1U] = false : false)
 #define TARGET_BOARD_NUM ((VX_SIZE + (CARD_SIGNAL_MAX - 1U)) / CARD_SIGNAL_MAX)
 
-    typedef enum
-    {
-        Card_AnalogInput = 0x00,
-        Card_AnalogOutput = 0x10,
-        Card_DigitalInput = 0x20,
-        Card_DigitalOutput = 0x30,
-        Card_Wifi = 0xC0,
-        Card_4G = 0xD0,
-        Card_Lora1 = 0xE0,
-        Card_Lora2 = 0xF0,
-        Card_None = 0x55,
-    } Card_Tyte;
-    typedef struct
-    {
-        uint8_t SlaveId;
-        uint16_t Priority;
-        Card_Tyte TypeCoding;
-        uint16_t Number;
-        // bool flag;
-    } IRQ_Code;
+    //     typedef enum
+    //     {
+    //         Card_AnalogInput = 0x00,
+    //         Card_AnalogOutput = 0x10,
+    //         Card_DigitalInput = 0x20,
+    //         Card_DigitalOutput = 0x30,
+    //         Card_Wifi = 0xC0,
+    //         Card_4G = 0xD0,
+    //         Card_Lora1 = 0xE0,
+    //         Card_Lora2 = 0xF0,
+    //         Card_None = 0x55,
+    //     } Card_Tyte;
+    //     typedef struct
+    //     {
+    //         uint8_t SlaveId;
+    //         uint16_t Priority;
+    //         Card_Tyte TypeCoding;
+    //         uint16_t Number;
+    //         // bool flag;
+    //     } IRQ_Code;
 
-    typedef struct
-    {
-        uint16_t site;
-        uint16_t Priority;
-        bool flag;
-    } IRQ_Request;
+    //     typedef struct
+    //     {
+    //         uint16_t site;
+    //         uint16_t Priority;
+    //         bool flag;
+    //     } IRQ_Request;
 
-    typedef struct
-    {
-        IRQ_Request *pReIRQ;
-        uint16_t SiteCount;
-        IRQ_Code *pIRQ;
-        uint16_t TableCount;
-        // uint16_t Amount;
+    //     typedef struct
+    //     {
+    //         IRQ_Request *pReIRQ;
+    //         uint16_t SiteCount;
+    //         IRQ_Code *pIRQ;
+    //         uint16_t TableCount;
+    //         // uint16_t Amount;
 
-#if (USING_FREERTOS_LIST)
-        List_t *LReady, *LBlock;
-#endif
-    } Slave_IRQTableTypeDef __attribute__((aligned(4)));
+    // #if (USING_FREERTOS_LIST)
+    //         List_t *LReady, *LBlock;
+    // #endif
+    //     } Slave_IRQTableTypeDef __attribute__((aligned(4)));
 
     typedef struct
     {

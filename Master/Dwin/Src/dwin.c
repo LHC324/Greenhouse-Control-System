@@ -31,6 +31,8 @@ static void Dwin_EventHandle(pDwinHandle pd, uint8_t *pSite);
 static void Restore_Factory(pDwinHandle pd, uint8_t *pSite);
 static void Password_Handle(pDwinHandle pd, uint8_t *pSite);
 static void Card_Handle(pDwinHandle pd, uint8_t *pSite);
+static void Reset_Card_Info(pDwinHandle pd, uint8_t *pSite);
+static void Sure_Card_Info(pDwinHandle pd, uint8_t *pSite);
 
 /*迪文响应线程*/
 DwinMap Dwin_ObjMap[] = {
@@ -82,6 +84,9 @@ DwinMap Dwin_ObjMap[] = {
 	{.addr = CARD_SLOT15_ADDR, .upper = 0xFFFF, .lower = 0, .event = Card_Handle},
 	{.addr = CARD_SLOT16_ADDR, .upper = 0xFFFF, .lower = 0, .event = Card_Handle},
 	/*气站工作时间段和阀门工作时间设置*/
+	/*复位板卡组态信息*/
+	{.addr = RESET_CARD_INFO_ADDR, .upper = 0xFFFF, .lower = 0, .event = Reset_Card_Info},
+	{.addr = SURE_CARD_INFO_ADDR, .upper = 0xFFFF, .lower = 0, .event = Sure_Card_Info},
 };
 
 #define Dwin_EventSize (sizeof(Dwin_ObjMap) / sizeof(DwinMap))
@@ -568,12 +573,6 @@ static void Password_Handle(pDwinHandle pd, uint8_t *pSite)
 static void Card_Handle(pDwinHandle pd, uint8_t *pSite)
 {
 #define NEXT_DELAT_TIMES 50U
-#define DIGITAL_INPUT_PAGE 0x04
-#define DIFITAL_OUTPUT_PAGE 0x05
-#define ANALOG_INPUT_PAGE 0x06
-#define ANALOG_OUTPUT_PAGE 0x07
-#define COMMUNICATION_PAGE 0x0F
-#define NONE_PAGE 0x08
 #define Get_Change_Page(__type)                                                                                                                 \
 	((__type) == Card_AnalogInput ? ANALOG_INPUT_PAGE : (__type) == Card_AnalogOutput ? ANALOG_OUTPUT_PAGE                                      \
 													: (__type) == Card_DigitalInput	  ? DIGITAL_INPUT_PAGE                                      \
@@ -749,5 +748,97 @@ static void Card_Handle(pDwinHandle pd, uint8_t *pSite)
 		{
 			pd->Dw_Write(pd, report_addr, pDest, rSize);
 		}
+	}
+}
+
+/**
+ * @brief  复位板卡组态信息
+ * @param  pd 迪文屏幕对象句柄
+ * @param  pSite 记录当前Map中位置
+ * @retval None
+ */
+static void Reset_Card_Info(pDwinHandle pd, uint8_t *pSite)
+{
+	uint16_t rcode = Get_Data(pd, 7U, pd->Uart.pRbuf[6U]);
+	Save_HandleTypeDef *ps = &Save_Flash;
+	// Slave_IRQTableTypeDef *pt = (Slave_IRQTableTypeDef *)pd->Slave.pHandle1;
+	if (rcode == RSURE_CODE)
+	{
+		/*切换到重启电源提示界面*/
+		pd->Dw_Page(pd, RESET_POEWR_NOTE_PAGE);
+		/*清空中断请求列表和中断表*/
+		if (ps)
+		{
+			// ps->Param.Slave_IRQ_Table.SiteCount = ps->Param.Slave_IRQ_Table.TableCount = 0;
+			// ps->Param.Slave_IRQ_Table.IRQ_Table_SetFlag = false;
+			// for (uint8_t i = 0; i < CARD_NUM_MAX; i++)
+			// {
+			// 	ps->Param.Slave_IRQ_Table.ReIRQ[i].site = INACTIVE_SITE;
+			// 	ps->Param.Slave_IRQ_Table.ReIRQ[i].Priority = PRIORITY_MAX;
+			// 	ps->Param.Slave_IRQ_Table.ReIRQ[i].flag = false;
+			// 	ps->Param.Slave_IRQ_Table.IRQ[i].SlaveId = CARD_NUM_MAX;
+			// 	ps->Param.Slave_IRQ_Table.IRQ[i].Priority = PRIORITY_MAX;
+			// 	ps->Param.Slave_IRQ_Table.IRQ[i].TypeCoding = Card_None;
+			// 	ps->Param.Slave_IRQ_Table.IRQ[i].Priority = 0;
+			// }
+			memset(&ps->Param.Slave_IRQ_Table, 0x00, sizeof(ps->Param.Slave_IRQ_Table));
+		}
+		/*重新计算CRC校验码*/
+		/*Must be 4 byte aligned!!!*/
+		ps->Param.crc16 = Get_Crc16((uint8_t *)&ps->Param, sizeof(Save_Param) - sizeof(ps->Param.crc16), 0xFFFF);
+#if defined(USING_DEBUG)
+		shellPrint(Shell_Object, "ps->Param.crc16 = 0x%x.\r\n", ps->Param.crc16);
+#endif
+
+#if defined(USING_FREERTOS)
+		taskENTER_CRITICAL();
+#endif
+		FLASH_Write(PARAM_SAVE_ADDRESS, (uint32_t *)&ps->Param, sizeof(Save_Param));
+#if defined(USING_FREERTOS)
+		taskEXIT_CRITICAL();
+#endif
+		// Report_Backparam(Dwin_Object, &ps->Param);
+#if defined(USING_DEBUG)
+		shellPrint(Shell_Object, "success: Board information cleared successfully!\r\n");
+#endif
+	}
+}
+
+/**
+ * @brief  确认板卡组态信息
+ * @param  pd 迪文屏幕对象句柄
+ * @param  pSite 记录当前Map中位置
+ * @retval None
+ */
+static void Sure_Card_Info(pDwinHandle pd, uint8_t *pSite)
+{
+	uint16_t rcode = Get_Data(pd, 7U, pd->Uart.pRbuf[6U]);
+	Save_HandleTypeDef *ps = &Save_Flash;
+	if (rcode == RSURE_CODE)
+	{
+		/*切换到主界面*/
+		pd->Dw_Page(pd, MAIN_PAGE);
+		/*设置板卡信息记录标志有效*/
+		ps->Param.Slave_IRQ_Table.IRQ_Table_SetFlag = true;
+		/*拷贝中断表到falsh存储结构*/
+		memcpy(ps->Param.Slave_IRQ_Table.IRQ, IRQ_Table.pIRQ, sizeof(ps->Param.Slave_IRQ_Table.IRQ));
+		ps->Param.Slave_IRQ_Table.TableCount = IRQ_Table.TableCount;
+		/*重新计算CRC校验码*/
+		/*Must be 4 byte aligned!!!*/
+		ps->Param.crc16 = Get_Crc16((uint8_t *)&ps->Param, sizeof(Save_Param) - sizeof(ps->Param.crc16), 0xFFFF);
+#if defined(USING_DEBUG)
+		shellPrint(Shell_Object, "ps->Param.crc16 = 0x%x.\r\n", ps->Param.crc16);
+#endif
+
+#if defined(USING_FREERTOS)
+		taskENTER_CRITICAL();
+#endif
+		FLASH_Write(PARAM_SAVE_ADDRESS, (uint32_t *)&ps->Param, sizeof(Save_Param));
+#if defined(USING_FREERTOS)
+		taskEXIT_CRITICAL();
+#endif
+#if defined(USING_DEBUG)
+		shellPrint(Shell_Object, "success: Board information recording succeeded!\r\n");
+#endif
 	}
 }

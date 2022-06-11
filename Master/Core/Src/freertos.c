@@ -52,7 +52,7 @@ Save_User *puser = &Save_Flash.User;
 /* USER CODE BEGIN PD */
 // EventGroupHandle_t Event_Handle = NULL;
 Save_Param Save_InitPara = {
-    .crc16 = 0xFF17,
+    .crc16 = 0xF168,
     .Ptank_max = 4.0F,
     .Ptank_min = 0.0F,
     .Pvap_outlet_max = 4.0F,
@@ -81,6 +81,7 @@ Save_Param Save_InitPara = {
     .User_Name = 0x07E6,
     .User_Code = 0x0522,
     .Error_Code = 0x0000,
+    .Slave_IRQ_Table.IRQ_Table_SetFlag = false,
     // .Update = 0xFFFFFFFF,
 };
 /* USER CODE END PD */
@@ -242,23 +243,24 @@ void Param_WriteBack(Save_HandleTypeDef *ps)
  */
 void Report_Backparam(pDwinHandle pd, Save_Param *sp)
 {
+  uint32_t actual_size = sizeof(Save_Param) - sizeof(sp->Slave_IRQ_Table) - 1U;
 #if defined(USING_FREERTOS)
-  float *pdata = (float *)CUSTOM_MALLOC(sizeof(Save_Param) - 1U);
+  float *pdata = (float *)CUSTOM_MALLOC(actual_size);
   if (!pdata)
     goto __exit;
 #else
   float pdata[sizeof(Save_Param) - 1U];
 #endif
 
-  memcpy(pdata, sp, sizeof(Save_Param) - 1U);
-  for (float *p = pdata; p < pdata + sizeof(Save_Param) / sizeof(float) - 1U; p++)
+  memcpy(pdata, sp, actual_size);
+  for (float *p = pdata; p < pdata + (sizeof(Save_Param) - sizeof(sp->Slave_IRQ_Table)) / sizeof(float) - 1U; p++)
   {
 #if defined(USING_DEBUG)
     shellPrint(Shell_Object, "sp = %p,p = %p, *p = %.3f\r\n", sp, p, *p);
 #endif
     Endian_Swap((uint8_t *)p, 0U, sizeof(float));
   }
-  pd->Dw_Write(pd, PARAM_SETTING_ADDR, (uint8_t *)pdata, sizeof(Save_Param) - (sizeof(sp->User_Name) + sizeof(sp->User_Code) + sizeof(sp->Error_Code) + sizeof(sp->crc16)));
+  pd->Dw_Write(pd, PARAM_SETTING_ADDR, (uint8_t *)pdata, sizeof(Save_Param) - (sizeof(sp->Slave_IRQ_Table) + sizeof(sp->User_Name) + sizeof(sp->User_Code) + sizeof(sp->Error_Code) + sizeof(sp->crc16)));
 
 __exit:
   CUSTOM_FREE(pdata);
@@ -471,6 +473,34 @@ void MX_FREERTOS_Init(void)
     {
       Wifi_Object->AT_SetDefault(Wifi_Object);
       Wifi_Object->Free_AtObject(&Wifi_Object);
+    }
+  }
+  /*Check whether the board information has been initialized*/
+  if (!ps->Param.Slave_IRQ_Table.IRQ_Table_SetFlag)
+  {
+#if defined(USING_DEBUG)
+    shellPrint(Shell_Object, "Please initialize board information!\r\n");
+#endif
+#define CONFIG_CARD_INFO_PAGE 29U
+    /*The screen forcibly jumps to the image page of the board information configuration*/
+    Dwin_Object->Dw_Page(Dwin_Object, CONFIG_CARD_INFO_PAGE);
+  }
+  else
+  {
+    if (IRQ_Table.pReIRQ && IRQ_Table.pIRQ)
+    {
+      /*Copy flash parameters to the application area*/
+      // memcpy(IRQ_Table.pReIRQ, ps->Param.Slave_IRQ_Table.ReIRQ, sizeof(ps->Param.Slave_IRQ_Table.ReIRQ));
+      memcpy(IRQ_Table.pIRQ, ps->Param.Slave_IRQ_Table.IRQ, sizeof(ps->Param.Slave_IRQ_Table.IRQ));
+      IRQ_Table.TableCount = ps->Param.Slave_IRQ_Table.TableCount;
+#if defined(USING_DEBUG)
+      shellPrint(Shell_Object, "\r\nIRQ_Table Information:\r\nSlaveId\t\tPriority\t\tType\t\tNumber\r\n");
+      for (uint8_t i = 0; i < CARD_NUM_MAX; i++)
+      {
+        shellPrint(Shell_Object, "0x%x\t\t0x%x\t\t\t0x%x\t\t%d\r\n", IRQ_Table.pIRQ[i].SlaveId, IRQ_Table.pIRQ[i].Priority,
+                   IRQ_Table.pIRQ[i].TypeCoding, IRQ_Table.pIRQ[i].Number);
+      }
+#endif
     }
   }
   /*Parameters are stored in the holding register*/
@@ -839,7 +869,7 @@ void IRQ_Task(void const *argument)
       }
       for (uint16_t i = 0; i < sp_irq->SiteCount; i++)
       {
-        xQueueSend(SureQueueHandle, &sp_irq->pReIRQ[i], 10);
+        xQueueSend(SureQueueHandle, &sp_irq->pReIRQ[i], 0);
       }
       sp_irq->SiteCount = 0;
     }
@@ -904,7 +934,7 @@ void Control_Task(void const *argument)
   Save_HandleTypeDef *ps = (Save_HandleTypeDef *)argument;
   Save_User usinfo;
   static bool mutex_flag = false;
-  static uint8_t state = 1;
+  // static uint8_t state = 1;
   // Slave_IRQTableTypeDef *sp_irq = &IRQ_Table;
   // uint8_t target_type[TARGET_BOARD_NUM];
   // R_TargetTypeDef record_type = {
@@ -1249,6 +1279,7 @@ void Transimt_Task(void const *argument)
   // rp_irq = sp_irq->pReIRQ;
   uint16_t interrupt_record = 0xFFFF, first_interrupt;
   Slave_IRQTableTypeDef *sp_irq = (Slave_IRQTableTypeDef *)argument;
+  Save_HandleTypeDef *ps = &Save_Flash;
   IRQ_Code *tp_irq = sp_irq->pIRQ;
   IRQ_Request *rp_irq = sp_irq->pReIRQ;
   uint8_t slave_id = 0x00;
@@ -1336,6 +1367,12 @@ void Transimt_Task(void const *argument)
         /*no response from slave*/
         else
         {
+          if (ps->Param.Slave_IRQ_Table.IRQ_Table_SetFlag)
+          {
+#define CARD_ERROR_CODE 14U
+            /*Record error code*/
+            ps->Param.Error_Code = CARD_ERROR_CODE;
+          }
           // INCREMENT_COUNT();
           /*Read card type*/
           // MASTER_OBJECT->mdRTU_MasterCodex(MASTER_OBJECT, MODBUS_CODE_17, slave_id);
@@ -1518,29 +1555,27 @@ void Report_Task(void const *argument)
       osDelay(DELAY_TIMES);
     }
     /*Report error code*/
-//     if (ps->Param.Error_Code)
-//     {
-// #define ERROR_PAGE 0x10
-// #define MAIN_PAGE 0x03
-//       value = (uint16_t)ps->Param.Error_Code;
-//       value = (value >> 8U) | (value << 8U);
-//       Dwin_Object->Dw_Write(Dwin_Object, ERROR_CODE_ADDR, (uint8_t *)&value, sizeof(value));
-//       value = 0x0100;
-//       osDelay(5);
-//       Dwin_Object->Dw_Page(Dwin_Object, ERROR_PAGE);
-//       osDelay(5);
-//       /*Open error animation*/
-//       Dwin_Object->Dw_Write(Dwin_Object, ERROR_ANMATION, (uint8_t *)&value, sizeof(value));
-//       first_flag = false;
-//     }
-//     else
-//     {
-//       if (!first_flag)
-//       {
-//         first_flag = true;
-//         Dwin_Object->Dw_Page(Dwin_Object, MAIN_PAGE);
-//       }
-//     }
+    if (ps->Param.Error_Code && ps->Param.Slave_IRQ_Table.IRQ_Table_SetFlag)
+    {
+      value = (uint16_t)ps->Param.Error_Code;
+      value = (value >> 8U) | (value << 8U);
+      Dwin_Object->Dw_Write(Dwin_Object, ERROR_CODE_ADDR, (uint8_t *)&value, sizeof(value));
+      value = 0x0100;
+      osDelay(DELAY_TIMES);
+      Dwin_Object->Dw_Page(Dwin_Object, ERROR_PAGE);
+      osDelay(DELAY_TIMES);
+      /*Open error animation*/
+      Dwin_Object->Dw_Write(Dwin_Object, ERROR_ANMATION, (uint8_t *)&value, sizeof(value));
+      first_flag = false;
+    }
+    else
+    {
+      if ((!first_flag) && ps->Param.Slave_IRQ_Table.IRQ_Table_SetFlag)
+      {
+        first_flag = true;
+        Dwin_Object->Dw_Page(Dwin_Object, MAIN_PAGE);
+      }
+    }
 #if defined(USING_FREERTOS)
     // __exit:
     // CUSTOM_FREE(pdata);
@@ -1560,9 +1595,11 @@ void Report_Callback(void const *argument)
 #if defined(USING_DEBUG)
   // shellPrint(Shell_Object, "Report_Callback !\r\n");
 #endif
+  static bool first_flag = false;
   Slave_IRQTableTypeDef *p_irq = &IRQ_Table;
+  Save_HandleTypeDef *ps = &Save_Flash;
 
-  if (p_irq && p_irq->TableCount)
+  if (p_irq && p_irq->TableCount && (!first_flag))
   {
 #define BOARD_REPORT_SIZE (sizeof(uint16_t) * CARD_NUM_MAX)
 #if defined(USING_FREERTOS)
@@ -1588,6 +1625,9 @@ void Report_Callback(void const *argument)
     CUSTOM_FREE(pBoard);
 #endif
   }
+  /*When not configured, update the board information at any time, otherwise it will
+  only be updated for the first time*/
+  first_flag = ps->Param.Slave_IRQ_Table.IRQ_Table_SetFlag ? true : false;
   /* USER CODE END Report_Callback */
 }
 

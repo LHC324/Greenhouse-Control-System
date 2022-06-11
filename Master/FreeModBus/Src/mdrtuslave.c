@@ -745,6 +745,7 @@ static mdVOID mdRTUHandleCode16(ModbusRTUSlaveHandler handler)
 static mdVOID portRtuMasterHandle(ModbusRTUSlaveHandler handler, uint8_t target_slaveid)
 {
     pDmaHandle p = &Modbus_Cpu;
+    Save_HandleTypeDef *ps = &Save_Flash;
     uint32_t rx_count = *p->pRxCount;
     USER_TYPE *ptable = (USER_TYPE *)handler->puser;
     mdU16 startAddress = 0;
@@ -762,7 +763,8 @@ static mdVOID portRtuMasterHandle(ModbusRTUSlaveHandler handler, uint8_t target_
         handler->mdRTUError(handler, ERROR3);
         return;
     }
-    if (p->pRbuf[0U] != target_slaveid)
+    /*首次识别板卡时核对id号，后面再次上电后不需要核对*/
+    if ((p->pRbuf[0U] != target_slaveid) && (!ps->Param.Slave_IRQ_Table.IRQ_Table_SetFlag))
     {
         handler->mdRTUError(handler, ERROR4);
         return;
@@ -782,8 +784,16 @@ static mdVOID portRtuMasterHandle(ModbusRTUSlaveHandler handler, uint8_t target_
     {
         /*根据板卡信息编码中断表*/
     case MODBUS_CODE_17:
-    {
-        IRQ_Coding(ptable, p->pRbuf[3U]);
+    { /*如果中断信息表并未记录到flash，则进行板卡检测*/
+        if (ps->Param.Slave_IRQ_Table.IRQ_Table_SetFlag == false)
+        {
+            IRQ_Coding(ptable, p->pRbuf[3U]);
+        }
+        /*重新上电后检测每个卡槽位板卡信息是否与记录信息匹配*/
+        // else
+        // {
+        // }
+
 #if defined(USING_DEBUG)
         shellPrint(Shell_Object, "Note: The board is coded as 0x%02x.\r\n",
                    p->pRbuf[3U]);

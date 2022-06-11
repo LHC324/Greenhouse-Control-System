@@ -92,6 +92,8 @@ int main(void)
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
+  /*Solve the problem of abnormal operation of some peripherals
+  caused by incomplete reset after power on.*/
   HAL_Delay(1000);
   /* USER CODE END SysInit */
 

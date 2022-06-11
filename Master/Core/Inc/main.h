@@ -24,7 +24,8 @@
 #define __MAIN_H
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 /* Includes ------------------------------------------------------------------*/
@@ -78,6 +79,52 @@ extern "C" {
 #define SPOT_CODE 0x2E
 #define COMMA_CODE 0x2C
 
+/*Use ready list*/
+#define USING_FREERTOS_LIST 0
+
+#define CARD_NUM_MAX 0x10
+
+  typedef enum
+  {
+    Card_AnalogInput = 0x00,
+    Card_AnalogOutput = 0x10,
+    Card_DigitalInput = 0x20,
+    Card_DigitalOutput = 0x30,
+    Card_Wifi = 0xC0,
+    Card_4G = 0xD0,
+    Card_Lora1 = 0xE0,
+    Card_Lora2 = 0xF0,
+    Card_None = 0x55,
+  } Card_Tyte;
+  typedef struct
+  {
+    uint8_t SlaveId;
+    uint16_t Priority;
+    Card_Tyte TypeCoding;
+    uint16_t Number;
+    // bool flag;
+  } IRQ_Code;
+
+  typedef struct
+  {
+    uint16_t site;
+    uint16_t Priority;
+    bool flag;
+  } IRQ_Request;
+
+  typedef struct
+  {
+    IRQ_Request *pReIRQ;
+    uint16_t SiteCount;
+    IRQ_Code *pIRQ;
+    uint16_t TableCount;
+    // uint16_t Amount;
+
+#if (USING_FREERTOS_LIST)
+    List_t *LReady, *LBlock;
+#endif
+  } Slave_IRQTableTypeDef __attribute__((aligned(4)));
+
   typedef struct
   {
     float Ptank;
@@ -117,6 +164,14 @@ extern "C" {
     uint16_t User_Name;
     uint16_t User_Code;
     uint32_t Error_Code;
+    struct
+    {
+      // IRQ_Request ReIRQ[16];
+      // uint16_t SiteCount;
+      IRQ_Code IRQ[16];
+      uint16_t TableCount;
+      uint32_t IRQ_Table_SetFlag;
+    } Slave_IRQ_Table;
     uint32_t crc16;
   } Save_Param;
   typedef struct
@@ -133,10 +188,10 @@ extern "C" {
 
   extern Save_HandleTypeDef Save_Flash;
   extern Save_Param Save_InitPara;
-/* USER CODE END EM */
+  /* USER CODE END EM */
 
-/* Exported functions prototypes ---------------------------------------------*/
-void Error_Handler(void);
+  /* Exported functions prototypes ---------------------------------------------*/
+  void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
 
@@ -263,9 +318,9 @@ void Error_Handler(void);
 #define CARD4_GPIO_Port GPIOI
 #define CARD5_Pin GPIO_PIN_7
 #define CARD5_GPIO_Port GPIOI
-/* USER CODE BEGIN Private defines */
+  /* USER CODE BEGIN Private defines */
 
-/* USER CODE END Private defines */
+  /* USER CODE END Private defines */
 
 #ifdef __cplusplus
 }
