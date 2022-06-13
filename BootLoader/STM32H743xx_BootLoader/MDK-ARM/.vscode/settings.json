@@ -1,0 +1,9 @@
+{
+    "files.associations": {
+        "flash_if.h": "c",
+        "common.h": "c",
+        "ymodem.h": "c",
+        "main.h": "c",
+        "usart.h": "c"
+    }
+}

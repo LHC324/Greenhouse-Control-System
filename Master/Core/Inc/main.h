@@ -50,7 +50,7 @@ extern "C"
 /*Custom memory management*/
 #define CUSTOM_MALLOC pvPortMalloc
 #define CUSTOM_FREE vPortFree
-#define CURRENT_SOFT_VERSION 120
+#define CURRENT_SOFT_VERSION 130
 #define PARAM_MD_ADDR 0x0008
 #define MDUSER_NAME_ADDR 0x0038
 #define SOFT_VERSION_ADDR 0x003A
