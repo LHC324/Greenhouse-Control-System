@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "main.h": "c",
+        "cmsis_os.h": "c"
+    }
+}

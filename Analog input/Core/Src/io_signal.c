@@ -100,8 +100,8 @@ void Write_Digital_IO(void)
 void Read_Analog_Io(void)
 {
 #define MAX_RANGE 0.1F
-#define CP 0.00888554F
-#define CQ 0.487198795F
+#define CP 0.00911038F
+#define CQ 0.641778298F
     static bool first_flag = false;
     pModbusHandle pd = Modbus_Object;
 /*滤波结构需要不断迭代，否则滤波器无法正常工作*/

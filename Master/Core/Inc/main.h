@@ -44,13 +44,13 @@ extern "C"
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
 // #define USING_DEBUG 1
-// #define USING_DEBUG_APPLICATION
+#define USING_DEBUG_APPLICATION
 #define USING_RTOS
 #define USING_DMA
 /*Custom memory management*/
 #define CUSTOM_MALLOC pvPortMalloc
 #define CUSTOM_FREE vPortFree
-#define CURRENT_SOFT_VERSION 130
+#define CURRENT_SOFT_VERSION 150
 #define PARAM_MD_ADDR 0x0008
 #define MDUSER_NAME_ADDR 0x0038
 #define SOFT_VERSION_ADDR 0x003A
@@ -146,7 +146,8 @@ extern "C"
     float Ptoler_upper;
     float Ptoler_lower;
     float Ltoler_upper;
-    float Ltoler_lower;
+    // float Ltoler_lower;
+    float PStank_supplement;
     /*Threshold 2*/
     float PSspf_start;
     float PSspf_stop;
@@ -160,6 +161,9 @@ extern "C"
     float PPspf_stop;
     float Ptank_limit;
     float Ltank_limit;
+    // float Htank;
+    // float Rtank;
+    // float
 
     uint16_t User_Name;
     uint16_t User_Code;

@@ -42,10 +42,10 @@ DwinMap Dwin_ObjMap[] = {
 	{.addr = PVAOUT_MIN_ADDR, .upper = 4.0F, .lower = 0, .event = Dwin_EventHandle},
 	{.addr = PGAS_MAX_ADDR, .upper = 4.0F, .lower = 0, .event = Dwin_EventHandle},
 	{.addr = PGAS_MIN_ADDR, .upper = 4.0F, .lower = 0, .event = Dwin_EventHandle},
-	{.addr = LTANK_MAX_ADDR, .upper = 50.0F, .lower = 0, .event = Dwin_EventHandle},
+	{.addr = LTANK_MAX_ADDR, .upper = 200.0F, .lower = 0, .event = Dwin_EventHandle},
 	{.addr = LTANK_MIN_ADDR, .upper = 50.0F, .lower = 0, .event = Dwin_EventHandle},
-	{.addr = PTOLE_MAX_ADDR, .upper = 0.5F, .lower = 0, .event = Dwin_EventHandle},
-	{.addr = PTOLE_MIN_ADDR, .upper = 0.5F, .lower = 0, .event = Dwin_EventHandle},
+	{.addr = PTOLE_MAX_ADDR, .upper = 100.0F, .lower = 0, .event = Dwin_EventHandle},
+	{.addr = PTOLE_MIN_ADDR, .upper = 50.0F, .lower = 0, .event = Dwin_EventHandle},
 	{.addr = LEVEL_MAX_ADDR, .upper = 2.0F, .lower = 0, .event = Dwin_EventHandle},
 	{.addr = LEVEL_MIN_ADDR, .upper = 2.0F, .lower = 0, .event = Dwin_EventHandle},
 	{.addr = SPSFS_MAX_ADDR, .upper = 4.0F, .lower = 0, .event = Dwin_EventHandle},
@@ -59,7 +59,7 @@ DwinMap Dwin_ObjMap[] = {
 	{.addr = SPSFE_MAX_ADDR, .upper = 4.0F, .lower = 0, .event = Dwin_EventHandle},
 	{.addr = SPSFE_MIN_ADDR, .upper = 4.0F, .lower = 0, .event = Dwin_EventHandle},
 	{.addr = PTANK_LIMIT_ADDR, .upper = 2.0F, .lower = 0, .event = Dwin_EventHandle},
-	{.addr = LTANK_LIMIT_ADDR, .upper = 10.0F, .lower = 0, .event = Dwin_EventHandle},
+	{.addr = LTANK_LIMIT_ADDR, .upper = 200.0F, .lower = 0, .event = Dwin_EventHandle},
 	/*系统按钮设置地址*/
 	{.addr = RESTORE_ADDR, .upper = 0xFFFF, .lower = 0, .event = Restore_Factory},
 	{.addr = USER_NAME_ADDR, .upper = 9999, .lower = 0, .event = Password_Handle},
@@ -411,14 +411,14 @@ static void Dwin_EventHandle(pDwinHandle pd, uint8_t *pSite)
 	{
 		if ((pdata) && (*pSite < pd->Slave.Events_Size))
 			pdata[*pSite] = data;
-#if defined(USING_FREERTOS)
-		taskENTER_CRITICAL();
-#endif
-		/*参数保存到Flash*/
-		FLASH_Write(PARAM_SAVE_ADDRESS, (uint32_t *)&Save_Flash.Param, sizeof(Save_Param));
-#if defined(USING_FREERTOS)
-		taskEXIT_CRITICAL();
-#endif
+		// #if defined(USING_FREERTOS)
+		// 		taskENTER_CRITICAL();
+		// #endif
+		// 		/*参数保存到Flash*/
+		// 		FLASH_Write(PARAM_SAVE_ADDRESS, (uint32_t *)&Save_Flash.Param, sizeof(Save_Param));
+		// #if defined(USING_FREERTOS)
+		// 		taskEXIT_CRITICAL();
+		// #endif
 		Endian_Swap((uint8_t *)&data, 0U, sizeof(TYPEDEF_STRUCT));
 		/*确认数据回传到屏幕*/
 		pd->Dw_Write(pd, pd->Slave.pMap[*pSite].addr, (uint8_t *)&data, sizeof(TYPEDEF_STRUCT));
@@ -432,9 +432,20 @@ static void Dwin_EventHandle(pDwinHandle pd, uint8_t *pSite)
 #define ABOVE_UPPER_LIMIT 2U
 
 		uint8_t error = data < pd->Slave.pMap[*pSite].lower ? BELOW_LOWER_LIMIT : ABOVE_UPPER_LIMIT;
+		/*上下限保存到控制参数区*/
+		pdata[*pSite] = (error == BELOW_LOWER_LIMIT) ? pd->Slave.pMap[*pSite].lower : pd->Slave.pMap[*pSite].upper;
 		/*屏幕传回参数越界处理：维持原值不变、或者切换报错页面*/
 		pd->Dw_Error(pd, error, *pSite);
 	}
+/*设置错误或者正确都将保存有效参数*/
+#if defined(USING_FREERTOS)
+	taskENTER_CRITICAL();
+#endif
+	/*参数保存到Flash*/
+	FLASH_Write(PARAM_SAVE_ADDRESS, (uint32_t *)&Save_Flash.Param, sizeof(Save_Param));
+#if defined(USING_FREERTOS)
+	taskEXIT_CRITICAL();
+#endif
 }
 
 /**

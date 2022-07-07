@@ -87,65 +87,37 @@ extern float sidefilter(SideParm *side, float input);
 /*无效中断源位置*/
 #define INACTIVE_SITE 0x00
 
-#define START_SIGNAL_MAX 10U
+/*是否使用用户定时器*/
+#define USING_USERTIMER0 0
+#define USING_USERTIMER1 1
+#define START_SIGNAL_MAX 3U
 #define USER_COIL_OFFSET 4U
 #define BX_SIZE 4U
 #define VX_SIZE 16U // 5U
-#define STIMES 10U
+#define T_5S 5U
 #define CURRENT_UPPER 16.0F
 #define CURRENT_LOWER 4.0F
 #define Get_Target(__current, __upper, __lower) \
     (((__current)-CURRENT_LOWER) / CURRENT_UPPER * ((__upper) - (__lower)) + (__lower))
 #define Set_SoftTimer_Flag(__obj, __val) \
     ((__obj)->flag = (__val))
-#define Sure_Overtimes(__obj, __times) \
-    ((__obj)->flag ? (++(__obj)->counts >= (__times) ? (__obj)->counts = 0U, (__obj)->flag = false, true : false) : false)
+#define Set_SoftTimer_Count(__obj, __val) \
+    (__obj)->flag ? false : ((__obj)->counts = (__val), (__obj)->flag = true)
+#define Reset_SoftTimer(__obj, __val) \
+    ((__obj)->counts = (__val), (__obj)->flag = false)
+#define SoftTimer_IsTrue(__obj) \
+    do                          \
+    {                           \
+        if ((__obj)->counts)    \
+        {                       \
+            (__obj)->counts--;  \
+            goto __no_action;   \
+        }                       \
+    } while (0);
 #define Clear_Counter(__obj) ((__obj)->counts = 0U)
-#define Open_Vx(__x) ((__x) <= VX_SIZE ? wbit[__x - 1U] = true : false)
-#define Close_Vx(__x) ((__x) <= VX_SIZE ? wbit[__x - 1U] = false : false)
+#define Open_Qx(__x) ((__x) < VX_SIZE ? wbit[__x] = true : false)
+#define Close_Qx(__x) ((__x) < VX_SIZE ? wbit[__x] = false : false)
 #define TARGET_BOARD_NUM ((VX_SIZE + (CARD_SIGNAL_MAX - 1U)) / CARD_SIGNAL_MAX)
-
-    //     typedef enum
-    //     {
-    //         Card_AnalogInput = 0x00,
-    //         Card_AnalogOutput = 0x10,
-    //         Card_DigitalInput = 0x20,
-    //         Card_DigitalOutput = 0x30,
-    //         Card_Wifi = 0xC0,
-    //         Card_4G = 0xD0,
-    //         Card_Lora1 = 0xE0,
-    //         Card_Lora2 = 0xF0,
-    //         Card_None = 0x55,
-    //     } Card_Tyte;
-    //     typedef struct
-    //     {
-    //         uint8_t SlaveId;
-    //         uint16_t Priority;
-    //         Card_Tyte TypeCoding;
-    //         uint16_t Number;
-    //         // bool flag;
-    //     } IRQ_Code;
-
-    //     typedef struct
-    //     {
-    //         uint16_t site;
-    //         uint16_t Priority;
-    //         bool flag;
-    //     } IRQ_Request;
-
-    //     typedef struct
-    //     {
-    //         IRQ_Request *pReIRQ;
-    //         uint16_t SiteCount;
-    //         IRQ_Code *pIRQ;
-    //         uint16_t TableCount;
-    //         // uint16_t Amount;
-
-    // #if (USING_FREERTOS_LIST)
-    //         List_t *LReady, *LBlock;
-    // #endif
-    //     } Slave_IRQTableTypeDef __attribute__((aligned(4)));
-
     typedef struct
     {
         // IRQ_Code *pTIRQ;

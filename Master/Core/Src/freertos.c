@@ -64,7 +64,8 @@ Save_Param Save_InitPara = {
     .Ptoler_upper = 0.5F,
     .Ptoler_lower = 0.1F,
     .Ltoler_upper = 2.0F,
-    .Ltoler_lower = 0.5F,
+    // .Ltoler_lower = 0.5F,
+    .PStank_supplement = 1.3F,
     .PSspf_start = 2.0F,
     .PSspf_stop = 1.8F,
     .PSvap_outlet_Start = 1.2F,
@@ -504,12 +505,12 @@ void MX_FREERTOS_Init(void)
     }
   }
   /*Parameters are stored in the holding register*/
-  Param_WriteBack(ps);
+  // Param_WriteBack(ps);
   /*Turn off the global interrupt in bootloader, and turn it on here*/
   // __set_FAULTMASK(0);
   /*Solve the problem that the background data cannot be received due to the unstable power supply when the Devon screen is turned on*/
   // HAL_Delay(2000);
-  Report_Backparam(Dwin_Object, &ps->Param);
+  // Report_Backparam(Dwin_Object, &ps->Param);
   /* USER CODE END RTOS_SEMAPHORES */
 
   /* Create the timer(s) */
@@ -642,6 +643,9 @@ void Screen_Task(void const *argument)
 {
   /* USER CODE BEGIN Screen_Task */
   pDwinHandle pDewin = (pDwinHandle)argument;
+  osDelay(5);
+  /*Parameters are stored in the holding register*/
+  Param_WriteBack(&Save_Flash);
   /* Infinite loop */
   for (;;)
   {
@@ -921,97 +925,89 @@ bool Check_Vx_State(mdBit *p_current, mdBit *p_last, uint8_t size)
 void Control_Task(void const *argument)
 {
   /* USER CODE BEGIN Control_Task */
-  mdBit sbit = mdLow, mode = mdLow, bitx = mdLow;
-  // mdU32 addr;
+  mdBit sbit = mdLow, mode = mdLow, bitx = mdLow, rbit = mdLow;
   mdSTATUS ret = mdFALSE;
-  // static mdBit wbit[] = {false, false, false, false, false};
-  // static mdBit wbit[VX_SIZE], copy_wbit[VX_SIZE];
   mdBit wbit[VX_SIZE];
   static Soft_Timer_HandleTypeDef timer[] = {
       {.counts = 0, .flag = false},
       {.counts = 0, .flag = false},
   };
+  // bool flag_group[] = {false, false};
   Save_HandleTypeDef *ps = (Save_HandleTypeDef *)argument;
   Save_User usinfo;
   static bool mutex_flag = false;
-  // static uint8_t state = 1;
-  // Slave_IRQTableTypeDef *sp_irq = &IRQ_Table;
-  // uint8_t target_type[TARGET_BOARD_NUM];
-  // R_TargetTypeDef record_type = {
-  //     .count = 0,
-  //     .p_id = target_type,
-  //     // .pTIRQ = target_type,
-  //     // .size = sizeof(target_type) / sizeof(IRQ_Code),
-  // };
+  /*Solve the problem of screen background parameter delay*/
+  osDelay(2000);
+  Report_Backparam(Dwin_Object, &ps->Param);
   /* Infinite loop */
   for (;;)
   {
-    // MASTER_OBJECT->uartId = 0x01;
-    // MASTER_OBJECT->mdRTU_MasterCodex(MASTER_OBJECT, MODBUS_CODE_17, 0x02);
-
+    sbit = mdLow;
+    uint16_t error_code = 0;
     /*Initialize WBIT*/
     memset(wbit, false, VX_SIZE);
-    // memset(copy_wbit, false, VX_SIZE);
-    sbit = mdLow;
-
-    uint16_t error_code = 0;
-
-    memset((void *)&ps->User, 0x00, BX_SIZE * 2U);
-    ret = mdRTU_ReadInputRegisters(Slave1_Object, INPUT_ANALOG_START_ADDR, BX_SIZE * 2U, (mdU16 *)&ps->User);
-    if (ret == mdFALSE)
+    /*The default state of the initialization electric valve is off*/
+    Close_Qx(5U), Open_Qx(6U), Close_Qx(7U), Open_Qx(8U);
+#define __USER_CONTRL_PARAMTER_CALCULATION
     {
-#if defined(USING_DEBUG)
-      shellPrint(Shell_Object, "Failed to read input register!\r\n");
-#endif
-      goto __no_action;
-    }
-    // taskENTER_CRITICAL();
-    for (float *p = &ps->User.Ptank, *pu = &ps->Param.Ptank_max, *pinfo = (float *)&usinfo;
-         p < &ps->User.Ptank + BX_SIZE; p++, pu += 2U, pinfo++)
-    {
-#define ERROR_BASE_CODE 0x02
-      uint8_t site = p - &ps->User.Ptank;
-#if defined(USING_DEBUG)
-      // shellPrint(Shell_Object, "R_Current[0x%X] = %.3f\r\n", p, *p);
-#endif
-      // Endian_Swap((uint8_t *)p, 0U, sizeof(float));
-      /*User sensor access error check*/
-#define ERROR_CHECK
+      ret = mdRTU_ReadInputRegisters(Slave1_Object, INPUT_ANALOG_START_ADDR, BX_SIZE * 2U, (mdU16 *)&ps->User);
+      if (ret == mdFALSE)
       {
-        if (!error_code)
-          error_code = *p <= 0.0F ? (3U * site + ERROR_BASE_CODE) : (*p < CURRENT_LOWER ? (3U * site + ERROR_BASE_CODE + 1U) : (*p > (CURRENT_LOWER + CURRENT_UPPER + 1.0F) ? (3U * site + ERROR_BASE_CODE + 2U) : 0));
+#if defined(USING_DEBUG)
+        shellPrint(Shell_Object, "Failed to read input register!\r\n");
+#endif
+        goto __exit;
       }
-      /*Convert analog signal into physical quantity*/
-      *p = Get_Target(*p, *pu, *(pu + 1U));
-      *p = *p <= 0.0F ? 0 : *p;
-      *pinfo = *p;
+      // taskENTER_CRITICAL();
+      for (float *p = &ps->User.Ptank, *pu = &ps->Param.Ptank_max, *pinfo = (float *)&usinfo;
+           p < &ps->User.Ptank + BX_SIZE; p++, pu += 2U, pinfo++)
+      {
+#define ERROR_BASE_CODE 0x02
+        uint8_t site = p - &ps->User.Ptank;
 #if defined(USING_DEBUG)
-      // shellPrint(Shell_Object, "max = %.3f,min = %.3f, C_Value[0x%p] = %.3fMpa/M3\r\n", *pu, *(pu + 1U), p, *p);
+        // shellPrint(Shell_Object, "R_Current[0x%X] = %.3f\r\n", p, *p);
 #endif
-    }
-    ps->Param.Error_Code = error_code;
-    // taskEXIT_CRITICAL();
-    if (xQueueSend(UserQueueHandle, &usinfo, 2) != pdPASS)
-    // if (osMailPut(UserQueueHandle, &usinfo) != osOK)
-    {
+        /*User sensor access error check*/
+#define ERROR_CHECK
+        {
+          if (!error_code)
+            error_code = *p <= 0.0F ? (3U * site + ERROR_BASE_CODE) : (*p < CURRENT_LOWER ? (3U * site + ERROR_BASE_CODE + 1U) : (*p > (CURRENT_LOWER + CURRENT_UPPER + 1.0F) ? (3U * site + ERROR_BASE_CODE + 2U) : 0));
+        }
+        /*Convert analog signal into physical quantity*/
+        *p = Get_Target(*p, *pu, *(pu + 1U));
+        *p = *p <= 0.0F ? 0 : *p;
+        *pinfo = *p;
 #if defined(USING_DEBUG)
-      shellPrint(Shell_Object, "Error: Failed to send user parameters!\r\n");
+        // shellPrint(Shell_Object, "max = %.3f,min = %.3f, C_Value[0x%p] = %.3fMpa/M3\r\n", *pu, *(pu + 1U), p, *p);
 #endif
+      }
+      ps->Param.Error_Code = error_code;
+      // taskEXIT_CRITICAL();
+      if (xQueueSend(UserQueueHandle, &usinfo, 2) != pdPASS)
+      // if (osMailPut(UserQueueHandle, &usinfo) != osOK)
+      {
+#if defined(USING_DEBUG)
+        shellPrint(Shell_Object, "Error: Failed to send user parameters!\r\n");
+#endif
+      }
     }
-
 #if defined(USING_DEBUG)
     // shellPrint(Shell_Object, "ps->User.Ptank = %.3f\r\n", ps->User.Ptank);
 #endif
-
+    rbit = mdLow;
     /*Read start signal:0-N,As long as one start signal is valid, it is valid*/
     for (uint8_t i = 0; i < START_SIGNAL_MAX; i++)
     {
       ret = mdRTU_ReadInputCoil(Slave1_Object, INPUT_DIGITAL_START_ADDR + i, bitx);
       sbit += bitx;
+      rbit |= (uint8_t)(bitx << i);
+#if defined(USING_DEBUG)
+      shellPrint(Shell_Object, "bitx[%d] = 0x%d\r\n", i, bitx);
+#endif
       /*When the start signal is valid, the corresponding user valve is also valid.*/
 #define __OPEN_USER_VALVE
       {
-        wbit[USER_COIL_OFFSET + i] = bitx;
+        // wbit[USER_COIL_OFFSET + i] = bitx;
       }
       if (ret == mdFALSE)
       {
@@ -1033,7 +1029,7 @@ void Control_Task(void const *argument)
     if (mode == mdHigh)
     {
 #if defined(USING_DEBUG)
-      shellPrint(Shell_Object, "Note: Manual mode startup, automatic management failure!\r\n");
+      shellPrint(Shell_Object, "@Note: Manual mode startup, automatic management failure!\r\n");
 #endif
       /*Clear error codes*/
       ps->Param.Error_Code = 0;
@@ -1042,12 +1038,20 @@ void Control_Task(void const *argument)
     /*Safe operation guarantee*/
 #define SAFETY
     {
-      if ((ps->User.Ptank <= ps->Param.Ptank_limit) || (ps->User.Ltank <= ps->Param.Ltank_limit) || (ps->Param.Error_Code))
+      if ((ps->User.Ptank <= ps->Param.Ptank_limit) || (ps->User.Ltank <= ps->Param.Ltank_limit) ||
+          (ps->Param.Error_Code))
       {
-        /*close V1、V2、V3*/
-        Close_Vx(1U), Close_Vx(2U), Close_Vx(3U), Close_Vx(4U), Close_Vx(5U);
+/*close Q0、Q1、Q3、Q4*/
+// Close_Qx(0U), Close_Qx(1U), Close_Qx(3U), Close_Qx(4U);
+/*reset timer*/
+#if (USING_USERTIMER0)
+        Reset_SoftTimer(&timer[0U], T_5S);
+#endif
+#if (USING_USERTIMER1)
+        Reset_SoftTimer(&timer[1U], T_5S); //######
+#endif
 #if defined(USING_DEBUG_APPLICATION)
-        shellPrint(Shell_Object, "SAF: close V1 V2 V3\r\n");
+        shellPrint(Shell_Object, "@SAF: close Q0 Q1 Q3 Q4 Q5 Q7 open Q6 Q8.\r\n");
 #endif
         goto __no_action;
       }
@@ -1060,10 +1064,10 @@ void Control_Task(void const *argument)
     {
 #define D1
       {
-        /*close V4*/
-        Close_Vx(4U);
+        /*close Q3*/
+        // Close_Qx(3U);
 #if defined(USING_DEBUG_APPLICATION)
-        shellPrint(Shell_Object, "D1: close V4\r\n");
+        shellPrint(Shell_Object, "@D1-1: close Q3.\r\n");
 #endif
       }
 #define A1
@@ -1071,16 +1075,38 @@ void Control_Task(void const *argument)
 #if defined(USING_DEBUG_APPLICATION)
         // shellPrint(Shell_Object, "ps->User.Ptank = %.3f, ps->Param.PSspf_start = %.3f\r\n", ps->User.Ptank, ps->Param.PSspf_start);
 #endif
+        /*The pressure of the storage tank is protected in the safe mode,
+        as long as the outlet pressure conditions of the vaporizer are met here*/
+        if (ps->User.Pvap_outlet > ps->Param.PSvap_outlet_Start)
+        {
+#if (USING_USERTIMER0)
+          SoftTimer_IsTrue(&timer[0U]); //#######
+#endif
+#if (USING_USERTIMER1)
+          SoftTimer_IsTrue(&timer[1U]); //#######
+#endif
+          (rbit & 0x03) ? Open_Qx(5U), Close_Qx(6U) : false;
+          (rbit & 0x04) ? Open_Qx(7U), Close_Qx(8U) : false;
+#if defined(USING_DEBUG_APPLICATION)
+          shellPrint(Shell_Object, "@A1-1: open Q5 or Q7;close Q6 or Q8.\r\n");
+#endif
+        }
         /*Pressure relief*/
         if (ps->User.Ptank >= ps->Param.PSspf_start)
-        { /*open counter*/
-          // Set_SoftTimer_Flag(&timer[0U], true);
-          /*openV1、openV2、V3*/
-          Close_Vx(1U), Open_Vx(2U), Open_Vx(3U);
+        {
+          /*openQ0、openQ1、Q2*/
+          // Close_Qx(0U);
+          Open_Qx(1U);
+          // (rbit & 0x03) ? Open_Qx(5U), Close_Qx(6U) : false;
+          // (rbit & 0x04) ? Open_Qx(7U), Close_Qx(8U) : false;
           /*set flag*/
           mutex_flag = true;
+#if (USING_USERTIMER0)
+          /*reset timer*/
+          // Reset_SoftTimer(&timer[0U], T_5S);
+#endif
 #if defined(USING_DEBUG_APPLICATION)
-          shellPrint(Shell_Object, "A1: open V1 open V2 V3\r\n");
+          shellPrint(Shell_Object, "@A1-2: open Q1 Q5 or Q7;close Q0 Q6 or Q8.\r\n");
 #endif
           goto __no_action;
         }
@@ -1089,24 +1115,26 @@ void Control_Task(void const *argument)
           if (ps->User.Ptank <= ps->Param.PSspf_stop)
           {
             mutex_flag = false;
-            /*close V2 、close V4*/
-            Close_Vx(2U), Close_Vx(4U);
+            /*close Q1 、close Q3*/
+            // Close_Qx(1U), Close_Qx(3U);
 #if defined(USING_DEBUG_APPLICATION)
-            shellPrint(Shell_Object, "A1: close V2 V4\r\n");
+            shellPrint(Shell_Object, "@A1-3: open Q0;close Q1 Q3.\r\n");
 #endif
           }
           else
           {
             if (mutex_flag)
             {
+              Open_Qx(1U);
               goto __no_action;
             }
             else
             {
-              /*openV3*/
-              Open_Vx(3U);
+              /*open outlet valve*/
+              // (rbit & 0x03) ? Open_Qx(5U), Close_Qx(6U) : false;
+              // (rbit & 0x04) ? Open_Qx(7U), Close_Qx(8U) : false;
 #if defined(USING_DEBUG_APPLICATION)
-              shellPrint(Shell_Object, "A1: open V3\r\n");
+              shellPrint(Shell_Object, "@A1-4: open Q5 or Q7 Close Q6 or Q8.\r\n");
 #endif
             }
           }
@@ -1116,31 +1144,37 @@ void Control_Task(void const *argument)
       {
         if (ps->User.Pvap_outlet >= ps->Param.PSvap_outlet_Start)
         {
-          Set_SoftTimer_Flag(&timer[1U], true);
-          if (Sure_Overtimes(&timer[1U], STIMES))
-          {
-            /*open V3*/
-            Open_Vx(3U);
-#if defined(USING_DEBUG_APPLICATION)
-            shellPrint(Shell_Object, "B1C1: open V3\r\n");
-#endif
-          }
+          // SoftTimer_IsTrue(&timer[1U]); //#######
           /*open V1 、close V2*/
-          Open_Vx(1U), Close_Vx(2U);
+          Open_Qx(0U);
 #if defined(USING_DEBUG_APPLICATION)
-          shellPrint(Shell_Object, "B1C1: open V1 close V2\r\n");
+          shellPrint(Shell_Object, "@B1C1-1: open Q0 close Q1\r\n");
+#endif
+#if (USING_USERTIMER0)
+          Set_SoftTimer_Count(&timer[0U], T_5S); //#####
+#endif
+              // SoftTimer_IsTrue(&timer[0U]);
+          /*open outlet valve*/
+          // (rbit & 0x03) ? Open_Qx(5U), Close_Qx(6U) : false;
+          // (rbit & 0x04) ? Open_Qx(7U), Close_Qx(8U) : false;
+#if defined(USING_DEBUG_APPLICATION)
+          shellPrint(Shell_Object, "@B1C1-2: open Q5 or Q7 Close Q6 or Q8.\r\n");
 #endif
         }
-        else if (ps->User.Pvap_outlet <= ps->Param.PSvap_outlet_stop)
+        else if (ps->User.Pvap_outlet <= ps->Param.PSvap_outlet_stop &&
+                 ps->User.Ptank > ps->Param.PStank_supplement)
         {
-          /*Clear counter*/
-          Clear_Counter(&timer[1U]);
-          /*open counter*/
-          // Set_SoftTimer_Flag(&timer[1U], true);
-          /*close V3*/
-          Close_Vx(3U), Close_Vx(1U), Open_Vx(2U);
+#if (USING_USERTIMER0)
+          /*reset timer*/
+          Reset_SoftTimer(&timer[0U], T_5S);
+#endif
+#if (USING_USERTIMER1)
+          Set_SoftTimer_Count(&timer[1U], T_5S); //#######
+#endif
+          /*close Q0 and outlet valve*/
+          Open_Qx(1U);
 #if defined(USING_DEBUG_APPLICATION)
-          shellPrint(Shell_Object, "B1C1: close V3 close V1 open V2\r\n");
+          shellPrint(Shell_Object, "@B1C1-3: open  Q1  Q5 or Q7;close Q0 Q6 or Q8.\r\n");
 #endif
         }
       }
@@ -1148,28 +1182,32 @@ void Control_Task(void const *argument)
     /*stop mode*/
     else
     {
+#if (USING_USERTIMER0)
+      /*clear flag*/
+      Reset_SoftTimer(&timer[0U], T_5S);
+#endif
+#if (USING_USERTIMER1)
+      Reset_SoftTimer(&timer[1U], T_5S); //######
+#endif
       /*Check whether the pressure relief operation is on*/
-      if (mutex_flag)
-      {
-        mutex_flag = false;
-      }
+      mutex_flag ? mutex_flag = false : false;
 #define A2
       {
         if (((ps->User.Pvap_outlet - ps->User.Ptank) >= ps->Param.Pback_difference) &&
             (ps->User.Ptank < ps->Param.Ptank_difference))
         {
-          /*open V2*/
-          Open_Vx(2U);
+          /*open Q1*/
+          Open_Qx(1U);
 #if defined(USING_DEBUG_APPLICATION)
-          shellPrint(Shell_Object, "A2: open V2\r\n");
+          shellPrint(Shell_Object, "@A2-1: open Q1.\r\n");
 #endif
         }
         else
         {
-          /*Close V2*/
-          Close_Vx(2U);
+          /*Close Q1*/
+          // Close_Qx(1U);
 #if defined(USING_DEBUG_APPLICATION)
-          shellPrint(Shell_Object, "A2: Close V2\r\n");
+          shellPrint(Shell_Object, "@A2-2: Close Q1.\r\n");
 #endif
         }
       }
@@ -1178,17 +1216,23 @@ void Control_Task(void const *argument)
         if (ps->User.Pvap_outlet >= ps->Param.PPvap_outlet_Start)
         {
           /*open V3、open V5、close V2*/
-          Open_Vx(3U), Open_Vx(5U), Close_Vx(2U);
+          // (rbit & 0x03) ? Open_Qx(5U), Close_Qx(6U) : false;
+          // (rbit & 0x04) ? Open_Qx(7U), Close_Qx(8U) : false;
+          Open_Qx(5U), Close_Qx(6U);
+          Open_Qx(4U);
+          // Close_Qx(1U);
 #if defined(USING_DEBUG_APPLICATION)
-          shellPrint(Shell_Object, "B2: open V3 open V5 close V2\r\n");
+          shellPrint(Shell_Object, "@B2-1: open Q4 Q5 or Q7;close Q1 Q6 or Q8.\r\n");
 #endif
         }
         else if (ps->User.Pvap_outlet <= ps->Param.PPvap_outlet_stop)
         {
           /*close V3*/
-          Close_Vx(3U), Close_Vx(5U);
+          // (rbit & 0x03) ? Close_Qx(5U), Open_Qx(6U) : false;
+          // (rbit & 0x04) ? Close_Qx(7U), Open_Qx(8U) : false;
+          // Close_Qx(4U);
 #if defined(USING_DEBUG_APPLICATION)
-          shellPrint(Shell_Object, "B2: close V3 close V5\r\n");
+          shellPrint(Shell_Object, "@B2-2: open Q5 or Q7 close Q4 Q6 or Q8.\r\n");
 #endif
         }
       }
@@ -1197,43 +1241,37 @@ void Control_Task(void const *argument)
         if (ps->User.Ptank >= ps->Param.PPspf_start)
         {
           /*open V4*/
-          Open_Vx(4U);
+          Open_Qx(3U);
 #if defined(USING_DEBUG_APPLICATION)
-          shellPrint(Shell_Object, "C2: open V4\r\n");
+          shellPrint(Shell_Object, "@C2-1: open Q3.\r\n");
 #endif
         }
         else if (ps->User.Ptank <= ps->Param.PPspf_stop)
         {
           /*close V4*/
-          Close_Vx(4U);
+          // Close_Qx(3U);
 #if defined(USING_DEBUG_APPLICATION)
-          shellPrint(Shell_Object, "C2: close V4\r\n");
+          shellPrint(Shell_Object, "@C2-2: close Q3.\r\n");
 #endif
         }
       }
 #define D2
       {
         /*close V1*/
-        Close_Vx(1U);
+        // Close_Qx(0U);
 #if defined(USING_DEBUG_APPLICATION)
-        shellPrint(Shell_Object, "D2: close V1\r\n");
+        shellPrint(Shell_Object, "@D2-1: close Q0.\r\n");
 #endif
       }
     }
   __no_action:
 #if defined(USING_DEBUG_APPLICATION)
-    for (uint16_t i = 0; i < VX_SIZE; i++)
-    {
-      // ret = mdRTU_WriteCoil(Slave1_Object, i, wbit[i]);
-      shellPrint(Shell_Object, "wbit[%d] = 0x%x\r\n", i, wbit[i]);
-    }
-#endif
-    // memset(wbit, 0x01, VX_SIZE);
-    // state ^= 1;
-    // for (uint8_t i = 0; i < VX_SIZE; i++)
+    // for (uint16_t i = 0; i < VX_SIZE; i++)
     // {
-    //   wbit[i] = state;
+    //   // ret = mdRTU_WriteCoil(Slave1_Object, i, wbit[i]);
+    //   shellPrint(Shell_Object, "wbit[%d] = 0x%x\r\n", i, wbit[i]);
     // }
+#endif
     ret = mdRTU_WriteCoils(Slave1_Object, OUT_DIGITAL_START_ADDR, VX_SIZE, wbit);
     if (ret == mdFALSE)
     {
@@ -1490,22 +1528,6 @@ void Report_Task(void const *argument)
   /* Infinite loop */
   for (;;)
   {
-    // #if defined(USING_FREERTOS)
-    //   float *pdata = (float *)CUSTOM_MALLOC(sizeof(float) * ADC_DMA_CHANNEL);
-    //   if (!pdata)
-    //     goto __exit;
-    // #else
-    //   float pdata[ADC_DMA_CHANNEL];
-    // #endif
-    //   memset(pdata, 0x00, sizeof(float) * ADC_DMA_CHANNEL);
-    //     ret = mdRTU_ReadInputCoils(Slave1_Object, INPUT_DIGITAL_START_ADDR, VX_SIZE, rbit);
-    //     // ret = mdRTU_ReadCoils(Slave1_Object, OUT_DIGITAL_START_ADDR, VX_SIZE, wbit);
-    //     if (ret == mdFALSE)
-    //     {
-    // #if defined(USING_DEBUG)
-    //       shellPrint(Shell_Object, "Error: Modbus register read failed!\r\n");
-    // #endif
-    //     }
     /*Clear last status*/
     crbit = cwbit = 0;
     for (uint16_t i = 0; i < VX_SIZE; i++)
@@ -1663,17 +1685,20 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
     /*Clear all interrupt signals*/
     __HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_All);
   }
-  xQueueSendToBackFromISR(CodeQueueHandle, &irq_id, &xHigherPriorityTaskWoken);
-  // xQueueSendFromISR(CodeQueueHandle, &GPIO_Pin, &xHigherPriorityTaskWoken);
-  /* Now the buffer is empty we can switch context if necessary. */
-  if (xHigherPriorityTaskWoken)
+  /*Ensure that the message queue has been initialized when the interrupt arrives*/
+  if (CodeQueueHandle)
   {
-    UBaseType_t uxSavedInterruptStatus = taskENTER_CRITICAL_FROM_ISR();
-    /* Actual macro used here is port specific. */
-    osThreadYield();
-    taskEXIT_CRITICAL_FROM_ISR(uxSavedInterruptStatus);
+    xQueueSendToBackFromISR(CodeQueueHandle, &irq_id, &xHigherPriorityTaskWoken);
+    // xQueueSendFromISR(CodeQueueHandle, &GPIO_Pin, &xHigherPriorityTaskWoken);
+    /* Now the buffer is empty we can switch context if necessary. */
+    if (xHigherPriorityTaskWoken)
+    {
+      UBaseType_t uxSavedInterruptStatus = taskENTER_CRITICAL_FROM_ISR();
+      /* Actual macro used here is port specific. */
+      osThreadYield();
+      taskEXIT_CRITICAL_FROM_ISR(uxSavedInterruptStatus);
+    }
   }
-
   /* NOTE: This function Should not be modified, when the callback is needed,
            the HAL_GPIO_EXTI_Callback could be implemented in the user file
    */

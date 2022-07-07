@@ -4,6 +4,7 @@
         "io_signal.h": "c",
         "main.h": "c",
         "tim.h": "c",
-        "tool.h": "c"
+        "tool.h": "c",
+        "dma.h": "c"
     }
 }

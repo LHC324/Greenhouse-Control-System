@@ -120,13 +120,15 @@ static mdVOID mdRTUHook(ModbusRTUSlaveHandler handler, mdU16 addr)
         else
         {
             float *pdata = (float *)pd->Slave.pHandle;
+            // uint8_t *ptarget = NULL;
             /*保留迪文屏幕值*/
-            temp_data = data;
-            Endian_Swap((uint8_t *)&temp_data, 0U, sizeof(float));
+            // temp_data = data;
+            // Endian_Swap((uint8_t *)&temp_data, 0U, sizeof(float));
             if ((data >= pd->Slave.pMap[site].lower) && (data <= pd->Slave.pMap[site].upper))
             {
+                temp_data = data;
                 /*确认数据回传到屏幕*/
-                pd->Dw_Write(pd, pd->Slave.pMap[site].addr, (uint8_t *)&temp_data, sizeof(float));
+                // pd->Dw_Write(pd, pd->Slave.pMap[site].addr, (uint8_t *)&temp_data, sizeof(float));
                 if (site < pd->Slave.Events_Size)
                 {
                     pdata[site] = data;
@@ -134,6 +136,20 @@ static mdVOID mdRTUHook(ModbusRTUSlaveHandler handler, mdU16 addr)
                     save_flag = true;
                 }
             }
+            else
+            {
+                temp_data = data < pd->Slave.pMap[site].lower ? pd->Slave.pMap[site].lower : pd->Slave.pMap[site].upper;
+                /*确认数据回传到屏幕*/
+                // pd->Dw_Write(pd, pd->Slave.pMap[site].addr, (uint8_t *)&pd->Slave.pMap[site].upper, sizeof(float));
+                /*设置目标寄存器值为上限/下限*/
+                mdRTU_WriteHoldRegs(handler, addr, 2U, (mdU16 *)&temp_data);
+            }
+            // if (ptarget)
+            // {
+            Endian_Swap((uint8_t *)&temp_data, 0U, sizeof(float));
+            /*确认数据回传到屏幕*/
+            pd->Dw_Write(pd, pd->Slave.pMap[site].addr, (uint8_t *)&temp_data, sizeof(float));
+            // }
         }
 #if defined(USING_DEBUG)
         shellPrint(Shell_Object, "Modbus[0x%x] received a data: %.3f.\r\n", addr, data);

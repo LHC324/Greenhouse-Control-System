@@ -68,7 +68,8 @@ typedef enum
   ENOTE6_TEXT_INFO,   /*Note6 information*/
   ENOTE7_TEXT_INFO,   /*Note7 information*/
   ENOTE8_TEXT_INFO,   /*Note8 information*/
-  ENOTE9_TEXT_INFO,   /*Note8 information*/
+  ENOTE9_TEXT_INFO,   /*Note9 information*/
+  ENOTE10_TEXT_INFO,  /*Note10 information*/
   SUCCESS1_TEXT_INFO, /*Success1 information*/
   SUCCESS2_TEXT_INFO, /*Success2 information*/
   WARNING1_TEXT_INFO, /*Warning1 information*/
@@ -134,6 +135,8 @@ static const char *BootLoaderText[] =
             "@note 08:Start restarting the system .......\n\r",
         [ENOTE9_TEXT_INFO] =
             "@note 09:Terminal response timeout .......\n\r",
+        [ENOTE10_TEXT_INFO] =
+            "@note 09:Waiting for terminal response .......\n\r",
         /*Success class*/
         [SUCCESS1_TEXT_INFO] =
             "@Success 01:Programming Completed ! \n\r",
@@ -326,6 +329,9 @@ void Main_Menu(void)
 
   while (1)
   {
+    /*The serial port must be reinitialized,
+    otherwise the terminal cannot respond after it is stuck.*/
+    MX_USART2_UART_Init();
     /*Hardware watchdog feed dog*/
     // HAL_GPIO_TogglePin(WDI_GPIO_Port, WDI_Pin);
     /*Display menu*/
@@ -342,8 +348,7 @@ void Main_Menu(void)
       Serial_PutString((uint8_t *)BootLoaderText[SUBMENU2_TEXT_INFO]);
     }
     /* Clean the input path */
-    __HAL_UART_FLUSH_DRREGISTER(&UartHandle);
-
+    // __HAL_UART_FLUSH_DRREGISTER(&UartHandle);
     /* Receive key */
     if ((HAL_UART_Receive(&UartHandle, &key, 1, Get_Ms(EXIT_TIMEOUT)) == HAL_TIMEOUT) ||
         (input_count >= INPUT_COUNTS))
@@ -353,6 +358,13 @@ void Main_Menu(void)
       input_count = 0;
       key = '3';
     }
+    // else
+    // {
+    //   Serial_PutString((uint8_t *)BootLoaderText[ENOTE10_TEXT_INFO]);
+    //   HAL_Delay(1000);
+    // }
+    /* Clean the input path */
+    // __HAL_UART_FLUSH_DRREGISTER(&UartHandle);
 
     switch (key)
     {
