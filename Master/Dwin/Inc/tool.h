@@ -92,13 +92,18 @@ extern float sidefilter(SideParm *side, float input);
 #define USING_USERTIMER1 1
 #define START_SIGNAL_MAX 3U
 #define USER_COIL_OFFSET 4U
-#define BX_SIZE 4U
+#define BX_SIZE 7U
 #define VX_SIZE 16U // 5U
 #define T_5S 5U
 #define CURRENT_UPPER 16.0F
 #define CURRENT_LOWER 4.0F
+#define PI acosf(-1.0F)
 #define Get_Target(__current, __upper, __lower) \
     (((__current)-CURRENT_LOWER) / CURRENT_UPPER * ((__upper) - (__lower)) + (__lower))
+#define Get_Ptank_Level(__H, __HI, __CR, __CL)                                                                    \
+    (__CL * (PI * powf((__CR), 2.0F) / 2.0F - ((__CR) - (__H)) * sqrtf(2.0F * (__CR) * (__H)-powf((__H), 2.0F)) - \
+             powf((__CR), 2.0F) * asinf((__CR) - (__H))) +                                                        \
+     (PI * (__HI) / 3.0F * (__CR) * (3.0F * powf((__CR), 2.0F) * (__H)-powf((__CR), 3.0F) + powf((__CR) - (__H), 3.0F))))
 #define Set_SoftTimer_Flag(__obj, __val) \
     ((__obj)->flag = (__val))
 #define Set_SoftTimer_Count(__obj, __val) \

@@ -17,7 +17,8 @@
         "string.h": "c",
         "task.h": "c",
         "freertos.h": "c",
-        "mdcrc16.h": "c"
+        "mdcrc16.h": "c",
+        "stddef.h": "c"
     },
     "EIDE.SerialPortMonitor.BaudRate": 921600,
     "C_Cpp.errorSquiggles": "Disabled"

@@ -57,7 +57,7 @@
 #define ANALOG_OUTPUT7_ADDR 0x102C //模拟量7输出地址
 #define ANALOG_OUTPUT8_ADDR 0x102E //模拟量8输出地址
 /*参数存储区*/
-#define PRESSURE_OUT_ADDR 0x1060	//压力输出地址
+#define PRESSURE_OUT_ADDR 0x1068	//压力输出地址
 #define DIGITAL_INPUT_ADDR 0x1005	//数字量输入地址
 #define DIGITAL_OUTPUT_ADDR 0x1006	//数字量输出地址
 #define SS_SIGNAL_ADDR 0x1008		//启停信号地址
@@ -93,29 +93,33 @@
 #define SPSFE_MIN_ADDR 0x105A	//停机模式时：储槽泄压启动值下限地址
 #define PTANK_LIMIT_ADDR 0x105C //安全策略储槽压力极限
 #define LTANK_LIMIT_ADDR 0x105E //安全策略储槽液位极限
+#define TANK_HEAD_HEIGHT 0x1060 //储槽封头高度
+#define TANK_CY_RADIUS 0x1062	//储槽圆柱半径
+#define TANK_CY_LENGTH 0x1064	//储槽圆柱长度
+#define TANK_FL_DENSITY 0x1066	//储槽液体密度
 #define RESTORE_ADDR 0x1007		//恢复出厂设置地址
-#define BOARD_TYPE_ADDR 0x1070	//板卡类型显示地址
+#define BOARD_TYPE_ADDR 0x1080	//板卡类型显示地址
 #define ERROR_CODE_ADDR 0x1091	//错误代码地址
 #define ERROR_ANMATION 0x1092	//错误动画地址
 #define RSURE_CODE 0x00F1		//恢复出厂设置确认键值
 #define RCANCEL_CODE 0x00F0		//注销键值
 /*板卡卡槽地址*/
-#define CARD_SLOT1_ADDR 0x1070
-#define CARD_SLOT2_ADDR 0x1071
-#define CARD_SLOT3_ADDR 0x1072
-#define CARD_SLOT4_ADDR 0x1073
-#define CARD_SLOT5_ADDR 0x1074
-#define CARD_SLOT6_ADDR 0x1075
-#define CARD_SLOT7_ADDR 0x1076
-#define CARD_SLOT8_ADDR 0x1077
-#define CARD_SLOT9_ADDR 0x1078
-#define CARD_SLOT10_ADDR 0x1079
-#define CARD_SLOT11_ADDR 0x107A
-#define CARD_SLOT12_ADDR 0x107B
-#define CARD_SLOT13_ADDR 0x107C
-#define CARD_SLOT14_ADDR 0x107D
-#define CARD_SLOT15_ADDR 0x107E
-#define CARD_SLOT16_ADDR 0x107F
+#define CARD_SLOT1_ADDR 0x1080
+#define CARD_SLOT2_ADDR 0x1081
+#define CARD_SLOT3_ADDR 0x1082
+#define CARD_SLOT4_ADDR 0x1083
+#define CARD_SLOT5_ADDR 0x1084
+#define CARD_SLOT6_ADDR 0x1085
+#define CARD_SLOT7_ADDR 0x1086
+#define CARD_SLOT8_ADDR 0x1087
+#define CARD_SLOT9_ADDR 0x1088
+#define CARD_SLOT10_ADDR 0x1089
+#define CARD_SLOT11_ADDR 0x108A
+#define CARD_SLOT12_ADDR 0x108B
+#define CARD_SLOT13_ADDR 0x108C
+#define CARD_SLOT14_ADDR 0x108D
+#define CARD_SLOT15_ADDR 0x108E
+#define CARD_SLOT16_ADDR 0x108F
 /*板卡类型显示基地址*/
 #define CARD_TYPE_BASE_ADDR 0x1080
 /*同类型板卡区分地址*/

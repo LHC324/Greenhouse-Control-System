@@ -50,10 +50,12 @@ extern "C"
 /*Custom memory management*/
 #define CUSTOM_MALLOC pvPortMalloc
 #define CUSTOM_FREE vPortFree
+#define CURRENT_HARDWARE_VERSION 140
 #define CURRENT_SOFT_VERSION 150
-#define PARAM_MD_ADDR 0x0008
-#define MDUSER_NAME_ADDR 0x0038
-#define SOFT_VERSION_ADDR 0x003A
+#define SYSTEM_VERSION() ((uint32_t)((CURRENT_HARDWARE_VERSION << 16U) | CURRENT_SOFT_VERSION))
+#define PARAM_BASE_ADDR 0x0008
+// #define MDUSER_NAME_ADDR  0x0038
+// #define SOFT_VERSION_ADDR 0x003A
 #define SAVE_SIZE 26U
 #define SAVE_SURE_CODE 0x5AA58734
 // #define UPDATE_FLAG_FLASH_PAGE 254
@@ -127,10 +129,13 @@ extern "C"
 
   typedef struct
   {
-    float Ptank;
+    float Ptank_M;
     float Pvap_outlet;
     float Pgas_soutlet;
     float Ltank;
+    float Ptank_S;
+    float Flowmeter_A;
+    float Flowmeter_B;
   } Save_User;
 
   typedef struct
@@ -161,13 +166,16 @@ extern "C"
     float PPspf_stop;
     float Ptank_limit;
     float Ltank_limit;
-    // float Htank;
-    // float Rtank;
-    // float
+    float Htank;
+    float Rtank;
+    float LEtank;
+    float Dtank;
 
+    uint32_t Error_Code;
     uint16_t User_Name;
     uint16_t User_Code;
-    uint32_t Error_Code;
+    uint32_t System_Version;
+    uint32_t System_Flag;
     struct
     {
       // IRQ_Request ReIRQ[16];
@@ -323,7 +331,11 @@ extern "C"
 #define CARD5_Pin GPIO_PIN_7
 #define CARD5_GPIO_Port GPIOI
   /* USER CODE BEGIN Private defines */
-
+/*Target address: target member +1*/
+#define GET_PARAM_SITE(TYPE, MEMBER, SIZE) (offsetof(TYPE, MEMBER) / sizeof(SIZE))
+#define PARAM_END_ADDR (PARAM_BASE_ADDR + GET_PARAM_SITE(Save_Param, Error_Code, uint16_t))
+#define MDUSER_NAME_ADDR (PARAM_BASE_ADDR + GET_PARAM_SITE(Save_Param, User_Code, uint16_t))
+#define SOFT_VERSION_ADDR (PARAM_BASE_ADDR + GET_PARAM_SITE(Save_Param, Slave_IRQ_Table, uint16_t))
   /* USER CODE END Private defines */
 
 #ifdef __cplusplus

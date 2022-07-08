@@ -100,14 +100,15 @@ DmaHandle Modbus_Rs485 = {
 static mdVOID mdRTUHook(ModbusRTUSlaveHandler handler, mdU16 addr)
 {
     pDwinHandle pd = Dwin_Object;
-    Save_HandleTypeDef *ps = &Save_Flash;
+    // Save_HandleTypeDef *ps = &Save_Flash;
+    Save_HandleTypeDef *ps = (Save_HandleTypeDef *)pd->Slave.pHandle;
     extern uint32_t FLASH_Write(uint32_t Address, const uint16_t *pBuf, uint32_t Size);
     bool save_flag = false;
 
     /*处于后台参数区*/
-    if ((addr >= PARAM_MD_ADDR) && (addr < MDUSER_NAME_ADDR))
+    if ((addr >= PARAM_BASE_ADDR) && (addr < PARAM_END_ADDR))
     {
-        uint8_t site = (addr - PARAM_MD_ADDR) / 2U;
+        uint8_t site = (addr - PARAM_BASE_ADDR) / 2U;
         float data = 0, temp_data = 0;
 
         mdSTATUS ret = mdRTU_ReadHoldRegisters(handler, addr, 2U, (mdU16 *)&data);
@@ -119,7 +120,8 @@ static mdVOID mdRTUHook(ModbusRTUSlaveHandler handler, mdU16 addr)
         }
         else
         {
-            float *pdata = (float *)pd->Slave.pHandle;
+            // float *pdata = (float *)pd->Slave.pHandle;
+            float *pdata = (float *)&ps->Param;
             // uint8_t *ptarget = NULL;
             /*保留迪文屏幕值*/
             // temp_data = data;
@@ -144,19 +146,16 @@ static mdVOID mdRTUHook(ModbusRTUSlaveHandler handler, mdU16 addr)
                 /*设置目标寄存器值为上限/下限*/
                 mdRTU_WriteHoldRegs(handler, addr, 2U, (mdU16 *)&temp_data);
             }
-            // if (ptarget)
-            // {
             Endian_Swap((uint8_t *)&temp_data, 0U, sizeof(float));
             /*确认数据回传到屏幕*/
             pd->Dw_Write(pd, pd->Slave.pMap[site].addr, (uint8_t *)&temp_data, sizeof(float));
-            // }
         }
 #if defined(USING_DEBUG)
         shellPrint(Shell_Object, "Modbus[0x%x] received a data: %.3f.\r\n", addr, data);
 #endif
     }
     /*用户名和密码处理*/
-    else if (addr >= MDUSER_NAME_ADDR)
+    else if (addr >= PARAM_END_ADDR)
     {
         uint16_t data = 0;
         mdSTATUS ret = mdRTU_ReadHoldRegisters(handler, addr, 2U, (mdU16 *)&data);
@@ -169,8 +168,8 @@ static mdVOID mdRTUHook(ModbusRTUSlaveHandler handler, mdU16 addr)
         else
         {
 #define NUMBER_USER_MAX 9999U
-            uint8_t site = addr - PARAM_MD_ADDR;
-            uint16_t *puser = (uint16_t *)pd->Slave.pHandle;
+            uint8_t site = addr - PARAM_BASE_ADDR;
+            uint16_t *puser = (typeof(ps->Param.User_Name) *)&ps->Param;
             if (data <= NUMBER_USER_MAX)
             {
                 puser[site] = data;
@@ -191,7 +190,7 @@ static mdVOID mdRTUHook(ModbusRTUSlaveHandler handler, mdU16 addr)
         /*计算crc校验码*/
         ps->Param.crc16 = Get_Crc16((uint8_t *)&ps->Param, sizeof(Save_Param) - sizeof(ps->Param.crc16), 0xFFFF);
         /*参数保存到Flash*/
-        FLASH_Write(PARAM_SAVE_ADDRESS, (uint16_t *)&Save_Flash.Param, sizeof(Save_Param));
+        FLASH_Write(PARAM_SAVE_ADDRESS, (uint16_t *)&ps->Param, sizeof(Save_Param));
 #if defined(USING_FREERTOS)
         taskEXIT_CRITICAL();
 #endif
@@ -780,7 +779,7 @@ static mdVOID portRtuMasterHandle(ModbusRTUSlaveHandler handler, uint8_t target_
         return;
     }
     /*首次识别板卡时核对id号，后面再次上电后不需要核对*/
-    if ((p->pRbuf[0U] != target_slaveid) && (!ps->Param.Slave_IRQ_Table.IRQ_Table_SetFlag))
+    if ((p->pRbuf[0U] != target_slaveid) && (ps->Param.Slave_IRQ_Table.IRQ_Table_SetFlag != SAVE_SURE_CODE))
     {
         handler->mdRTUError(handler, ERROR4);
         return;
@@ -801,7 +800,7 @@ static mdVOID portRtuMasterHandle(ModbusRTUSlaveHandler handler, uint8_t target_
         /*根据板卡信息编码中断表*/
     case MODBUS_CODE_17:
     { /*如果中断信息表并未记录到flash，则进行板卡检测*/
-        if (ps->Param.Slave_IRQ_Table.IRQ_Table_SetFlag == false)
+        if (ps->Param.Slave_IRQ_Table.IRQ_Table_SetFlag != SAVE_SURE_CODE)
         {
             IRQ_Coding(ptable, p->pRbuf[3U]);
         }

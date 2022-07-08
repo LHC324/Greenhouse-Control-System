@@ -161,6 +161,10 @@ mdAPI mdVOID MX_ModbusInit(void);
 #define OUT_ANALOG_START_ADDR 0x00
 /*手动模式有效信号地址*/
 #define M_MODE_ADDR 0x0010
+/*启用副储槽压力传感器地址*/
+#define ENABLE_S_PTANK_ADDR (M_MODE_ADDR + 1U)
+/*启用副汽化器压力传感器地址*/
+#define ENABLE_S_PCARBURETOR_ADDR (ENABLE_S_PTANK_ADDR + 1U)
 #endif
 
 #endif

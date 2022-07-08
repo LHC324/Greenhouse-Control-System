@@ -36,18 +36,20 @@ static void Sure_Card_Info(pDwinHandle pd, uint8_t *pSite);
 
 /*迪文响应线程*/
 DwinMap Dwin_ObjMap[] = {
+	/*系统传感器上下限设置区*/
 	{.addr = PTANK_MAX_ADDR, .upper = 4.0F, .lower = 0, .event = Dwin_EventHandle},
 	{.addr = PTANK_MIN_ADDR, .upper = 4.0F, .lower = 0, .event = Dwin_EventHandle},
 	{.addr = PVAOUT_MAX_ADDR, .upper = 4.0F, .lower = 0, .event = Dwin_EventHandle},
 	{.addr = PVAOUT_MIN_ADDR, .upper = 4.0F, .lower = 0, .event = Dwin_EventHandle},
 	{.addr = PGAS_MAX_ADDR, .upper = 4.0F, .lower = 0, .event = Dwin_EventHandle},
 	{.addr = PGAS_MIN_ADDR, .upper = 4.0F, .lower = 0, .event = Dwin_EventHandle},
-	{.addr = LTANK_MAX_ADDR, .upper = 200.0F, .lower = 0, .event = Dwin_EventHandle},
-	{.addr = LTANK_MIN_ADDR, .upper = 50.0F, .lower = 0, .event = Dwin_EventHandle},
+	{.addr = LTANK_MAX_ADDR, .upper = 20.0F, .lower = 0, .event = Dwin_EventHandle},
+	{.addr = LTANK_MIN_ADDR, .upper = 5.0F, .lower = 0, .event = Dwin_EventHandle},
 	{.addr = PTOLE_MAX_ADDR, .upper = 100.0F, .lower = 0, .event = Dwin_EventHandle},
 	{.addr = PTOLE_MIN_ADDR, .upper = 50.0F, .lower = 0, .event = Dwin_EventHandle},
 	{.addr = LEVEL_MAX_ADDR, .upper = 2.0F, .lower = 0, .event = Dwin_EventHandle},
 	{.addr = LEVEL_MIN_ADDR, .upper = 2.0F, .lower = 0, .event = Dwin_EventHandle},
+	/*系统控制参数区*/
 	{.addr = SPSFS_MAX_ADDR, .upper = 4.0F, .lower = 0, .event = Dwin_EventHandle},
 	{.addr = SPSFS_MIN_ADDR, .upper = 4.0F, .lower = 0, .event = Dwin_EventHandle},
 	{.addr = PSVA_START_ADDR, .upper = 4.0F, .lower = 0, .event = Dwin_EventHandle},
@@ -60,6 +62,10 @@ DwinMap Dwin_ObjMap[] = {
 	{.addr = SPSFE_MIN_ADDR, .upper = 4.0F, .lower = 0, .event = Dwin_EventHandle},
 	{.addr = PTANK_LIMIT_ADDR, .upper = 2.0F, .lower = 0, .event = Dwin_EventHandle},
 	{.addr = LTANK_LIMIT_ADDR, .upper = 200.0F, .lower = 0, .event = Dwin_EventHandle},
+	{.addr = TANK_HEAD_HEIGHT, .upper = 5.0F, .lower = 0, .event = Dwin_EventHandle},
+	{.addr = TANK_CY_RADIUS, .upper = 5.0F, .lower = 0.1, .event = Dwin_EventHandle},
+	{.addr = TANK_CY_LENGTH, .upper = 100.0F, .lower = 0, .event = Dwin_EventHandle},
+	{.addr = TANK_FL_DENSITY, .upper = 50.0F, .lower = 0, .event = Dwin_EventHandle},
 	/*系统按钮设置地址*/
 	{.addr = RESTORE_ADDR, .upper = 0xFFFF, .lower = 0, .event = Restore_Factory},
 	{.addr = USER_NAME_ADDR, .upper = 9999, .lower = 0, .event = Password_Handle},
@@ -215,7 +221,7 @@ void MX_DwinInit()
 	Dwin.Slave.pMap = Dwin_ObjMap;
 	Dwin.Slave.Events_Size = Dwin_EventSize;
 	Dwin.Uart = Dma_Param;
-	Dwin.Slave.pHandle = &Save_Flash.Param;
+	Dwin.Slave.pHandle = &Save_Flash;
 	Dwin.Slave.pHandle1 = &IRQ_Table;
 	Dwin.Slave.pHandle2 = Slave1_Object;
 	/*定义迪文屏幕使用目标串口*/
@@ -225,6 +231,7 @@ void MX_DwinInit()
 #define TYPEDEF_STRUCT float
 #define TYPEDEF_STRUCT1 Slave_IRQTableTypeDef
 #define TYPEDEF_STRUCT2 ModbusRTUSlaveHandler
+#define TYPEDEF_STRUCT3 Save_HandleTypeDef
 	Create_DwinObject(&Dwin_Object, &Dwin);
 }
 
@@ -402,7 +409,10 @@ static void Dwin_EventHandle(pDwinHandle pd, uint8_t *pSite)
 {
 	TYPEDEF_STRUCT data = (TYPEDEF_STRUCT)Get_Data(pd, 7U, pd->Uart.pRbuf[6U]) / 10.0F;
 	// TYPEDEF_STRUCT *pdata = (TYPEDEF_STRUCT *)pd->Slave.pMap[*pSite].pHandle;
-	TYPEDEF_STRUCT *pdata = (TYPEDEF_STRUCT *)pd->Slave.pHandle;
+	// TYPEDEF_STRUCT *pdata = (TYPEDEF_STRUCT *)pd->Slave.pHandle;
+	// Save_HandleTypeDef *ps = &Save_Flash;
+	TYPEDEF_STRUCT3 *ps = (TYPEDEF_STRUCT3 *)pd->Slave.pHandle;
+	TYPEDEF_STRUCT *pdata = (TYPEDEF_STRUCT *)&ps->Param;
 
 #if defined(USING_DEBUG)
 	shellPrint(Shell_Object, "data = %.3f, *psite = %d.\r\n", data, *pSite);
@@ -437,12 +447,21 @@ static void Dwin_EventHandle(pDwinHandle pd, uint8_t *pSite)
 		/*屏幕传回参数越界处理：维持原值不变、或者切换报错页面*/
 		pd->Dw_Error(pd, error, *pSite);
 	}
+	/*数据同时更新到本地保持寄存器*/
+	mdSTATUS ret = mdRTU_WriteHoldRegs(Slave1_Object, PARAM_BASE_ADDR, GET_PARAM_SITE(Save_Param, User_Name, uint16_t),
+									   (mdU16 *)&ps->Param);
+	if (ret == mdFALSE)
+	{
+#if defined(USING_DEBUG)
+		shellPrint(Shell_Object, "Parameter write to hold register failed!\r\n");
+#endif
+	}
 /*设置错误或者正确都将保存有效参数*/
 #if defined(USING_FREERTOS)
 	taskENTER_CRITICAL();
 #endif
 	/*参数保存到Flash*/
-	FLASH_Write(PARAM_SAVE_ADDRESS, (uint32_t *)&Save_Flash.Param, sizeof(Save_Param));
+	FLASH_Write(PARAM_SAVE_ADDRESS, (uint32_t *)&ps->Param, sizeof(Save_Param));
 #if defined(USING_FREERTOS)
 	taskEXIT_CRITICAL();
 #endif
@@ -482,7 +501,8 @@ static void Dwin_ErrorHandle(pDwinHandle pd, uint8_t error_code, uint8_t site)
 static void Restore_Factory(pDwinHandle pd, uint8_t *pSite)
 {
 	uint16_t rcode = Get_Data(pd, 7U, pd->Uart.pRbuf[6U]);
-	Save_HandleTypeDef *ps = &Save_Flash;
+	// Save_HandleTypeDef *ps = &Save_Flash;
+	TYPEDEF_STRUCT3 *ps = (TYPEDEF_STRUCT3 *)pd->Slave.pHandle;
 	if (rcode == RSURE_CODE)
 	{
 		memcpy(&ps->Param, &Save_InitPara, sizeof(Save_Param));
@@ -508,9 +528,10 @@ static void Restore_Factory(pDwinHandle pd, uint8_t *pSite)
  */
 static void Password_Handle(pDwinHandle pd, uint8_t *pSite)
 {
-#define USER_NAMES 0x07E6
-#define USER_PASSWORD 0x0522
+// #define USER_NAMES 0x07E6
+// #define USER_PASSWORD 0x0522
 #define PAGE_NUMBER 0x016
+	TYPEDEF_STRUCT3 *ps = (TYPEDEF_STRUCT3 *)pd->Slave.pHandle;
 	uint16_t data = Get_Data(pd, 7U, pd->Uart.pRbuf[6U]);
 	uint16_t addr = pd->Slave.pMap[*pSite].addr;
 	static uint16_t user_name = 0x0000, user_code = 0x0000, error = 0x0000;
@@ -520,7 +541,7 @@ static void Password_Handle(pDwinHandle pd, uint8_t *pSite)
 		addr == USER_NAME_ADDR ? user_name = data : (addr == USER_PASSWORD_ADDR ? user_code = data : 0U);
 		if ((addr == LOGIN_SURE_ADDR) && (data == RSURE_CODE))
 		{ /*密码用户名正确*/
-			if ((user_name == USER_NAMES) && (user_code == USER_PASSWORD))
+			if ((user_name == ps->Param.User_Name) && (user_code == ps->Param.User_Code))
 			{ /*清除错误信息*/
 				error = 0x0000;
 				pd->Dw_Page(pd, PAGE_NUMBER);
@@ -531,7 +552,7 @@ static void Password_Handle(pDwinHandle pd, uint8_t *pSite)
 			else
 			{
 				/*用户名、密码错误*/
-				if ((user_name != USER_NAMES) && (user_code != USER_PASSWORD))
+				if ((user_name != ps->Param.User_Name) && (user_code != ps->Param.User_Code))
 				{
 					error = 0x0300;
 #if defined(USING_DEBUG)
@@ -539,7 +560,7 @@ static void Password_Handle(pDwinHandle pd, uint8_t *pSite)
 #endif
 				}
 				/*用户名错误*/
-				else if (user_name != USER_NAMES)
+				else if (user_name != ps->Param.User_Name)
 				{
 					error = 0x0100;
 #if defined(USING_DEBUG)
@@ -771,7 +792,8 @@ static void Card_Handle(pDwinHandle pd, uint8_t *pSite)
 static void Reset_Card_Info(pDwinHandle pd, uint8_t *pSite)
 {
 	uint16_t rcode = Get_Data(pd, 7U, pd->Uart.pRbuf[6U]);
-	Save_HandleTypeDef *ps = &Save_Flash;
+	// Save_HandleTypeDef *ps = &Save_Flash;
+	TYPEDEF_STRUCT3 *ps = (TYPEDEF_STRUCT3 *)pd->Slave.pHandle;
 	// Slave_IRQTableTypeDef *pt = (Slave_IRQTableTypeDef *)pd->Slave.pHandle1;
 	if (rcode == RSURE_CODE)
 	{
@@ -793,6 +815,7 @@ static void Reset_Card_Info(pDwinHandle pd, uint8_t *pSite)
 			// 	ps->Param.Slave_IRQ_Table.IRQ[i].Priority = 0;
 			// }
 			memset(&ps->Param.Slave_IRQ_Table, 0x00, sizeof(ps->Param.Slave_IRQ_Table));
+			ps->Param.Slave_IRQ_Table.IRQ_Table_SetFlag = 0xFFFFFFFF;
 		}
 		/*重新计算CRC校验码*/
 		/*Must be 4 byte aligned!!!*/
@@ -824,13 +847,14 @@ static void Reset_Card_Info(pDwinHandle pd, uint8_t *pSite)
 static void Sure_Card_Info(pDwinHandle pd, uint8_t *pSite)
 {
 	uint16_t rcode = Get_Data(pd, 7U, pd->Uart.pRbuf[6U]);
-	Save_HandleTypeDef *ps = &Save_Flash;
+	// Save_HandleTypeDef *ps = &Save_Flash;
+	TYPEDEF_STRUCT3 *ps = (TYPEDEF_STRUCT3 *)pd->Slave.pHandle;
 	if (rcode == RSURE_CODE)
 	{
 		/*切换到主界面*/
 		pd->Dw_Page(pd, MAIN_PAGE);
 		/*设置板卡信息记录标志有效*/
-		ps->Param.Slave_IRQ_Table.IRQ_Table_SetFlag = true;
+		ps->Param.Slave_IRQ_Table.IRQ_Table_SetFlag = SAVE_SURE_CODE;
 		/*拷贝中断表到falsh存储结构*/
 		memcpy(ps->Param.Slave_IRQ_Table.IRQ, IRQ_Table.pIRQ, sizeof(ps->Param.Slave_IRQ_Table.IRQ));
 		ps->Param.Slave_IRQ_Table.TableCount = IRQ_Table.TableCount;

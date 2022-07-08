@@ -59,10 +59,10 @@ Save_Param Save_InitPara = {
     .Pvap_outlet_min = 0.0F,
     .Pgas_soutlet_max = 4.0F,
     .Pgas_soutlet_min = 0.0F,
-    .Ltank_max = 50.0F,
+    .Ltank_max = 20.0F,
     .Ltank_min = 0.0F,
-    .Ptoler_upper = 0.5F,
-    .Ptoler_lower = 0.1F,
+    .Ptoler_upper = 100.0F,
+    .Ptoler_lower = 0.0F,
     .Ltoler_upper = 2.0F,
     // .Ltoler_lower = 0.5F,
     .PStank_supplement = 1.3F,
@@ -70,7 +70,7 @@ Save_Param Save_InitPara = {
     .PSspf_stop = 1.8F,
     .PSvap_outlet_Start = 1.2F,
     .PSvap_outlet_stop = 1.1F,
-    .Pback_difference = 0.2F,
+    .Pback_difference = 1.8F,
     .Ptank_difference = 2.0F,
     .PPvap_outlet_Start = 2.2F,
     .PPvap_outlet_stop = 1.8F,
@@ -78,11 +78,17 @@ Save_Param Save_InitPara = {
     .PPspf_stop = 2.1F,
     .Ptank_limit = 1.2F,
     .Ltank_limit = 2.0F,
+    .Htank = 0.1F,
+    .Rtank = 1.25F,
+    .LEtank = 11.14F,
+    .Dtank = 1.977F,
 
+    .Error_Code = 0x0000,
     .User_Name = 0x07E6,
     .User_Code = 0x0522,
-    .Error_Code = 0x0000,
-    .Slave_IRQ_Table.IRQ_Table_SetFlag = false,
+    .System_Version = SYSTEM_VERSION(),
+    .System_Flag = 0xFFFFFFFF,
+    .Slave_IRQ_Table.IRQ_Table_SetFlag = 0xFFFFFFFF,
     // .Update = 0xFFFFFFFF,
 };
 /* USER CODE END PD */
@@ -216,17 +222,19 @@ void vApplicationGetTimerTaskMemory(StaticTask_t **ppxTimerTaskTCBBuffer, StackT
  */
 void Param_WriteBack(Save_HandleTypeDef *ps)
 {
-  uint16_t len = sizeof(Save_Param) - sizeof(uint32_t) - sizeof(ps->Param.crc16);
+  // uint16_t len = sizeof(Save_Param) - sizeof(uint32_t) - sizeof(ps->Param.crc16);
+  ps->Param.System_Flag = (*(__IO uint32_t *)UPDATE_SAVE_ADDRESS);
   /*Parameters are written to the mdbus hold register*/
-  mdSTATUS ret = mdRTU_WriteHoldRegs(Slave1_Object, PARAM_MD_ADDR, len, (mdU16 *)&ps->Param);
+  mdSTATUS ret = mdRTU_WriteHoldRegs(Slave1_Object, PARAM_BASE_ADDR, GET_PARAM_SITE(Save_Param, Slave_IRQ_Table, uint16_t),
+                                     (mdU16 *)&ps->Param);
   /*Write user name and password*/
-  ret = mdRTU_WriteHoldRegs(Slave1_Object, MDUSER_NAME_ADDR, 2U, (mdU16 *)&ps->Param.User_Name);
-  mdU16 temp_data[2U] = {(mdU16)CURRENT_SOFT_VERSION, (mdU16)((uint32_t)((*(__IO uint32_t *)UPDATE_SAVE_ADDRESS) >> 16U))};
-#if defined(USING_DEBUG)
-  shellPrint(Shell_Object, "version:%d, flag:%d.\r\n", temp_data[0], temp_data[1]);
-#endif
-  /*Write software version number and status*/
-  ret = mdRTU_WriteHoldRegs(Slave1_Object, SOFT_VERSION_ADDR, 2U, temp_data);
+  // ret = mdRTU_WriteHoldRegs(Slave1_Object, MDUSER_NAME_ADDR, 2U, (mdU16 *)&ps->Param.User_Name);
+  //   mdU16 temp_data[2U] = {(mdU16)CURRENT_SOFT_VERSION, (mdU16)((uint32_t)((*(__IO uint32_t *)UPDATE_SAVE_ADDRESS) >> 16U))};
+  // #if defined(USING_DEBUG)
+  //   shellPrint(Shell_Object, "version:%d, flag:%d.\r\n", temp_data[0], temp_data[1]);
+  // #endif
+  //   /*Write software version number and status*/
+  //   ret = mdRTU_WriteHoldRegs(Slave1_Object, SOFT_VERSION_ADDR, 2U, temp_data);
   if (ret == mdFALSE)
   {
 #if defined(USING_DEBUG)
@@ -244,7 +252,7 @@ void Param_WriteBack(Save_HandleTypeDef *ps)
  */
 void Report_Backparam(pDwinHandle pd, Save_Param *sp)
 {
-  uint32_t actual_size = sizeof(Save_Param) - sizeof(sp->Slave_IRQ_Table) - 1U;
+  uint32_t actual_size = offsetof(Save_Param, Error_Code); // 29*szieof(float)
 #if defined(USING_FREERTOS)
   float *pdata = (float *)CUSTOM_MALLOC(actual_size);
   if (!pdata)
@@ -254,14 +262,14 @@ void Report_Backparam(pDwinHandle pd, Save_Param *sp)
 #endif
 
   memcpy(pdata, sp, actual_size);
-  for (float *p = pdata; p < pdata + (sizeof(Save_Param) - sizeof(sp->Slave_IRQ_Table)) / sizeof(float) - 1U; p++)
+  for (float *p = pdata; p < pdata + actual_size / sizeof(float); p++)
   {
 #if defined(USING_DEBUG)
     shellPrint(Shell_Object, "sp = %p,p = %p, *p = %.3f\r\n", sp, p, *p);
 #endif
     Endian_Swap((uint8_t *)p, 0U, sizeof(float));
   }
-  pd->Dw_Write(pd, PARAM_SETTING_ADDR, (uint8_t *)pdata, sizeof(Save_Param) - (sizeof(sp->Slave_IRQ_Table) + sizeof(sp->User_Name) + sizeof(sp->User_Code) + sizeof(sp->Error_Code) + sizeof(sp->crc16)));
+  pd->Dw_Write(pd, PARAM_SETTING_ADDR, (uint8_t *)pdata, actual_size);
 
 __exit:
   CUSTOM_FREE(pdata);
@@ -477,7 +485,7 @@ void MX_FREERTOS_Init(void)
     }
   }
   /*Check whether the board information has been initialized*/
-  if (!ps->Param.Slave_IRQ_Table.IRQ_Table_SetFlag)
+  if (ps->Param.Slave_IRQ_Table.IRQ_Table_SetFlag != SAVE_SURE_CODE)
   {
 #if defined(USING_DEBUG)
     shellPrint(Shell_Object, "Please initialize board information!\r\n");
@@ -505,7 +513,7 @@ void MX_FREERTOS_Init(void)
     }
   }
   /*Parameters are stored in the holding register*/
-  // Param_WriteBack(ps);
+  Param_WriteBack(ps);
   /*Turn off the global interrupt in bootloader, and turn it on here*/
   // __set_FAULTMASK(0);
   /*Solve the problem that the background data cannot be received due to the unstable power supply when the Devon screen is turned on*/
@@ -643,9 +651,12 @@ void Screen_Task(void const *argument)
 {
   /* USER CODE BEGIN Screen_Task */
   pDwinHandle pDewin = (pDwinHandle)argument;
-  osDelay(5);
-  /*Parameters are stored in the holding register*/
-  Param_WriteBack(&Save_Flash);
+  // osDelay(5);
+  // /*Parameters are stored in the holding register*/
+  // Param_WriteBack(&Save_Flash);
+  /*Solve the problem of screen background parameter delay*/
+  osDelay(3000);
+  Report_Backparam(Dwin_Object, &Save_Flash.Param);
   /* Infinite loop */
   for (;;)
   {
@@ -928,6 +939,7 @@ void Control_Task(void const *argument)
   mdBit sbit = mdLow, mode = mdLow, bitx = mdLow, rbit = mdLow;
   mdSTATUS ret = mdFALSE;
   mdBit wbit[VX_SIZE];
+  float Ptank = 0, Pcarburetor = 0;
   static Soft_Timer_HandleTypeDef timer[] = {
       {.counts = 0, .flag = false},
       {.counts = 0, .flag = false},
@@ -937,8 +949,8 @@ void Control_Task(void const *argument)
   Save_User usinfo;
   static bool mutex_flag = false;
   /*Solve the problem of screen background parameter delay*/
-  osDelay(2000);
-  Report_Backparam(Dwin_Object, &ps->Param);
+  // osDelay(2000);
+  // Report_Backparam(Dwin_Object, &ps->Param);
   /* Infinite loop */
   for (;;)
   {
@@ -958,12 +970,24 @@ void Control_Task(void const *argument)
 #endif
         goto __exit;
       }
+      mdBit enable_sate[] = {false, false};
+      /*Read whether the remote enables the secondary sensor to participate in the control*/
+      ret = mdRTU_ReadCoils(Slave1_Object, ENABLE_S_PTANK_ADDR, sizeof(enable_sate) / sizeof(mdBit), enable_sate);
+      if (ret == mdFALSE)
+      {
+#if defined(USING_DEBUG)
+        shellPrint(Shell_Object, "enable_sate[0] = 0x%d,enable_sate[1] = 0x%d\r\n", enable_sate[0], enable_sate[1]);
+#endif
+        goto __no_action;
+      }
       // taskENTER_CRITICAL();
-      for (float *p = &ps->User.Ptank, *pu = &ps->Param.Ptank_max, *pinfo = (float *)&usinfo;
-           p < &ps->User.Ptank + BX_SIZE; p++, pu += 2U, pinfo++)
+      // for (float *p = &ps->User.Ptank_M, *pu = &ps->Param.Ptank_max, *pinfo = (float *)&usinfo;
+      //      p < &ps->User.Ptank_M + BX_SIZE; p++, pu += 2U, pinfo++)
+      for (float *p = &ps->User.Ptank_M, *pu = &ps->Param.Ptank_max, *pinfo = (float *)&usinfo;
+           p < &ps->User.Ptank_M + BX_SIZE; p++, pinfo++)
       {
 #define ERROR_BASE_CODE 0x02
-        uint8_t site = p - &ps->User.Ptank;
+        uint8_t site = p - &ps->User.Ptank_M;
 #if defined(USING_DEBUG)
         // shellPrint(Shell_Object, "R_Current[0x%X] = %.3f\r\n", p, *p);
 #endif
@@ -971,10 +995,24 @@ void Control_Task(void const *argument)
 #define ERROR_CHECK
         {
           if (!error_code)
+          {
             error_code = *p <= 0.0F ? (3U * site + ERROR_BASE_CODE) : (*p < CURRENT_LOWER ? (3U * site + ERROR_BASE_CODE + 1U) : (*p > (CURRENT_LOWER + CURRENT_UPPER + 1.0F) ? (3U * site + ERROR_BASE_CODE + 2U) : 0));
+          }
+        }
+        if (p < &ps->User.Ltank)
+        {
+          *p = Get_Target(*p, *pu, *(pu + 1U));
+          pu += 2U;
+        }
+        else
+        {
+          *p = (p == &ps->User.Ptank_S) ? Get_Target(*p, ps->Param.Ptank_max, ps->Param.Ptank_min)
+               : (p == &ps->User.Ltank) ? Get_Ptank_Level(Get_Target(*p, ps->Param.Ltank_max, ps->Param.Ltank_min),
+                                                          ps->Param.Htank, ps->Param.Rtank, ps->Param.LEtank)
+                                        : Get_Target(*p, ps->Param.Ptoler_upper, ps->Param.Ptoler_lower);
         }
         /*Convert analog signal into physical quantity*/
-        *p = Get_Target(*p, *pu, *(pu + 1U));
+        // *p = Get_Target(*p, *pu, *(pu + 1U));
         *p = *p <= 0.0F ? 0 : *p;
         *pinfo = *p;
 #if defined(USING_DEBUG)
@@ -982,6 +1020,11 @@ void Control_Task(void const *argument)
 #endif
       }
       ps->Param.Error_Code = error_code;
+#define __Enable_Secondary_Sensor
+      {
+        Ptank = enable_sate[0] ? ps->Param.Error_Code = 0, ps->User.Ptank_S : ps->User.Ptank_M;
+        Pcarburetor = enable_sate[1] ? ps->Param.Error_Code = 0, ps->User.Pgas_soutlet : ps->User.Pvap_outlet;
+      }
       // taskEXIT_CRITICAL();
       if (xQueueSend(UserQueueHandle, &usinfo, 2) != pdPASS)
       // if (osMailPut(UserQueueHandle, &usinfo) != osOK)
@@ -991,6 +1034,7 @@ void Control_Task(void const *argument)
 #endif
       }
     }
+    // goto __no_action;
 #if defined(USING_DEBUG)
     // shellPrint(Shell_Object, "ps->User.Ptank = %.3f\r\n", ps->User.Ptank);
 #endif
@@ -1038,7 +1082,7 @@ void Control_Task(void const *argument)
     /*Safe operation guarantee*/
 #define SAFETY
     {
-      if ((ps->User.Ptank <= ps->Param.Ptank_limit) || (ps->User.Ltank <= ps->Param.Ltank_limit) ||
+      if ((Ptank <= ps->Param.Ptank_limit) || (ps->User.Ltank <= ps->Param.Ltank_limit) ||
           (ps->Param.Error_Code))
       {
 /*close Q0、Q1、Q3、Q4*/
@@ -1077,7 +1121,7 @@ void Control_Task(void const *argument)
 #endif
         /*The pressure of the storage tank is protected in the safe mode,
         as long as the outlet pressure conditions of the vaporizer are met here*/
-        if (ps->User.Pvap_outlet > ps->Param.PSvap_outlet_Start)
+        if (Pcarburetor > ps->Param.PSvap_outlet_Start)
         {
 #if (USING_USERTIMER0)
           SoftTimer_IsTrue(&timer[0U]); //#######
@@ -1092,7 +1136,7 @@ void Control_Task(void const *argument)
 #endif
         }
         /*Pressure relief*/
-        if (ps->User.Ptank >= ps->Param.PSspf_start)
+        if (Ptank >= ps->Param.PSspf_start)
         {
           /*openQ0、openQ1、Q2*/
           // Close_Qx(0U);
@@ -1112,7 +1156,7 @@ void Control_Task(void const *argument)
         }
         else
         {
-          if (ps->User.Ptank <= ps->Param.PSspf_stop)
+          if (Ptank <= ps->Param.PSspf_stop)
           {
             mutex_flag = false;
             /*close Q1 、close Q3*/
@@ -1142,7 +1186,7 @@ void Control_Task(void const *argument)
       }
 #define B1C1
       {
-        if (ps->User.Pvap_outlet >= ps->Param.PSvap_outlet_Start)
+        if (Pcarburetor >= ps->Param.PSvap_outlet_Start)
         {
           // SoftTimer_IsTrue(&timer[1U]); //#######
           /*open V1 、close V2*/
@@ -1153,6 +1197,9 @@ void Control_Task(void const *argument)
 #if (USING_USERTIMER0)
           Set_SoftTimer_Count(&timer[0U], T_5S); //#####
 #endif
+#if (USING_USERTIMER1)
+          Set_SoftTimer_Flag(&timer[1U], false); //######
+#endif
               // SoftTimer_IsTrue(&timer[0U]);
           /*open outlet valve*/
           // (rbit & 0x03) ? Open_Qx(5U), Close_Qx(6U) : false;
@@ -1161,8 +1208,8 @@ void Control_Task(void const *argument)
           shellPrint(Shell_Object, "@B1C1-2: open Q5 or Q7 Close Q6 or Q8.\r\n");
 #endif
         }
-        else if (ps->User.Pvap_outlet <= ps->Param.PSvap_outlet_stop &&
-                 ps->User.Ptank > ps->Param.PStank_supplement)
+        else if (Pcarburetor <= ps->Param.PSvap_outlet_stop &&
+                 Ptank > ps->Param.PStank_supplement)
         {
 #if (USING_USERTIMER0)
           /*reset timer*/
@@ -1193,8 +1240,8 @@ void Control_Task(void const *argument)
       mutex_flag ? mutex_flag = false : false;
 #define A2
       {
-        if (((ps->User.Pvap_outlet - ps->User.Ptank) >= ps->Param.Pback_difference) &&
-            (ps->User.Ptank < ps->Param.Ptank_difference))
+        // if (((Pcarburetor - Ptank) >= ps->Param.Pback_difference) && (Ptank < ps->Param.Ptank_difference))
+        if (Pcarburetor > ps->Param.Pback_difference && (Ptank < ps->Param.Ptank_difference))
         {
           /*open Q1*/
           Open_Qx(1U);
@@ -1213,7 +1260,7 @@ void Control_Task(void const *argument)
       }
 #define B2
       {
-        if (ps->User.Pvap_outlet >= ps->Param.PPvap_outlet_Start)
+        if (Pcarburetor >= ps->Param.PPvap_outlet_Start)
         {
           /*open V3、open V5、close V2*/
           // (rbit & 0x03) ? Open_Qx(5U), Close_Qx(6U) : false;
@@ -1225,7 +1272,7 @@ void Control_Task(void const *argument)
           shellPrint(Shell_Object, "@B2-1: open Q4 Q5 or Q7;close Q1 Q6 or Q8.\r\n");
 #endif
         }
-        else if (ps->User.Pvap_outlet <= ps->Param.PPvap_outlet_stop)
+        else if (Pcarburetor <= ps->Param.PPvap_outlet_stop)
         {
           /*close V3*/
           // (rbit & 0x03) ? Close_Qx(5U), Open_Qx(6U) : false;
@@ -1238,7 +1285,7 @@ void Control_Task(void const *argument)
       }
 #define C2
       {
-        if (ps->User.Ptank >= ps->Param.PPspf_start)
+        if (Ptank >= ps->Param.PPspf_start)
         {
           /*open V4*/
           Open_Qx(3U);
@@ -1246,7 +1293,7 @@ void Control_Task(void const *argument)
           shellPrint(Shell_Object, "@C2-1: open Q3.\r\n");
 #endif
         }
-        else if (ps->User.Ptank <= ps->Param.PPspf_stop)
+        else if (Ptank <= ps->Param.PPspf_stop)
         {
           /*close V4*/
           // Close_Qx(3U);
@@ -1405,9 +1452,9 @@ void Transimt_Task(void const *argument)
         /*no response from slave*/
         else
         {
-          if (ps->Param.Slave_IRQ_Table.IRQ_Table_SetFlag)
+          if (ps->Param.Slave_IRQ_Table.IRQ_Table_SetFlag == SAVE_SURE_CODE)
           {
-#define CARD_ERROR_CODE 14U
+#define CARD_ERROR_CODE 23U
             /*Record error code*/
             ps->Param.Error_Code = CARD_ERROR_CODE;
           }
@@ -1566,7 +1613,7 @@ void Report_Task(void const *argument)
     }
     else
     {
-      for (float *puser = &urinfo.Ptank; puser < &urinfo.Ptank + BX_SIZE; puser++)
+      for (float *puser = &urinfo.Ptank_M; puser < &urinfo.Ptank_M + BX_SIZE; puser++)
       {
 #if defined(USING_DEBUG)
         // shellPrint(Shell_Object, "Value[%d] = %.3fMpa/M3\r\n", i, temp_data[i]);
@@ -1577,7 +1624,7 @@ void Report_Task(void const *argument)
       osDelay(DELAY_TIMES);
     }
     /*Report error code*/
-    if (ps->Param.Error_Code && ps->Param.Slave_IRQ_Table.IRQ_Table_SetFlag)
+    if (ps->Param.Error_Code && (ps->Param.Slave_IRQ_Table.IRQ_Table_SetFlag == SAVE_SURE_CODE))
     {
       value = (uint16_t)ps->Param.Error_Code;
       value = (value >> 8U) | (value << 8U);
@@ -1592,7 +1639,7 @@ void Report_Task(void const *argument)
     }
     else
     {
-      if ((!first_flag) && ps->Param.Slave_IRQ_Table.IRQ_Table_SetFlag)
+      if ((!first_flag) && (ps->Param.Slave_IRQ_Table.IRQ_Table_SetFlag == SAVE_SURE_CODE))
       {
         first_flag = true;
         Dwin_Object->Dw_Page(Dwin_Object, MAIN_PAGE);
@@ -1649,7 +1696,7 @@ void Report_Callback(void const *argument)
   }
   /*When not configured, update the board information at any time, otherwise it will
   only be updated for the first time*/
-  first_flag = ps->Param.Slave_IRQ_Table.IRQ_Table_SetFlag ? true : false;
+  first_flag = (ps->Param.Slave_IRQ_Table.IRQ_Table_SetFlag == SAVE_SURE_CODE) ? true : false;
   /* USER CODE END Report_Callback */
 }
 
