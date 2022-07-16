@@ -45,8 +45,8 @@ DwinMap Dwin_ObjMap[] = {
 	{.addr = PGAS_MIN_ADDR, .upper = 4.0F, .lower = 0, .event = Dwin_EventHandle},
 	{.addr = LTANK_MAX_ADDR, .upper = 20.0F, .lower = 0, .event = Dwin_EventHandle},
 	{.addr = LTANK_MIN_ADDR, .upper = 5.0F, .lower = 0, .event = Dwin_EventHandle},
-	{.addr = PTOLE_MAX_ADDR, .upper = 100.0F, .lower = 0, .event = Dwin_EventHandle},
-	{.addr = PTOLE_MIN_ADDR, .upper = 50.0F, .lower = 0, .event = Dwin_EventHandle},
+	{.addr = PTOLE_MAX_ADDR, .upper = 5000.0F, .lower = 0, .event = Dwin_EventHandle},
+	{.addr = PTOLE_MIN_ADDR, .upper = 2000.0F, .lower = 0, .event = Dwin_EventHandle},
 	{.addr = LEVEL_MAX_ADDR, .upper = 2.0F, .lower = 0, .event = Dwin_EventHandle},
 	{.addr = LEVEL_MIN_ADDR, .upper = 2.0F, .lower = 0, .event = Dwin_EventHandle},
 	/*系统控制参数区*/
@@ -460,6 +460,8 @@ static void Dwin_EventHandle(pDwinHandle pd, uint8_t *pSite)
 #if defined(USING_FREERTOS)
 	taskENTER_CRITICAL();
 #endif
+	/*计算crc校验码*/
+	ps->Param.crc16 = Get_Crc16((uint8_t *)&ps->Param, sizeof(Save_Param) - sizeof(ps->Param.crc16), 0xFFFF);
 	/*参数保存到Flash*/
 	FLASH_Write(PARAM_SAVE_ADDRESS, (uint32_t *)&ps->Param, sizeof(Save_Param));
 #if defined(USING_FREERTOS)

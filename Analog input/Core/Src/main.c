@@ -75,11 +75,11 @@ SoftTimer timer_map[] = {
     {.counter = 0U, .enable = true, .execute_flag = false, .event = TIRQ_Handle, .target_counter = 10U},
     {.counter = 0U, .enable = true, .execute_flag = false, .event = Modbus_Handle, .target_counter = 1U},
 #if defined(USING_DEBUG)
-    {.counter = 0U, .enable = true, .execute_flag = false, .event = Read_Analog_Io, .target_counter = 100U},
-#else
-	{.counter = 0U, .enable = true, .execute_flag = false, .event = Read_Analog_Io, .target_counter = 10U},
-#endif
     {.counter = 0U, .enable = true, .execute_flag = false, .event = Debug_Handle, .target_counter = 100U},
+#else
+	{.counter = 0U, .enable = true, .execute_flag = false, .event = Read_Analog_Io, .target_counter = 20U},
+#endif
+//    {.counter = 0U, .enable = true, .execute_flag = false, .event = Debug_Handle, .target_counter = 100U},
 };
 Timer_HandleTypeDef stimer = {
     .pmap = timer_map,
@@ -129,7 +129,9 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-//  HAL_Delay(5000);
+#if defined(USING_DEBUG)
+  HAL_Delay(5000);
+#endif
   /* USER CODE END Init */
 
   /* Configure the system clock */

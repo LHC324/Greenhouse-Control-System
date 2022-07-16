@@ -44,7 +44,7 @@ extern "C"
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
 // #define USING_DEBUG 1
-#define USING_DEBUG_APPLICATION
+// #define USING_DEBUG_APPLICATION
 #define USING_RTOS
 #define USING_DMA
 /*Custom memory management*/

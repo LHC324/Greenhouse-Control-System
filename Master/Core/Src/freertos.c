@@ -71,11 +71,11 @@ Save_Param Save_InitPara = {
     .PSvap_outlet_Start = 1.2F,
     .PSvap_outlet_stop = 1.1F,
     .Pback_difference = 1.8F,
-    .Ptank_difference = 2.0F,
-    .PPvap_outlet_Start = 2.2F,
-    .PPvap_outlet_stop = 1.8F,
-    .PPspf_start = 2.3F,
-    .PPspf_stop = 2.1F,
+    .Ptank_difference = 1.6F,
+    .PPvap_outlet_Start = 2.1F,
+    .PPvap_outlet_stop = 1.6F,
+    .PPspf_start = 2.1F,
+    .PPspf_stop = 1.9F,
     .Ptank_limit = 1.2F,
     .Ltank_limit = 2.0F,
     .Htank = 0.1F,
@@ -947,7 +947,7 @@ void Control_Task(void const *argument)
   // bool flag_group[] = {false, false};
   Save_HandleTypeDef *ps = (Save_HandleTypeDef *)argument;
   Save_User usinfo;
-  static bool mutex_flag = false;
+  static bool mutex_flag[] = {false, false, false};
   /*Solve the problem of screen background parameter delay*/
   // osDelay(2000);
   // Report_Backparam(Dwin_Object, &ps->Param);
@@ -1135,16 +1135,13 @@ void Control_Task(void const *argument)
           shellPrint(Shell_Object, "@A1-1: open Q5 or Q7;close Q6 or Q8.\r\n");
 #endif
         }
+        (Ptank >= ps->Param.PSspf_start)  ? mutex_flag[0] = true
+        : (Ptank <= ps->Param.PSspf_stop) ? mutex_flag[0] = false
+                                          : false;
         /*Pressure relief*/
-        if (Ptank >= ps->Param.PSspf_start)
+        if (mutex_flag[0])
         {
-          /*openQ0、openQ1、Q2*/
-          // Close_Qx(0U);
           Open_Qx(1U);
-          // (rbit & 0x03) ? Open_Qx(5U), Close_Qx(6U) : false;
-          // (rbit & 0x04) ? Open_Qx(7U), Close_Qx(8U) : false;
-          /*set flag*/
-          mutex_flag = true;
 #if (USING_USERTIMER0)
           /*reset timer*/
           // Reset_SoftTimer(&timer[0U], T_5S);
@@ -1156,32 +1153,9 @@ void Control_Task(void const *argument)
         }
         else
         {
-          if (Ptank <= ps->Param.PSspf_stop)
-          {
-            mutex_flag = false;
-            /*close Q1 、close Q3*/
-            // Close_Qx(1U), Close_Qx(3U);
 #if defined(USING_DEBUG_APPLICATION)
-            shellPrint(Shell_Object, "@A1-3: open Q0;close Q1 Q3.\r\n");
+          shellPrint(Shell_Object, "@A1-3: open Q0;close Q1 Q3.\r\n");
 #endif
-          }
-          else
-          {
-            if (mutex_flag)
-            {
-              Open_Qx(1U);
-              goto __no_action;
-            }
-            else
-            {
-              /*open outlet valve*/
-              // (rbit & 0x03) ? Open_Qx(5U), Close_Qx(6U) : false;
-              // (rbit & 0x04) ? Open_Qx(7U), Close_Qx(8U) : false;
-#if defined(USING_DEBUG_APPLICATION)
-              shellPrint(Shell_Object, "@A1-4: open Q5 or Q7 Close Q6 or Q8.\r\n");
-#endif
-            }
-          }
         }
       }
 #define B1C1
@@ -1225,6 +1199,9 @@ void Control_Task(void const *argument)
 #endif
         }
       }
+      /*Ensure that after the startup mode is switched to the shutdown mode*/
+      mutex_flag[1] ? mutex_flag[1] = false : false;
+      mutex_flag[2] ? mutex_flag[2] = false : false;
     }
     /*stop mode*/
     else
@@ -1237,7 +1214,7 @@ void Control_Task(void const *argument)
       Reset_SoftTimer(&timer[1U], T_5S); //######
 #endif
       /*Check whether the pressure relief operation is on*/
-      mutex_flag ? mutex_flag = false : false;
+      mutex_flag[0] ? mutex_flag[0] = false : false;
 #define A2
       {
         // if (((Pcarburetor - Ptank) >= ps->Param.Pback_difference) && (Ptank < ps->Param.Ptank_difference))
@@ -1260,24 +1237,19 @@ void Control_Task(void const *argument)
       }
 #define B2
       {
-        if (Pcarburetor >= ps->Param.PPvap_outlet_Start)
+        (Pcarburetor >= ps->Param.PPvap_outlet_Start)  ? mutex_flag[1] = true
+        : (Pcarburetor <= ps->Param.PPvap_outlet_stop) ? mutex_flag[1] = false
+                                                       : false;
+        if (mutex_flag[1])
         {
-          /*open V3、open V5、close V2*/
-          // (rbit & 0x03) ? Open_Qx(5U), Close_Qx(6U) : false;
-          // (rbit & 0x04) ? Open_Qx(7U), Close_Qx(8U) : false;
           Open_Qx(5U), Close_Qx(6U);
           Open_Qx(4U);
-          // Close_Qx(1U);
 #if defined(USING_DEBUG_APPLICATION)
           shellPrint(Shell_Object, "@B2-1: open Q4 Q5 or Q7;close Q1 Q6 or Q8.\r\n");
 #endif
         }
-        else if (Pcarburetor <= ps->Param.PPvap_outlet_stop)
+        else
         {
-          /*close V3*/
-          // (rbit & 0x03) ? Close_Qx(5U), Open_Qx(6U) : false;
-          // (rbit & 0x04) ? Close_Qx(7U), Open_Qx(8U) : false;
-          // Close_Qx(4U);
 #if defined(USING_DEBUG_APPLICATION)
           shellPrint(Shell_Object, "@B2-2: open Q5 or Q7 close Q4 Q6 or Q8.\r\n");
 #endif
@@ -1285,18 +1257,18 @@ void Control_Task(void const *argument)
       }
 #define C2
       {
-        if (Ptank >= ps->Param.PPspf_start)
+        (Ptank >= ps->Param.PPspf_start)  ? mutex_flag[2] = true
+        : (Ptank <= ps->Param.PPspf_stop) ? mutex_flag[2] = false
+                                          : false;
+        if (mutex_flag[2])
         {
-          /*open V4*/
           Open_Qx(3U);
 #if defined(USING_DEBUG_APPLICATION)
           shellPrint(Shell_Object, "@C2-1: open Q3.\r\n");
 #endif
         }
-        else if (Ptank <= ps->Param.PPspf_stop)
+        else
         {
-          /*close V4*/
-          // Close_Qx(3U);
 #if defined(USING_DEBUG_APPLICATION)
           shellPrint(Shell_Object, "@C2-2: close Q3.\r\n");
 #endif
@@ -1532,6 +1504,8 @@ void Transimt_Task(void const *argument)
                 osDelay(50);
                 // xQueueSend(SureQueueHandle, &slave_id, 10);
               }
+              else
+                break;
             }
             // osDelay(200);
           }

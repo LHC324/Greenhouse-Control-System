@@ -100,10 +100,14 @@ extern float sidefilter(SideParm *side, float input);
 #define PI acosf(-1.0F)
 #define Get_Target(__current, __upper, __lower) \
     (((__current)-CURRENT_LOWER) / CURRENT_UPPER * ((__upper) - (__lower)) + (__lower))
-#define Get_Ptank_Level(__H, __HI, __CR, __CL)                                                                    \
-    (__CL * (PI * powf((__CR), 2.0F) / 2.0F - ((__CR) - (__H)) * sqrtf(2.0F * (__CR) * (__H)-powf((__H), 2.0F)) - \
-             powf((__CR), 2.0F) * asinf((__CR) - (__H))) +                                                        \
+#define Get_Ptank_Level(__H, __HI, __CR, __CL)                                                                      \
+    ((__CL) * (PI * powf((__CR), 2.0F) / 2.0F - ((__CR) - (__H)) * sqrtf(2.0F * (__CR) * (__H)-powf((__H), 2.0F)) - \
+               powf((__CR), 2.0F) * asinf(((__CR) - (__H)) / (__CR))) +                                             \
      (PI * (__HI) / 3.0F * (__CR) * (3.0F * powf((__CR), 2.0F) * (__H)-powf((__CR), 3.0F) + powf((__CR) - (__H), 3.0F))))
+#define Get_Ptank_Level_1(__H, __CR, __CL)                                           \
+    ((1.0F + 2.0F * (__CR) / (3.0F * (__CL))) * ((__CL)*powf((__CR), 2.0F) *         \
+                                                 (asinf(((__H) - (__CR)) / (__CR)) + \
+                                                  ((__H) - (__CR)) / powf((__CR), 2.0F) * sqrtf(powf((__CR), 2.0F) - powf(((__H) - (__CR)), 2.0F)) + PI / 2.0F)))
 #define Set_SoftTimer_Flag(__obj, __val) \
     ((__obj)->flag = (__val))
 #define Set_SoftTimer_Count(__obj, __val) \

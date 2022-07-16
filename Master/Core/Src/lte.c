@@ -138,12 +138,12 @@ void MX_AtInit(void)
 		.pList = Lte_list,
 		.Comm_Num = LTE_CMD_SIZE,
 	};
-	extern UART_HandleTypeDef huart3;
+	extern UART_HandleTypeDef huart2;
 	AtHandle lte = {
 		.Id = 0x00,
 		.Gpio = lte_gpio,
 		.Table = lte_table,
-		.huart = &huart3,
+		.huart = &huart2,
 	};
 	Creat_AtObject(&Lte_Object, &lte);
 
