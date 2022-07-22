@@ -10,10 +10,10 @@
 
 #include "main.h"
 
-#define SLAVE_ADDRESS 0x02
-#define MOD_RX_BUF_SIZE 128U
-#define MOD_TX_BUF_SIZE 128U
-#define REG_POOL_SIZE 16U
+#define Slave_ADDRESS 0x02
+#define MOD_RX_BUF_SIZE 64U
+#define MOD_TX_BUF_SIZE 64U
+#define REG_POOL_SIZE 32U
 
 #define COIL_OFFSET (1)
 #define INPUT_COIL_OFFSET (10001)
@@ -144,6 +144,10 @@ struct Modbus_HandleTypeDef
 		uint8_t RxCount;
 		/*预留外部数据结构接口*/
 		void *pHandle;
+#if defined(USING_FREERTOS)
+		/*使用操作系统时二值信号量*/
+		void *bSemaphore;
+#endif
 		// ModbusMap *pMap;
 		Regsiter_Type Reg_Type;
 		ModbusPools *pPools;
@@ -177,6 +181,19 @@ extern void MX_ModbusInit(void);
 extern pModbusHandle Modbus_Object;
 extern void Modbus_Handle(void);
 
+#define MOD_WORD 1U
+#define MOD_DWORD 2U
+/*获取主机号*/
+#define Get_ModId(__obj) ((__obj)->Slave.pRbuf[0U])
+/*获取Modbus功能号*/
+#define Get_ModFunCode(__obj) ((__obj)->Slave.pRbuf[1U])
+/*获取Modbus协议数据*/
+#define Get_Data(__ptr, __s, __size)                                                                     \
+	((__size) < 2U ? (((__ptr)->Slave.pRbuf[__s] << 8U) |                                                \
+					  ((__ptr)->Slave.pRbuf[__s + 1U]))                                                  \
+				   : (((__ptr)->Slave.pRbuf[__s] << 24U) |                                               \
+					  ((__ptr)->Slave.pRbuf[__s + 1U] << 16U) | ((__ptr)->Slave.pRbuf[__s + 2U] << 8U) | \
+					  ((__ptr)->Slave.pRbuf[__s + 3U])))
 #define Modbus_ReciveHandle(__obj, __dma) ((__obj)->Mod_TI_Recive((__obj), (__dma)))
 
 #endif /* INC_MODBUS_H_ */

@@ -1,20 +1,20 @@
 /* USER CODE BEGIN Header */
 /**
-  ******************************************************************************
-  * @file    stm32f0xx_it.c
-  * @brief   Interrupt Service Routines.
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2022 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-  */
+ ******************************************************************************
+ * @file    stm32f0xx_it.c
+ * @brief   Interrupt Service Routines.
+ ******************************************************************************
+ * @attention
+ *
+ * Copyright (c) 2022 STMicroelectronics.
+ * All rights reserved.
+ *
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ *
+ ******************************************************************************
+ */
 /* USER CODE END Header */
 
 /* Includes ------------------------------------------------------------------*/
@@ -22,6 +22,8 @@
 #include "stm32f0xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "Modbus.h"
+#include "lora.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -71,8 +73,8 @@ extern TIM_HandleTypeDef htim17;
 /*           Cortex-M0 Processor Interruption and Exception Handlers          */
 /******************************************************************************/
 /**
-  * @brief This function handles Non maskable interrupt.
-  */
+ * @brief This function handles Non maskable interrupt.
+ */
 void NMI_Handler(void)
 {
   /* USER CODE BEGIN NonMaskableInt_IRQn 0 */
@@ -86,8 +88,8 @@ void NMI_Handler(void)
 }
 
 /**
-  * @brief This function handles Hard fault interrupt.
-  */
+ * @brief This function handles Hard fault interrupt.
+ */
 void HardFault_Handler(void)
 {
   /* USER CODE BEGIN HardFault_IRQn 0 */
@@ -108,8 +110,8 @@ void HardFault_Handler(void)
 /******************************************************************************/
 
 /**
-  * @brief This function handles DMA1 channel 2 and 3 interrupts.
-  */
+ * @brief This function handles DMA1 channel 2 and 3 interrupts.
+ */
 void DMA1_Channel2_3_IRQHandler(void)
 {
   /* USER CODE BEGIN DMA1_Channel2_3_IRQn 0 */
@@ -123,8 +125,8 @@ void DMA1_Channel2_3_IRQHandler(void)
 }
 
 /**
-  * @brief This function handles DMA1 channel 4 and 5 interrupts.
-  */
+ * @brief This function handles DMA1 channel 4 and 5 interrupts.
+ */
 void DMA1_Channel4_5_IRQHandler(void)
 {
   /* USER CODE BEGIN DMA1_Channel4_5_IRQn 0 */
@@ -138,8 +140,8 @@ void DMA1_Channel4_5_IRQHandler(void)
 }
 
 /**
-  * @brief This function handles TIM17 global interrupt.
-  */
+ * @brief This function handles TIM17 global interrupt.
+ */
 void TIM17_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM17_IRQn 0 */
@@ -152,12 +154,17 @@ void TIM17_IRQHandler(void)
 }
 
 /**
-  * @brief This function handles USART1 global interrupt.
-  */
+ * @brief This function handles USART1 global interrupt.
+ */
 void USART1_IRQHandler(void)
 {
   /* USER CODE BEGIN USART1_IRQn 0 */
-
+  // #if !defined(USING_SHELL)
+  if (Modbus_Object)
+  {
+    Modbus_ReciveHandle(Modbus_Object, &hdma_usart1_rx);
+  }
+  // #endif
   /* USER CODE END USART1_IRQn 0 */
   HAL_UART_IRQHandler(&huart1);
   /* USER CODE BEGIN USART1_IRQn 1 */
@@ -166,11 +173,15 @@ void USART1_IRQHandler(void)
 }
 
 /**
-  * @brief This function handles USART2 global interrupt.
-  */
+ * @brief This function handles USART2 global interrupt.
+ */
 void USART2_IRQHandler(void)
 {
   /* USER CODE BEGIN USART2_IRQn 0 */
+  if (Lora_Object)
+  {
+    Lora_ReciveHandle(Lora_Object, &hdma_usart2_rx);
+  }
 
   /* USER CODE END USART2_IRQn 0 */
   HAL_UART_IRQHandler(&huart2);

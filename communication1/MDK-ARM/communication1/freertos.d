@@ -52,3 +52,10 @@ communication1\freertos.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/ti
 communication1\freertos.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/queue.h
 communication1\freertos.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/semphr.h
 communication1\freertos.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/event_groups.h
+communication1\freertos.o: ../Core/Inc/tool.h
+communication1\freertos.o: ../Core/Inc/Modbus.h
+communication1\freertos.o: ../Core/Inc/lora.h
+communication1\freertos.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.h
+communication1\freertos.o: ../Letter_Shell/Inc/shell_port.h
+communication1\freertos.o: ../Letter_Shell/Inc/shell.h
+communication1\freertos.o: ../Letter_Shell/Inc/shell_cfg.h

@@ -1,6 +1,15 @@
 {
     "files.associations": {
         "main.h": "c",
-        "cmsis_os.h": "c"
+        "cmsis_os.h": "c",
+        "dma.h": "c",
+        "modbus.h": "c",
+        "usart.h": "c",
+        "shell_port.h": "c",
+        "comdef.h": "c",
+        "at.h": "c",
+        "l101.h": "c",
+        "stm32f0xx_it.h": "c",
+        "lora.h": "c"
     }
 }

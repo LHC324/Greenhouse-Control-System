@@ -11,10 +11,14 @@
                 "g:\\STM32_Workers\\STM32H7\\Greenhouse_Control_System\\communication1\\Middlewares\\Third_Party\\FreeRTOS\\Source\\include",
                 "g:\\STM32_Workers\\STM32H7\\Greenhouse_Control_System\\communication1\\Middlewares\\Third_Party\\FreeRTOS\\Source\\CMSIS_RTOS",
                 "g:\\STM32_Workers\\STM32H7\\Greenhouse_Control_System\\communication1\\Middlewares\\Third_Party\\FreeRTOS\\Source\\portable\\RVDS\\ARM_CM0",
+                "g:\\STM32_Workers\\STM32H7\\Greenhouse_Control_System\\communication1\\Letter_Shell\\Inc",
+                "g:\\STM32_Workers\\STM32H7\\Greenhouse_Control_System\\communication1\\AT\\Inc",
                 "C:\\Keil_v5\\ARM\\ARMCC\\include",
                 "C:\\Keil_v5\\ARM\\ARMCC\\include\\rw",
                 "g:\\STM32_Workers\\STM32H7\\Greenhouse_Control_System\\communication1\\MDK-ARM",
                 "g:\\STM32_Workers\\STM32H7\\Greenhouse_Control_System\\communication1\\Core\\Src",
+                "g:\\STM32_Workers\\STM32H7\\Greenhouse_Control_System\\communication1\\AT\\Src",
+                "g:\\STM32_Workers\\STM32H7\\Greenhouse_Control_System\\communication1\\Letter_Shell\\Src",
                 "g:\\STM32_Workers\\STM32H7\\Greenhouse_Control_System\\communication1\\Drivers\\STM32F0xx_HAL_Driver\\Src",
                 "g:\\STM32_Workers\\STM32H7\\Greenhouse_Control_System\\communication1\\Middlewares\\Third_Party\\FreeRTOS\\Source",
                 "g:\\STM32_Workers\\STM32H7\\Greenhouse_Control_System\\communication1\\Middlewares\\Third_Party\\FreeRTOS\\Source\\portable\\MemMang"
@@ -22,6 +26,7 @@
             "defines": [
                 "USE_HAL_DRIVER",
                 "STM32F030x8",
+                "USING_DEBUG",
                 "__CC_ARM",
                 "__arm__",
                 "__align(x)=",

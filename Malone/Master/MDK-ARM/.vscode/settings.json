@@ -1,0 +1,25 @@
+{
+    "files.associations": {
+        "flash.h": "c",
+        "usart.h": "c",
+        "shell_port.h": "c",
+        "mdrtuslave.h": "c",
+        "tool.h": "c",
+        "cmsis_os.h": "c",
+        "dwin.h": "c",
+        "usbd_cdc_if.h": "c",
+        "usb_device.h": "c",
+        "main.h": "c",
+        "shell.h": "c",
+        "string": "c",
+        "mdconfig.h": "c",
+        "lte.h": "c",
+        "string.h": "c",
+        "task.h": "c",
+        "freertos.h": "c",
+        "mdcrc16.h": "c",
+        "stddef.h": "c"
+    },
+    "EIDE.SerialPortMonitor.BaudRate": 921600,
+    "C_Cpp.errorSquiggles": "Disabled"
+}

@@ -77,7 +77,7 @@
       <WinId>466</WinId>
       <ViewName>Source Browser</ViewName>
       <UserString>500</UserString>
-      <TableColWidths>166</TableColWidths>
+      <TableColWidths>300</TableColWidths>
     </View>
   </TreeListPane>
 
@@ -109,9 +109,9 @@
       </MaxPosition>
       <NormalPosition>
         <Top>0</Top>
-        <Left>470</Left>
-        <Right>1622</Right>
-        <Bottom>593</Bottom>
+        <Left>-5</Left>
+        <Right>1933</Right>
+        <Bottom>1048</Bottom>
       </NormalPosition>
     </WindowPosition>
     <MDIClientArea>
@@ -3612,7 +3612,7 @@
       <Size>100</Size>
       <ActiveTab>0</ActiveTab>
       <Doc>
-        <Name>&lt;6&gt;../Core/Src/main.c</Name>
+        <Name>G:\STM32_Workers\STM32H7\Greenhouse_Control_System\Master\Core\Src\main.c</Name>
         <ColumnNumber>3</ColumnNumber>
         <TopLine>45</TopLine>
         <CurrentLine>131</CurrentLine>
@@ -3657,7 +3657,7 @@
         <PaneID>0</PaneID>
       </Doc>
       <Doc>
-        <Name>&lt;6&gt;../Core/Src/gpio.c</Name>
+        <Name>G:\STM32_Workers\STM32H7\Greenhouse_Control_System\Master\Core\Src\gpio.c</Name>
         <ColumnNumber>30</ColumnNumber>
         <TopLine>44</TopLine>
         <CurrentLine>58</CurrentLine>
@@ -3675,7 +3675,7 @@
         <PaneID>0</PaneID>
       </Doc>
       <Doc>
-        <Name>&lt;6&gt;../Core/Src/usart.c</Name>
+        <Name>G:\STM32_Workers\STM32H7\Greenhouse_Control_System\Master\Core\Src\usart.c</Name>
         <ColumnNumber>40</ColumnNumber>
         <TopLine>25</TopLine>
         <CurrentLine>14</CurrentLine>

@@ -9,6 +9,7 @@
 
   <project>
     <PathAndName>.\Analog input\MDK-ARM\Analog input.uvprojx</PathAndName>
+    <NodeIsActive>1</NodeIsActive>
   </project>
 
   <project>
@@ -28,8 +29,7 @@
   </project>
 
   <project>
-    <PathAndName>.\Master\MDK-ARM\Master.uvprojx</PathAndName>
-    <NodeIsActive>1</NodeIsActive>
+    <PathAndName>.\Jinning\Master\MDK-ARM\Master.uvprojx</PathAndName>
   </project>
 
 </ProjectWorkspace>

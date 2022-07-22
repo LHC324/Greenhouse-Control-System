@@ -40,17 +40,17 @@
     <View>
       <WinId>38003</WinId>
       <ViewName>Registers</ViewName>
-      <TableColWidths>180 116</TableColWidths>
+      <TableColWidths>180 180</TableColWidths>
     </View>
     <View>
       <WinId>346</WinId>
       <ViewName>Code Coverage</ViewName>
-      <TableColWidths>1008 100</TableColWidths>
+      <TableColWidths>1008 160</TableColWidths>
     </View>
     <View>
       <WinId>204</WinId>
       <ViewName>Performance Analyzer</ViewName>
-      <TableColWidths>1168 175 175 100</TableColWidths>
+      <TableColWidths>1168</TableColWidths>
     </View>
   </SECTreeCtrl>
 
@@ -95,7 +95,7 @@
       <WinId>466</WinId>
       <ViewName>Source Browser</ViewName>
       <UserString>500</UserString>
-      <TableColWidths>166</TableColWidths>
+      <TableColWidths>300</TableColWidths>
     </View>
   </TreeListPane>
 
@@ -118,8 +118,8 @@
       <flags>2</flags>
       <showCmd>3</showCmd>
       <MinPosition>
-        <xPos>-32000</xPos>
-        <yPos>-32000</yPos>
+        <xPos>-1</xPos>
+        <yPos>-1</yPos>
       </MinPosition>
       <MaxPosition>
         <xPos>-1</xPos>
@@ -127,16 +127,16 @@
       </MaxPosition>
       <NormalPosition>
         <Top>0</Top>
-        <Left>537</Left>
-        <Right>1689</Right>
-        <Bottom>593</Bottom>
+        <Left>-5</Left>
+        <Right>1933</Right>
+        <Bottom>1048</Bottom>
       </NormalPosition>
     </WindowPosition>
     <MDIClientArea>
       <RegID>0</RegID>
       <MDITabState>
-        <Len>1159</Len>
-        <Data>01000000040000000100000001000000010000000100000000000000020000000000000001000000010000000000000028000000280000000100000009000000080000000100000050473A5C53544D33325F576F726B6572735C53544D333248375C477265656E686F7573655F436F6E74726F6C5F53797374656D5C416E616C6F67206F75747075745C436F72655C5372635C6D61696E2E6300000000066D61696E2E6300000000C5D4F200FFFFFFFF50473A5C53544D33325F576F726B6572735C53544D333248375C477265656E686F7573655F436F6E74726F6C5F53797374656D5C416E616C6F67206F75747075745C436F72655C496E635C6D61696E2E6800000000066D61696E2E6800000000FFDC7800FFFFFFFF53473A5C53544D33325F576F726B6572735C53544D333248375C477265656E686F7573655F436F6E74726F6C5F53797374656D5C416E616C6F67206F75747075745C436F72655C5372635C4D6370343832322E6300000000094D6370343832322E6300000000BECEA100FFFFFFFF50473A5C53544D33325F576F726B6572735C53544D333248375C477265656E686F7573655F436F6E74726F6C5F53797374656D5C416E616C6F67206F75747075745C436F72655C5372635C746F6F6C2E630000000006746F6F6C2E6300000000F0A0A100FFFFFFFF52473A5C53544D33325F576F726B6572735C53544D333248375C477265656E686F7573655F436F6E74726F6C5F53797374656D5C416E616C6F67206F75747075745C436F72655C5372635C4D6F646275732E6300000000084D6F646275732E6300000000BCA8E100FFFFFFFF51473A5C53544D33325F576F726B6572735C53544D333248375C477265656E686F7573655F436F6E74726F6C5F53797374656D5C416E616C6F67206F75747075745C436F72655C5372635C75736172742E63000000000775736172742E63000000009CC1B600FFFFFFFF55473A5C53544D33325F576F726B6572735C53544D333248375C477265656E686F7573655F436F6E74726F6C5F53797374656D5C416E616C6F67206F75747075745C436F72655C5372635C696F5F7369676E616C2E63000000000B696F5F7369676E616C2E6300000000D9ADC200FFFFFFFF50473A5C53544D33325F576F726B6572735C53544D333248375C477265656E686F7573655F436F6E74726F6C5F53797374656D5C416E616C6F67206F75747075745C436F72655C5372635C6770696F2E6300000000066770696F2E6300000000A5C2D700FFFFFFFF5E473A5C53544D33325F576F726B6572735C53544D333248375C477265656E686F7573655F436F6E74726F6C5F53797374656D5C416E616C6F67206F75747075745C4D444B2D41524D5C737461727475705F73746D33326630333078362E730000000015737461727475705F73746D33326630333078362E7300000000B3A6BE00FFFFFFFF0100000010000000C5D4F200FFDC7800BECEA100F0A0A100BCA8E1009CC1B600F7B88600D9ADC200A5C2D700B3A6BE00EAD6A300F6FA7D00B5E99D005FC3CF00C1838300CACAD500010000000000000002000000F4000000700000008007000083020000</Data>
+        <Len>60</Len>
+        <Data>010000000400000001000000010000000100000001000000000000000200000000000000010000000100000000000000280000002800000000000000</Data>
       </MDITabState>
     </MDIClientArea>
     <ViewEx>
@@ -3630,7 +3630,7 @@
       <Size>100</Size>
       <ActiveTab>8</ActiveTab>
       <Doc>
-        <Name>../Core/Src/main.c</Name>
+        <Name>G:\STM32_Workers\STM32H7\Greenhouse_Control_System\Master\Core\Src\main.c</Name>
         <ColumnNumber>0</ColumnNumber>
         <TopLine>117</TopLine>
         <CurrentLine>124</CurrentLine>
@@ -3639,7 +3639,7 @@
         <PaneID>0</PaneID>
       </Doc>
       <Doc>
-        <Name>../Core/Inc/main.h</Name>
+        <Name>G:\STM32_Workers\STM32H7\Greenhouse_Control_System\Master\Core\Inc\main.h</Name>
         <ColumnNumber>19</ColumnNumber>
         <TopLine>38</TopLine>
         <CurrentLine>41</CurrentLine>
@@ -3648,7 +3648,7 @@
         <PaneID>0</PaneID>
       </Doc>
       <Doc>
-        <Name>..\Core\Src\Mcp4822.c</Name>
+        <Name>G:\STM32_Workers\STM32H7\Greenhouse_Control_System\Master\Core\Src\Mcp4822.c</Name>
         <ColumnNumber>0</ColumnNumber>
         <TopLine>28</TopLine>
         <CurrentLine>42</CurrentLine>
@@ -3657,7 +3657,7 @@
         <PaneID>0</PaneID>
       </Doc>
       <Doc>
-        <Name>..\Core\Src\tool.c</Name>
+        <Name>G:\STM32_Workers\STM32H7\Greenhouse_Control_System\Master\Core\Src\tool.c</Name>
         <ColumnNumber>0</ColumnNumber>
         <TopLine>158</TopLine>
         <CurrentLine>162</CurrentLine>
@@ -3666,7 +3666,7 @@
         <PaneID>0</PaneID>
       </Doc>
       <Doc>
-        <Name>..\Core\Src\Modbus.c</Name>
+        <Name>G:\STM32_Workers\STM32H7\Greenhouse_Control_System\Master\Core\Src\Modbus.c</Name>
         <ColumnNumber>0</ColumnNumber>
         <TopLine>539</TopLine>
         <CurrentLine>553</CurrentLine>
@@ -3675,7 +3675,7 @@
         <PaneID>0</PaneID>
       </Doc>
       <Doc>
-        <Name>../Core/Src/usart.c</Name>
+        <Name>G:\STM32_Workers\STM32H7\Greenhouse_Control_System\Master\Core\Src\usart.c</Name>
         <ColumnNumber>32</ColumnNumber>
         <TopLine>35</TopLine>
         <CurrentLine>44</CurrentLine>
@@ -3684,7 +3684,7 @@
         <PaneID>0</PaneID>
       </Doc>
       <Doc>
-        <Name>..\Core\Src\io_signal.c</Name>
+        <Name>G:\STM32_Workers\STM32H7\Greenhouse_Control_System\Master\Core\Src\io_signal.c</Name>
         <ColumnNumber>0</ColumnNumber>
         <TopLine>197</TopLine>
         <CurrentLine>207</CurrentLine>
@@ -3693,7 +3693,7 @@
         <PaneID>0</PaneID>
       </Doc>
       <Doc>
-        <Name>../Core/Src/gpio.c</Name>
+        <Name>G:\STM32_Workers\STM32H7\Greenhouse_Control_System\Master\Core\Src\gpio.c</Name>
         <ColumnNumber>0</ColumnNumber>
         <TopLine>1</TopLine>
         <CurrentLine>1</CurrentLine>
@@ -3702,7 +3702,7 @@
         <PaneID>0</PaneID>
       </Doc>
       <Doc>
-        <Name>startup_stm32f030x6.s</Name>
+        <Name>G:\STM32_Workers\STM32H7\Greenhouse_Control_System\Master\MDK-ARM\startup_stm32f030x6.s</Name>
         <ColumnNumber>0</ColumnNumber>
         <TopLine>114</TopLine>
         <CurrentLine>121</CurrentLine>

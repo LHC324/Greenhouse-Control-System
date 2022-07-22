@@ -336,9 +336,9 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define>USE_HAL_DRIVER,STM32F030x8</Define>
+              <Define>USE_HAL_DRIVER,STM32F030x8,USING_DEBUG</Define>
               <Undefine></Undefine>
-              <IncludePath>../Core/Inc;../Drivers/STM32F0xx_HAL_Driver/Inc;../Drivers/STM32F0xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32F0xx/Include;../Drivers/CMSIS/Include;../Middlewares/Third_Party/FreeRTOS/Source/include;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS;../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM0</IncludePath>
+              <IncludePath>../Core/Inc;../Drivers/STM32F0xx_HAL_Driver/Inc;../Drivers/STM32F0xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32F0xx/Include;../Drivers/CMSIS/Include;../Middlewares/Third_Party/FreeRTOS/Source/include;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS;../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM0;../Letter_Shell/Inc;../AT/Inc</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -392,6 +392,16 @@
         <Group>
           <GroupName>Application/User/Core</GroupName>
           <Files>
+            <File>
+              <FileName>Modbus.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\Modbus.c</FilePath>
+            </File>
+            <File>
+              <FileName>tool.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\tool.c</FilePath>
+            </File>
             <File>
               <FileName>main.c</FileName>
               <FileType>1</FileType>
@@ -637,14 +647,156 @@
               </FileOption>
             </File>
             <File>
-              <FileName>Modbus.c</FileName>
+              <FileName>lora.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Core\Src\Modbus.c</FilePath>
+              <FilePath>..\Core\Src\lora.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Application/At</GroupName>
+          <Files>
+            <File>
+              <FileName>at.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\AT\Src\at.c</FilePath>
+              <FileOption>
+                <CommonProperty>
+                  <UseCPPCompiler>2</UseCPPCompiler>
+                  <RVCTCodeConst>0</RVCTCodeConst>
+                  <RVCTZI>0</RVCTZI>
+                  <RVCTOtherData>0</RVCTOtherData>
+                  <ModuleSelection>0</ModuleSelection>
+                  <IncludeInBuild>0</IncludeInBuild>
+                  <AlwaysBuild>2</AlwaysBuild>
+                  <GenerateAssemblyFile>2</GenerateAssemblyFile>
+                  <AssembleAssemblyFile>2</AssembleAssemblyFile>
+                  <PublicsOnly>2</PublicsOnly>
+                  <StopOnExitCode>11</StopOnExitCode>
+                  <CustomArgument></CustomArgument>
+                  <IncludeLibraryModules></IncludeLibraryModules>
+                  <ComprImg>1</ComprImg>
+                </CommonProperty>
+                <FileArmAds>
+                  <Cads>
+                    <interw>2</interw>
+                    <Optim>0</Optim>
+                    <oTime>2</oTime>
+                    <SplitLS>2</SplitLS>
+                    <OneElfS>2</OneElfS>
+                    <Strict>2</Strict>
+                    <EnumInt>2</EnumInt>
+                    <PlainCh>2</PlainCh>
+                    <Ropi>2</Ropi>
+                    <Rwpi>2</Rwpi>
+                    <wLevel>0</wLevel>
+                    <uThumb>2</uThumb>
+                    <uSurpInc>2</uSurpInc>
+                    <uC99>2</uC99>
+                    <uGnu>2</uGnu>
+                    <useXO>2</useXO>
+                    <v6Lang>0</v6Lang>
+                    <v6LangP>0</v6LangP>
+                    <vShortEn>2</vShortEn>
+                    <vShortWch>2</vShortWch>
+                    <v6Lto>2</v6Lto>
+                    <v6WtE>2</v6WtE>
+                    <v6Rtti>2</v6Rtti>
+                    <VariousControls>
+                      <MiscControls></MiscControls>
+                      <Define></Define>
+                      <Undefine></Undefine>
+                      <IncludePath></IncludePath>
+                    </VariousControls>
+                  </Cads>
+                </FileArmAds>
+              </FileOption>
             </File>
             <File>
-              <FileName>tool.c</FileName>
+              <FileName>at_usr.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Core\Src\tool.c</FilePath>
+              <FilePath>..\AT\Src\at_usr.c</FilePath>
+              <FileOption>
+                <CommonProperty>
+                  <UseCPPCompiler>2</UseCPPCompiler>
+                  <RVCTCodeConst>0</RVCTCodeConst>
+                  <RVCTZI>0</RVCTZI>
+                  <RVCTOtherData>0</RVCTOtherData>
+                  <ModuleSelection>0</ModuleSelection>
+                  <IncludeInBuild>0</IncludeInBuild>
+                  <AlwaysBuild>2</AlwaysBuild>
+                  <GenerateAssemblyFile>2</GenerateAssemblyFile>
+                  <AssembleAssemblyFile>2</AssembleAssemblyFile>
+                  <PublicsOnly>2</PublicsOnly>
+                  <StopOnExitCode>11</StopOnExitCode>
+                  <CustomArgument></CustomArgument>
+                  <IncludeLibraryModules></IncludeLibraryModules>
+                  <ComprImg>1</ComprImg>
+                </CommonProperty>
+                <FileArmAds>
+                  <Cads>
+                    <interw>2</interw>
+                    <Optim>0</Optim>
+                    <oTime>2</oTime>
+                    <SplitLS>2</SplitLS>
+                    <OneElfS>2</OneElfS>
+                    <Strict>2</Strict>
+                    <EnumInt>2</EnumInt>
+                    <PlainCh>2</PlainCh>
+                    <Ropi>2</Ropi>
+                    <Rwpi>2</Rwpi>
+                    <wLevel>0</wLevel>
+                    <uThumb>2</uThumb>
+                    <uSurpInc>2</uSurpInc>
+                    <uC99>2</uC99>
+                    <uGnu>2</uGnu>
+                    <useXO>2</useXO>
+                    <v6Lang>0</v6Lang>
+                    <v6LangP>0</v6LangP>
+                    <vShortEn>2</vShortEn>
+                    <vShortWch>2</vShortWch>
+                    <v6Lto>2</v6Lto>
+                    <v6WtE>2</v6WtE>
+                    <v6Rtti>2</v6Rtti>
+                    <VariousControls>
+                      <MiscControls></MiscControls>
+                      <Define></Define>
+                      <Undefine></Undefine>
+                      <IncludePath></IncludePath>
+                    </VariousControls>
+                  </Cads>
+                </FileArmAds>
+              </FileOption>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Application/Shell</GroupName>
+          <Files>
+            <File>
+              <FileName>shell.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Letter_Shell\Src\shell.c</FilePath>
+            </File>
+            <File>
+              <FileName>shell_cmd_list.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Letter_Shell\Src\shell_cmd_list.c</FilePath>
+            </File>
+            <File>
+              <FileName>shell_companion.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Letter_Shell\Src\shell_companion.c</FilePath>
+            </File>
+            <File>
+              <FileName>shell_ext.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Letter_Shell\Src\shell_ext.c</FilePath>
+            </File>
+            <File>
+              <FileName>shell_port.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Letter_Shell\Src\shell_port.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1157,7 +1309,7 @@
                   <RVCTZI>0</RVCTZI>
                   <RVCTOtherData>0</RVCTOtherData>
                   <ModuleSelection>0</ModuleSelection>
-                  <IncludeInBuild>1</IncludeInBuild>
+                  <IncludeInBuild>0</IncludeInBuild>
                   <AlwaysBuild>2</AlwaysBuild>
                   <GenerateAssemblyFile>2</GenerateAssemblyFile>
                   <AssembleAssemblyFile>2</AssembleAssemblyFile>

@@ -1,21 +1,21 @@
 /* USER CODE BEGIN Header */
 /**
-  ******************************************************************************
-  * @file           : main.h
-  * @brief          : Header for main.c file.
-  *                   This file contains the common defines of the application.
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2022 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-  */
+ ******************************************************************************
+ * @file           : main.h
+ * @brief          : Header for main.c file.
+ *                   This file contains the common defines of the application.
+ ******************************************************************************
+ * @attention
+ *
+ * Copyright (c) 2022 STMicroelectronics.
+ * All rights reserved.
+ *
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ *
+ ******************************************************************************
+ */
 /* USER CODE END Header */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
@@ -42,8 +42,10 @@ extern "C" {
 
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
-#define CUSTOM_MALLOC malloc
-#define CUSTOM_FREE free
+#define USING_FREERTOS
+#define USING_SHELL
+#define CUSTOM_MALLOC pvPortMalloc
+#define CUSTOM_FREE vPortFree
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/
@@ -53,7 +55,11 @@ extern "C" {
 
 /* Exported macro ------------------------------------------------------------*/
 /* USER CODE BEGIN EM */
-
+#define ESC_CODE 0x1B
+#define BACKSPACE_CODE 0x08
+#define ENTER_CODE 0x0D
+#define SPOT_CODE 0x2E
+#define COMMA_CODE 0x2C
 /* USER CODE END EM */
 
 /* Exported functions prototypes ---------------------------------------------*/
@@ -78,6 +84,10 @@ void Error_Handler(void);
 #define TYPE2_GPIO_Port GPIOB
 #define TYPE3_Pin GPIO_PIN_12
 #define TYPE3_GPIO_Port GPIOB
+#define LORA_STATUS_Pin GPIO_PIN_12
+#define LORA_STATUS_GPIO_Port GPIOA
+#define LORA_RELOAD_Pin GPIO_PIN_3
+#define LORA_RELOAD_GPIO_Port GPIOB
 #define CPU_TX_Pin GPIO_PIN_6
 #define CPU_TX_GPIO_Port GPIOB
 #define CPU_RX_Pin GPIO_PIN_7

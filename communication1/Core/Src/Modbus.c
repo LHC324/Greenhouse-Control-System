@@ -8,6 +8,10 @@
 #include "Modbus.h"
 #include "usart.h"
 #include "tool.h"
+#include "shell_port.h"
+#if defined(USING_FREERTOS)
+#include "cmsis_os.h"
+#endif
 
 /*使用屏幕接收处理时*/
 #define TYPEDEF_STRUCT bool
@@ -93,7 +97,7 @@ static void Create_ModObject(pModbusHandle *pd, pModbusHandle ps)
     if (!pTxbuf)
     {
 #if defined(USING_DEBUG)
-        Debug("pTxbuf Creation failed!\r\n");
+        shellPrint(Shell_Object, "pTxbuf Creation failed!\r\n");
 #endif
         CUSTOM_FREE(pTxbuf);
         return;
@@ -102,22 +106,16 @@ static void Create_ModObject(pModbusHandle *pd, pModbusHandle ps)
     if (!pRxbuf)
     {
 #if defined(USING_DEBUG)
-        Debug("pRxbuf Creation failed!\r\n");
+        shellPrint(Shell_Object, "pRxbuf Creation failed!\r\n");
 #endif
         CUSTOM_FREE(pRxbuf);
         return;
     }
 
-    // #endif
-
     memset(pTxbuf, 0x00, ps->Master.TxSize);
     memset(pRxbuf, 0x00, ps->Slave.RxSize);
 #if defined(USING_DEBUG)
-#if defined(USING_FREERTOS)
-    shellPrint(Shell_Object, "Dwin[%d]_handler = 0x%p\r\n", ps->Id, *pd);
-#else
-    Debug("Modbus[%d]_handler = 0x%p\r\n", ps->Slave_Id, *pd);
-#endif
+    shellPrint(Shell_Object, "Modbus[%d]_handler = 0x%p\r\n", ps->Slave_Id, *pd);
 #endif
     (*pd)->Slave_Id = ps->Slave_Id;
     (*pd)->Mod_CallBack = Modbus_CallBack;
@@ -147,8 +145,11 @@ static void Create_ModObject(pModbusHandle *pd, pModbusHandle ps)
     // (*pd)->Slave.pMap = ps->Slave.pMap;
     // (*pd)->Slave.Events_Size = ps->Slave.Events_Size;
     (*pd)->Slave.pHandle = ps->Slave.pHandle;
+    (*pd)->Slave.bSemaphore = ps->Slave.bSemaphore;
+    // memcpy(&(*pd)->Slave, &ps->Slave, sizeof(ps->Slave));
 #if !defined(USING_FREERTOS)
-    (*pd)->Slave.Recive_FinishFlag = false;
+    (*pd)
+        ->Slave.Recive_FinishFlag = false;
 #endif
     (*pd)->huart = ps->huart;
 }
@@ -174,25 +175,27 @@ void Free_ModObject(pModbusHandle *pd)
  */
 void MX_ModbusInit(void)
 {
-#define SLAVE_MAX 0x0F
+#define Slave_MAX 0x0F
     /*读板标志*/
     static bool Read_Flag = false;
     // extern Save_HandleTypeDef Save_Flash;
     MdbusHandle Modbus;
-    uint8_t slave_id = Get_CardId() & 0x0F;
+    uint8_t Slave_id = Get_CardId() & 0x0F;
 
-    // Modbus.Slave_Id = SLAVE_ADDRESS;
+    // Modbus.Slave_Id = Slave_ADDRESS;
 #if defined(USING_DEBUG)
-    Debug("Board id is 0x%02x, slave id is 0x%02x.\r\n", Get_CardId(), slave_id);
+    shellPrint(Shell_Object, "Board id is 0x%02x, Slave id is 0x%02x.\r\n", Get_CardId(), Slave_id);
 #endif
 
     /*从站ID通过卡槽编码确定*/
-    Modbus.Slave_Id = (slave_id <= SLAVE_MAX) ? slave_id : SLAVE_MAX + 1U;
+    Modbus.Slave_Id = (Slave_id <= Slave_MAX) ? Slave_id : Slave_MAX + 1U;
     // Modbus.Slave_Id = 0x00;
     Modbus.Master.TxSize = MOD_TX_BUF_SIZE;
     Modbus.Slave.RxSize = MOD_RX_BUF_SIZE;
     // Modbus.Slave.pMap = Modbus_ObjMap;
     // Modbus.Slave.Events_Size = Modbus_EventSize;
+    extern osSemaphoreId Cpu_ReciveHandle;
+    Modbus.Slave.bSemaphore = Cpu_ReciveHandle;
     Modbus.Slave.pHandle = &Read_Flag;
     /*定义迪文屏幕使用目标串口*/
     Modbus.huart = &huart1;
@@ -227,26 +230,16 @@ static void Modbus_TI_Recive(pModbusHandle pd, DMA_HandleTypeDef *hdma)
         }
 #if defined(USING_FREERTOS)
         /*After opening the serial port interrupt, the semaphore has not been created*/
-        if (Recive_Uart1Handle != NULL)
+        if (pd->Slave.bSemaphore)
         {
             /*Notification task processing*/
-            osSemaphoreRelease(Recive_Uart1Handle);
+            osSemaphoreRelease((osSemaphoreId)pd->Slave.bSemaphore);
         }
 #else
         pd->Slave.Recive_FinishFlag = true;
 #endif
     }
 }
-
-#define MOD_WORD 1U
-#define MOD_DWORD 2U
-/*获取主机号*/
-#define Get_ModId(__obj) ((__obj)->Slave.pRbuf[0U])
-/*获取Modbus功能号*/
-#define Get_ModFunCode(__obj) ((__obj)->Slave.pRbuf[1U])
-/*获取Modbus协议数据*/
-#define Get_Data(__ptr, __s, __size) \
-    ((__size) < 2U ? (((__ptr)->Slave.pRbuf[__s] << 8U) | ((__ptr)->Slave.pRbuf[__s + 1U])) : (((__ptr)->Slave.pRbuf[__s] << 24U) | ((__ptr)->Slave.pRbuf[__s + 1U] << 16U) | ((__ptr)->Slave.pRbuf[__s + 2U] << 8U) | ((__ptr)->Slave.pRbuf[__s + 3U])))
 
 /**
  * @brief  Modbus接收数据解析
@@ -264,16 +257,18 @@ static void Modbus_Poll(pModbusHandle pd)
         if (pd->Slave.RxCount > 2U)
             crc16 = Get_Crc16(pd->Slave.pRbuf, pd->Slave.RxCount - 2U, 0xffff);
 #if defined(USING_DEBUG)
-        Debug("rxcount = %d,crc16 = 0x%X.\r\n", pd->Slave.RxCount, (uint16_t)((crc16 >> 8U) | (crc16 << 8U)));
+        shellPrint(Shell_Object, "rxcount = %d,crc16 = 0x%X.\r\n", pd->Slave.RxCount,
+                   (uint16_t)((crc16 >> 8U) | (crc16 << 8U)));
 #endif
         /*检查是否是目标从站*/
-        if ((Get_ModId(pd) == pd->Slave_Id) && (Get_Data(pd, pd->Slave.RxCount - 2U, MOD_WORD) == ((uint16_t)((crc16 >> 8U) | (crc16 << 8U)))))
+        if ((Get_ModId(pd) == pd->Slave_Id) && (Get_Data(pd, pd->Slave.RxCount - 2U, MOD_WORD) ==
+                                                ((uint16_t)((crc16 >> 8U) | (crc16 << 8U)))))
         {
 #if defined(USING_DEBUG)
-            Debug("Data received!\r\n");
+            shellPrint(Shell_Object, "Data received!\r\n");
             for (uint8_t i = 0; i < pd->Slave.RxCount; i++)
             {
-                Debug("prbuf[%d] = 0x%X\r\n", i, pd->Slave.pRbuf[i]);
+                shellPrint(Shell_Object, "prbuf[%d] = 0x%X\r\n", i, pd->Slave.pRbuf[i]);
             }
 #endif
             switch (Get_ModFunCode(pd))
@@ -305,7 +300,7 @@ static void Modbus_Poll(pModbusHandle pd)
             {
                 pd->Mod_WriteHoldRegister(pd);
             }
-			break;
+            break;
 #endif
             case ReportSeverId:
             {
@@ -390,7 +385,7 @@ static bool Modbus_Operatex(pModbusHandle pd, uint16_t addr, uint8_t *pdata, uin
 #if defined(USING_DEBUG)
     // if (addr < 1U)
     // {
-    //     Debug("Error: Register address must be > = 1.\r\n");
+    //     shellPrint(Shell_Object,"Error: Register address must be > = 1.\r\n");
     // }
 #endif
     if ((addr < max) && (len < max))
@@ -408,7 +403,7 @@ static bool Modbus_Operatex(pModbusHandle pd, uint16_t addr, uint8_t *pdata, uin
         }
 #endif
 #if defined(USING_DEBUG)
-        // Debug("pdest[%p] = 0x%X, psou[%p]= 0x%X, len= %d.\r\n", pDest, *pDest, pSou, *pSou, len);
+        // shellPrint(Shell_Object,"pdest[%p] = 0x%X, psou[%p]= 0x%X, len= %d.\r\n", pDest, *pDest, pSou, *pSou, len);
 #endif
         if (memcpy(pDest, pSou, len))
             ret = true;
@@ -472,7 +467,7 @@ static void Modus_ReadXCoil(pModbusHandle pd)
     pd->Mod_Operatex(pd, Get_Data(pd, 2U, MOD_WORD), prbits, len);
 #if defined(USING_DEBUG)
     // for (uint8_t i = 0; i < len; i++)
-    // Debug("prbits[%d] = 0x%X, len= %d.\r\n", i, prbits[i], len);
+    // shellPrint(Shell_Object,"prbits[%d] = 0x%X, len= %d.\r\n", i, prbits[i], len);
 #endif
     for (uint8_t i = 0; i < bytes; i++)
     {
@@ -485,12 +480,12 @@ static void Modus_ReadXCoil(pModbusHandle pd)
                 pd->Master.pTbuf[pd->Master.TxCount] &= ~(bit << j);
         }
 #if defined(USING_DEBUG)
-        Debug("pTbuf[%d] = 0x%X.\r\n", i, pd->Master.pTbuf[pd->Master.TxCount]);
+        shellPrint(Shell_Object, "pTbuf[%d] = 0x%X.\r\n", i, pd->Master.pTbuf[pd->Master.TxCount]);
 #endif
         pd->Master.TxCount++;
     }
 #if defined(USING_DEBUG)
-    Debug("pd->Master.TxCount = %d.\r\n", pd->Master.TxCount);
+    shellPrint(Shell_Object, "pd->Master.TxCount = %d.\r\n", pd->Master.TxCount);
 #endif
     pd->Mod_Transmit(pd, UsedCrc);
 __exit:
@@ -535,7 +530,7 @@ static void Modus_WriteCoil(pModbusHandle pd)
         crc = UsedCrc;
     }
 #if defined(USING_DEBUG)
-    Debug("pdata = 0x%X, len= %d.\r\n", *pdata, len);
+    shellPrint(Shell_Object, "pdata = 0x%X, len= %d.\r\n", *pdata, len);
 #endif
     if (pdata)
         pd->Mod_Operatex(pd, Get_Data(pd, 2U, MOD_WORD), pdata, len);

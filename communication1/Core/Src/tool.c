@@ -1,14 +1,5 @@
 #include "tool.h"
-
-/*138芯片引脚配置表*/
-// Gpiox_info info_pin[] = {
-//     {.pGPIOx = A_GPIO_Port, .Gpio_Pin = A_Pin, .PinState = GPIO_PIN_RESET},
-//     {.pGPIOx = B_GPIO_Port, .Gpio_Pin = B_Pin, .PinState = GPIO_PIN_RESET},
-// };
-// Gpio_InfoTypeDef gpio_74HC138 = {
-//     .pGpio = info_pin,
-//     .PinNumbers = sizeof(info_pin) / sizeof(Gpiox_info),
-// };
+#include "shell_port.h"
 
 /**
  * @brief  写74HC138
@@ -103,29 +94,20 @@ uint8_t Read_74HC165(Read_InfoTypeDef *pr)
  */
 uint8_t Get_CardId(void)
 {
-    // Read_InfoTypeDef read_74HC165 = {
-    //     .p74HC138 = &gpio_74HC138,
-    //     .DO = {SO_GPIO_Port, SO_Pin, GPIO_PIN_RESET},
-    //     // .IRQ = DisEnable,
-    // };
-
     GPIO_TypeDef *pGPIOx = CODE0_GPIO_Port;
-    // uint16_t Gpio_Pin = CODE0_Pin;
     uint8_t data = 0x00; // 0xE0;
     /*PB8、PB9*/
     data |= (uint16_t)(((uint16_t)pGPIOx->IDR & 0x0300) >> 8U);
-    pGPIOx = CODE1_GPIO_Port;
-    // Gpio_Pin = CODE1_Pin;
     /*PC13、PC14*/
-    data |= (uint16_t)(((uint16_t)pGPIOx->IDR & 0x3000) >> 10U);
-    pGPIOx = TYPE0_GPIO_Port;
+    pGPIOx = CODE2_GPIO_Port;
+    data |= (uint16_t)(((uint16_t)pGPIOx->IDR & 0x6000) >> 11U);
     /*PB0、PB1、PB2*/
+    pGPIOx = TYPE0_GPIO_Port;
     data |= (uint16_t)(((uint16_t)pGPIOx->IDR & 0x0007) << 4U);
-    pGPIOx = TYPE3_GPIO_Port;
     /*PB12*/
-    data |= (uint16_t)(((uint16_t)pGPIOx->IDR & 0x0800) >> 8U);
+    data |= (uint16_t)(((uint16_t)pGPIOx->IDR & 0x1000) >> 5U);
 #if defined(USING_DEBUG)
-    Debug("coding = %d.\r\n", data);
+    shellPrint(Shell_Object, "coding = 0x%X.\r\n", data);
 #endif
     return data;
 }
@@ -137,13 +119,6 @@ uint8_t Get_CardId(void)
  */
 void IRQ_Handle(IRQ_Type irq)
 {
-    // Gpio_InfoTypeDef *p138 = &gpio_74HC138;
-
-    // p138->pGpio[0].PinState = (irq == DisEnable) ? GPIO_PIN_SET : GPIO_PIN_RESET;
-    // p138->pGpio[1].PinState = GPIO_PIN_SET;
-
-    // Write_74HC138(p138);
-
     GPIO_PinState PinState = (irq == DisEnable) ? GPIO_PIN_SET : GPIO_PIN_RESET;
     HAL_GPIO_WritePin(M_IRQ_GPIO_Port, M_IRQ_Pin, PinState);
 }
