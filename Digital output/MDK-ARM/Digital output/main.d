@@ -26,6 +26,7 @@ digital output\main.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_flash.h
 digital output\main.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_flash_ex.h
 digital output\main.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_i2c.h
 digital output\main.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_i2c_ex.h
+digital output\main.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_iwdg.h
 digital output\main.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_pwr.h
 digital output\main.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_pwr_ex.h
 digital output\main.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_tim.h
@@ -39,6 +40,7 @@ digital output\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
 digital output\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdarg.h
 digital output\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
 digital output\main.o: ../Core/Inc/dma.h
+digital output\main.o: ../Core/Inc/iwdg.h
 digital output\main.o: ../Core/Inc/tim.h
 digital output\main.o: ../Core/Inc/usart.h
 digital output\main.o: ../Core/Inc/gpio.h

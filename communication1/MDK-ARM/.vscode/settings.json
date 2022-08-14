@@ -10,6 +10,7 @@
         "at.h": "c",
         "l101.h": "c",
         "stm32f0xx_it.h": "c",
-        "lora.h": "c"
+        "lora.h": "c",
+        "io_uart.h": "c"
     }
 }

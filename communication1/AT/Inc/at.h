@@ -27,7 +27,7 @@
 #define MAX_AT_CMD_LEN 128
 
 /* 单行urc接收超时时间*/
-#define MAX_URC_RECV_TIMEOUT 300
+#define MAX_URC_RECV_TIMEOUT 500
 
 /* 指定的URC 结束标记列表 */
 #define SPEC_URC_END_MARKS ":,\r\n"

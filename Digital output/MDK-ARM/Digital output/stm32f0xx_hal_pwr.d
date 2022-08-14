@@ -25,6 +25,7 @@ digital output\stm32f0xx_hal_pwr.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0x
 digital output\stm32f0xx_hal_pwr.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_flash_ex.h
 digital output\stm32f0xx_hal_pwr.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_i2c.h
 digital output\stm32f0xx_hal_pwr.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_i2c_ex.h
+digital output\stm32f0xx_hal_pwr.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_iwdg.h
 digital output\stm32f0xx_hal_pwr.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_pwr.h
 digital output\stm32f0xx_hal_pwr.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_pwr_ex.h
 digital output\stm32f0xx_hal_pwr.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_tim.h

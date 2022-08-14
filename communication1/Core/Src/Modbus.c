@@ -54,6 +54,20 @@ void Modbus_Handle(void)
  */
 static void Modbus_CallBack(pModbusHandle pd, Function_Code code)
 {
+    //    TYPEDEF_STRUCT *pflag = (TYPEDEF_STRUCT *)pd->Slave.pHandle;
+    //    if (pflag)
+    //    {
+    //        switch (code)
+    //        {
+    //        case ReportSeverId:
+    //        {
+    //            *pflag = true;
+    //        }
+    //        break;
+    //        default:
+    //            break;
+    //        }
+    //    }
     TYPEDEF_STRUCT *pflag = (TYPEDEF_STRUCT *)pd->Slave.pHandle;
     static bool check_flag = false;
     if (pd->Slave.pHandle)
@@ -257,7 +271,7 @@ static void Modbus_Poll(pModbusHandle pd)
         if (pd->Slave.RxCount > 2U)
             crc16 = Get_Crc16(pd->Slave.pRbuf, pd->Slave.RxCount - 2U, 0xffff);
 #if defined(USING_DEBUG)
-        shellPrint(Shell_Object, "rxcount = %d,crc16 = 0x%X.\r\n", pd->Slave.RxCount,
+        shellPrint(Shell_Object, "md_rxcount = %d,crc16 = 0x%X.\r\n", pd->Slave.RxCount,
                    (uint16_t)((crc16 >> 8U) | (crc16 << 8U)));
 #endif
         /*检查是否是目标从站*/
@@ -265,11 +279,12 @@ static void Modbus_Poll(pModbusHandle pd)
                                                 ((uint16_t)((crc16 >> 8U) | (crc16 << 8U)))))
         {
 #if defined(USING_DEBUG)
-            shellPrint(Shell_Object, "Data received!\r\n");
+            shellPrint(Shell_Object, "\r\nModbus_Buf[%d]:", pd->Slave.RxCount);
             for (uint8_t i = 0; i < pd->Slave.RxCount; i++)
             {
-                shellPrint(Shell_Object, "prbuf[%d] = 0x%X\r\n", i, pd->Slave.pRbuf[i]);
+                shellPrint(Shell_Object, "%02X ", pd->Slave.pRbuf[i]);
             }
+            shellPrint(Shell_Object, "\r\n\r\n");
 #endif
             switch (Get_ModFunCode(pd))
             {
@@ -306,11 +321,6 @@ static void Modbus_Poll(pModbusHandle pd)
             {
                 pd->Mod_ReportSeverId(pd);
                 pd->Mod_CallBack(pd, ReportSeverId);
-                /**/
-                // if (pd->Slave.pHandle)
-                // {
-                //     *(TYPEDEF_STRUCT *)pd->Slave.pHandle = true;
-                // }
             }
             break;
             default:
@@ -324,29 +334,6 @@ static void Modbus_Poll(pModbusHandle pd)
 #if !defined(USING_FREERTOS)
     }
 #endif
-    /*检查帧头是否符合要求*/
-    //     if ((pd->Slave.pRbuf[0] == 0x5A) && (pd->Slave.pRbuf[1] == 0xA5))
-    //     {
-    //         uint16_t addr = Get_Data(pd, 4U, MOD_DWORD);
-    // #if defined(USING_DEBUG)
-    //         // shellPrint(Shell_Object, "addr = 0x%x\r\n", addr);
-    // #endif
-    //         for (uint8_t i = 0; i < pd->Slave.Events_Size; i++)
-    //         {
-    //             if (pd->Slave.pMap[i].addr == addr)
-    //             {
-    //                 if (pd->Slave.pMap[i].event)
-    //                     pd->Slave.pMap[i].event(pd, &i);
-    //                 break;
-    //             }
-    //         }
-    //     }
-    // #if defined(USING_DEBUG)
-    //     for (uint16_t i = 0; i < pd->Slave.RxCount; i++)
-    //     // shellPrint(Shell_Object, "pRbuf[%d] = 0x%x\r\n", i, pd->Slave.pRbuf[i]);
-    // #endif
-    // memset(pd->Slave.pRbuf, 0x00, pd->Slave.RxCount);
-    // pd->Slave.RxCount = 0U;
 }
 
 /*获取寄存器类型*/
@@ -370,32 +357,23 @@ static void Modbus_Poll(pModbusHandle pd)
 /**
  * @brief  Modbus协议读取/写入寄存器
  * @param  pd 需要初始化对象指针
- * @param  regaddr 寄存器地址[寄存器起始地址从1开始]
+ * @param  regaddr 寄存器地址[寄存器起始地址从0开始]
  * @param  pdat 数据指针
  * @param  len  读取数据长度
  * @retval None
  */
 static bool Modbus_Operatex(pModbusHandle pd, uint16_t addr, uint8_t *pdata, uint8_t len)
 {
-    // uint16_t offset = pd->Slave.Reg_Type > Coil ? (pd->Slave.Reg_Type + 10000U) : 1U;
     uint8_t max = pd->Slave.Reg_Type < InputRegister ? REG_POOL_SIZE : REG_POOL_SIZE * 2U;
     uint8_t *pDest, *pSou;
-    // typeof(Get_RegType(pd, pd->Slave.Reg_Type)) *paddr;
     bool ret = false;
-#if defined(USING_DEBUG)
-    // if (addr < 1U)
-    // {
-    //     shellPrint(Shell_Object,"Error: Register address must be > = 1.\r\n");
-    // }
-#endif
-    if ((addr < max) && (len < max))
+
+    if ((addr < max) && (len <= max))
     {
 #if defined(USING_COIL) || defined(USING_INPUT_COIL) || defined(USING_INPUT_REGISTER) || defined(USING_HOLD_REGISTER)
         if (pd->Slave.Operate == Read)
         {
             pDest = pdata, pSou = Get_RegAddr(pd, pd->Slave.Reg_Type, addr);
-            // pd->Slave.pPools->Coils[0] = 0x000;
-            // pDest = (uint8_t *)Get_RegType(pd, pd->Slave.Reg_Type);
         }
         else
         {

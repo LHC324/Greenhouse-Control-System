@@ -53,7 +53,7 @@
 osThreadId shellHandle;
 osThreadId CpuHandle;
 osThreadId LoraHandle;
-osThreadId IRQHandle;
+osThreadId IWDGHandle;
 osMutexId shellMutexHandle;
 osSemaphoreId Cpu_ReciveHandle;
 osSemaphoreId Lora_ReciveHandle;
@@ -66,7 +66,7 @@ osSemaphoreId Lora_ReciveHandle;
 void Shell_Task(void const *argument);
 void Cpu_Task(void const *argument);
 void Lora_Task(void const *argument);
-void IRQ_Task(void const *argument);
+void IWDG_Task(void const *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -101,6 +101,11 @@ __weak void vApplicationMallocFailedHook(void)
   to query the size of free heap space that remains (although it does not
   provide information on how the remaining heap might be fragmented). */
   shellPrint(Shell_Object, "@Error:memory allocation failed!\r\n");
+  shellPrint(Shell_Object, "\r\n\r\nOS remaining heap = %dByte, Mini heap = %dByte\r\n",
+             xPortGetFreeHeapSize(), xPortGetMinimumEverFreeHeapSize());
+  /*Solve the problem of scheduling stuck after running out of memory: reset MCU with Watchdog*/
+  for (;;)
+    ;
 }
 
 static void TIRQ_Handle(void)
@@ -189,7 +194,7 @@ void MX_FREERTOS_Init(void)
 
   /* Create the thread(s) */
   /* definition and creation of shell */
-  osThreadDef(shell, Shell_Task, osPriorityBelowNormal, 0, 128);
+  osThreadDef(shell, Shell_Task, osPriorityLow, 0, 192);
   shellHandle = osThreadCreate(osThread(shell), (void *)Shell_Object);
 
   /* definition and creation of Cpu */
@@ -200,9 +205,9 @@ void MX_FREERTOS_Init(void)
   osThreadDef(Lora, Lora_Task, osPriorityHigh, 0, 256);
   LoraHandle = osThreadCreate(osThread(Lora), (void *)Lora_Object);
 
-  /* definition and creation of IRQ */
-  osThreadDef(IRQ, IRQ_Task, osPriorityLow, 0, 128);
-  IRQHandle = osThreadCreate(osThread(IRQ), NULL);
+  /* definition and creation of IWDG */
+  osThreadDef(IWDG, IWDG_Task, osPriorityRealtime, 0, 64);
+  IWDGHandle = osThreadCreate(osThread(IWDG), (void *)Shell_Object);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -219,15 +224,12 @@ void MX_FREERTOS_Init(void)
 void Shell_Task(void const *argument)
 {
   /* USER CODE BEGIN Shell_Task */
-  //  Shell *shell = (Shell *)argument;
+  // Shell *shell = (Shell *)argument;
+  // char data = '\0';
   /* Infinite loop */
   for (;;)
   {
-#if defined(USING_DEBUG)
-    // shellTask((void *)argument);
-#endif
-    /*External interruption*/
-    osDelay(10);
+    shellTask((void *)argument);
   }
   /* USER CODE END Shell_Task */
 }
@@ -247,7 +249,7 @@ void Cpu_Task(void const *argument)
   for (;;)
   {
     /*https://www.cnblogs.com/w-smile/p/11333950.html*/
-    if ((osOK == osSemaphoreWait(Cpu_ReciveHandle, osWaitForever)) && mdHandle)
+    if ((osOK == osSemaphoreWait(mdHandle->Slave.bSemaphore, osWaitForever)) && mdHandle)
     {
       mdHandle->Mod_Poll(mdHandle);
 #if defined(USING_DEBUG)
@@ -269,40 +271,25 @@ void Lora_Task(void const *argument)
 {
   /* USER CODE BEGIN Lora_Task */
   pLoraHandle pHandle = (pLoraHandle)argument;
+  extern bool g_At_mutex;
   /* Infinite loop */
   for (;;)
   {
     /*https://www.cnblogs.com/w-smile/p/11333950.html*/
-    if ((osOK == osSemaphoreWait(pHandle->Slave.bSemaphore, osWaitForever)))
+    if ((osOK == osSemaphoreWait(pHandle->Slave.bSemaphore, LORA_SCHEDULE_TIMES)))
     {
-      pHandle->Lora_Recive_Poll(pHandle);
+      if (!g_At_mutex)
+        pHandle->Lora_Recive_Poll(pHandle);
 #if defined(USING_DEBUG)
       shellPrint(Shell_Object, "Lora received a packet of data.\r\n");
 #endif
     }
     else
     {
-      pHandle->Lora_Transmit_Poll(pHandle);
+      if (!g_At_mutex)
+        pHandle->Lora_Transmit_Poll(pHandle);
     }
-    // osDelay(100);
-  }
-  /* USER CODE END Lora_Task */
-}
-
-/* USER CODE BEGIN Header_IRQ_Task */
-/**
- * @brief Function implementing the IRQ thread.
- * @param argument: Not used
- * @retval None
- */
-/* USER CODE END Header_IRQ_Task */
-void IRQ_Task(void const *argument)
-{
-  /* USER CODE BEGIN IRQ_Task */
-  /* Infinite loop */
-  for (;;)
-  {
-    TIRQ_Handle();
+// osDelay(1000);
 #if defined(USING_DEBUG)
 #if ((configUSE_TRACE_FACILITY == 1) && (configUSE_STATS_FORMATTING_FUNCTIONS > 0) && (configSUPPORT_DYNAMIC_ALLOCATION == 1))
     TaskStatus_t *pTable = CUSTOM_MALLOC(uxTaskGetNumberOfTasks() * sizeof(TaskStatus_t));
@@ -316,9 +303,32 @@ void IRQ_Task(void const *argument)
     shellPrint(Shell_Object, "\r\nremaining heap = %d.\r\n", xPortGetFreeHeapSize());
 #endif
 #endif
-    osDelay(100);
+    // shellPrint(Shell_Object, "\r\n\r\nOS remaining heap = %dByte, Mini heap = %dByte\r\n",
+    //            xPortGetFreeHeapSize(), xPortGetMinimumEverFreeHeapSize());
   }
-  /* USER CODE END IRQ_Task */
+  /* USER CODE END Lora_Task */
+}
+
+/* USER CODE BEGIN Header_IWDG_Task */
+/**
+ * @brief Function implementing the IWDG thread.
+ * @param argument: Not used
+ * @retval None
+ */
+/* USER CODE END Header_IWDG_Task */
+void IWDG_Task(void const *argument)
+{
+  /* USER CODE BEGIN IWDG_Task */
+  /* Infinite loop */
+  for (;;)
+  {
+    extern IWDG_HandleTypeDef hiwdg;
+    HAL_IWDG_Refresh(&hiwdg);
+    /*External interruption*/
+    TIRQ_Handle();
+    osDelay(120);
+  }
+  /* USER CODE END IWDG_Task */
 }
 
 /* Private application code --------------------------------------------------*/

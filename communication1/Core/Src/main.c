@@ -20,12 +20,14 @@
 #include "main.h"
 #include "cmsis_os.h"
 #include "dma.h"
+#include "iwdg.h"
+#include "tim.h"
 #include "usart.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "io_uart.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -91,8 +93,12 @@ int main(void)
   // MX_USART1_UART_Init();
   MX_DMA_Init();
   MX_USART2_UART_Init();
+  MX_TIM6_Init();
+  MX_TIM14_Init();
+  MX_IWDG_Init();
   /* USER CODE BEGIN 2 */
   MX_USART1_UART_Init();
+  MX_Suart_Init();
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in freertos.c) */
@@ -126,8 +132,9 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
    * in the RCC_OscInitTypeDef structure.
    */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSI | RCC_OSCILLATORTYPE_HSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+  RCC_OscInitStruct.LSIState = RCC_LSI_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL6;
@@ -162,7 +169,7 @@ void SystemClock_Config(void)
 
 /**
  * @brief  Period elapsed callback in non blocking mode
- * @note   This function is called  when TIM17 interrupt took place, inside
+ * @note   This function is called  when TIM1 interrupt took place, inside
  * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment
  * a global variable "uwTick" used as application time base.
  * @param  htim : TIM handle
@@ -171,14 +178,161 @@ void SystemClock_Config(void)
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   /* USER CODE BEGIN Callback 0 */
-
+  IoUart_HandleTypeDef *huart = &S_Uart1;
+  static uint8_t Samp_Bits = 0;
   /* USER CODE END Callback 0 */
-  if (htim->Instance == TIM17)
+  if (htim->Instance == TIM1)
   {
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
+  else if (htim->Instance == TIM6)
+  { /*Data transmission, transmission priority, no transmission before entering the receiving state*/
+    if (huart->Tx.En)
+    { /*Serial port sending bit status judgment*/
+      switch (huart->Tx.Status)
+      {
+      case COM_START_BIT:
+      {
+        HAL_GPIO_WritePin(IO_UART_TX_GPIO_Port, IO_UART_TX_Pin, GPIO_PIN_RESET);
+        huart->Tx.Status = COM_DATA_BIT;
+        huart->Tx.Bits = 0U;
+      }
+      break;
+      case COM_DATA_BIT:
+      {
+        HAL_GPIO_WritePin(IO_UART_TX_GPIO_Port, IO_UART_TX_Pin, (GPIO_PinState)((*(huart->Tx.pBuf) >> huart->Tx.Bits) & 0x01));
 
+        if (++huart->Tx.Bits >= 8U)
+        {
+          huart->Tx.Status = huart->Check_Type ? COM_CHECK_BIT : COM_STOP_BIT;
+        }
+      }
+      break;
+      case COM_CHECK_BIT:
+      {
+      }
+      break;
+      case COM_STOP_BIT:
+      {
+        HAL_GPIO_WritePin(IO_UART_TX_GPIO_Port, IO_UART_TX_Pin, GPIO_PIN_SET);
+        huart->Tx.Bits = 0U;
+        if (--huart->Tx.Len)
+        {
+          huart->Tx.Status = COM_START_BIT;
+          huart->Tx.pBuf++;
+        }
+        else
+        {
+          huart->Tx.Status = COM_NONE_BIT;
+          huart->Tx.En = false;
+          huart->Rx.En = true;
+          HAL_TIM_Base_Stop_IT(huart->Tx.Timer_Handle);
+          __HAL_TIM_SET_COUNTER(huart->Tx.Timer_Handle, 0U);
+          HAL_NVIC_EnableIRQ(huart->Rx.IRQn);
+          huart->Tx.Finsh_Flag = true;
+        }
+      }
+      break;
+      default:
+        break;
+      }
+    }
+  }
+  else if (htim->Instance == TIM14)
+  {
+    if (huart->Rx.En)
+    {
+      switch (huart->Rx.Status)
+      {
+      case COM_START_BIT:
+      {
+        Samp_Bits = (Samp_Bits << 1U) | (HAL_GPIO_ReadPin(IO_UART_RX_GPIO_Port, IO_UART_RX_Pin) & 0x01);
+
+        if (++huart->Rx.Filters >= MAX_SAMPING)
+        {
+          if (!Get_ValidBits(Samp_Bits))
+          {
+            huart->Rx.Status = COM_DATA_BIT;
+            __HAL_TIM_SET_AUTORELOAD(huart->Rx.Timer_Handle, huart->Rx.Sam_Times[huart->Rx.Filters]);
+          }
+          else
+          {
+            huart->Rx.Status = COM_STOP_BIT;
+          }
+          Samp_Bits = 0U;
+          huart->Rx.Filters = 0U;
+        }
+        else
+        {
+          __HAL_TIM_SET_AUTORELOAD(huart->Rx.Timer_Handle, huart->Rx.Sam_Times[huart->Rx.Filters]);
+        }
+      }
+      break;
+      case COM_DATA_BIT: /*Data bit*/
+      {
+        Samp_Bits = (Samp_Bits << 1U) | (HAL_GPIO_ReadPin(IO_UART_RX_GPIO_Port, IO_UART_RX_Pin) & 0x01);
+
+        if (++huart->Rx.Filters >= MAX_SAMPING)
+        {
+          huart->Rx.Data |= (Get_ValidBits(Samp_Bits) & 0x01) << huart->Rx.Bits;
+          if (huart->Rx.Bits >= 7U)
+          {
+            huart->Rx.Bits = 0;
+            huart->Rx.Status = huart->Check_Type ? COM_CHECK_BIT : COM_STOP_BIT;
+          }
+          else
+          {
+            huart->Rx.Bits++;
+          }
+          __HAL_TIM_SET_AUTORELOAD(huart->Rx.Timer_Handle, huart->Rx.Sam_Times[huart->Rx.Filters]);
+          huart->Rx.Filters = 0U;
+          Samp_Bits = 0U;
+        }
+        else
+        {
+          __HAL_TIM_SET_AUTORELOAD(huart->Rx.Timer_Handle, huart->Rx.Sam_Times[huart->Rx.Filters]);
+        }
+      }
+      break;
+      case COM_CHECK_BIT: /*Check bit*/
+      {
+        huart->Rx.Status = COM_NONE_BIT;
+      }
+      break;
+      case COM_STOP_BIT: /*stop bit*/
+      {
+        Samp_Bits = (Samp_Bits << 1U) | (HAL_GPIO_ReadPin(IO_UART_RX_GPIO_Port, IO_UART_RX_Pin) & 0x01);
+
+        if (++huart->Rx.Filters >= MAX_SAMPING)
+        { /*Stop bit received correctly*/
+          if (Get_ValidBits(Samp_Bits))
+          {
+            huart->Rx.Len++;
+            huart->Rx.Status = COM_NONE_BIT;
+            // huart->Rx.En = true;
+            // huart->Tx.En = false; ///
+            HAL_TIM_Base_Stop_IT(huart->Rx.Timer_Handle);
+            __HAL_TIM_SET_COUNTER(huart->Rx.Timer_Handle, 0U);
+            // HAL_NVIC_EnableIRQ(huart->Rx.IRQn);
+            /*Two interrupts are generated when one data is received?*/
+            // huart->Rx.Finsh_Flag ^= true;
+            huart->Rx.Finsh_Flag = true;
+          }
+          huart->Rx.Filters = 0U;
+          Samp_Bits = 0U;
+        }
+        else
+        {
+          __HAL_TIM_SET_AUTORELOAD(huart->Rx.Timer_Handle, huart->Rx.Sam_Times[huart->Rx.Filters]);
+        }
+      }
+      break;
+      default:
+        break;
+      }
+    }
+  }
   /* USER CODE END Callback 1 */
 }
 

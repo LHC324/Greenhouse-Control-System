@@ -48,6 +48,11 @@
 .\master\lte.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
 .\master\lte.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdarg.h
 .\master\lte.o: ../Core/Inc/usart.h
+.\master\lte.o: ../FreeModBus/Inc/mdrtuslave.h
+.\master\lte.o: ../FreeModBus/Inc/mdtype.h
+.\master\lte.o: ../FreeModBus/Inc/mdconfig.h
+.\master\lte.o: ../FreeModBus/Inc/mdregpool.h
+.\master\lte.o: ../FreeModBus/Inc/mdrecbuffer.h
 .\master\lte.o: ../Letter_Shell/Inc/shell_port.h
 .\master\lte.o: ../Letter_Shell/Inc/shell.h
 .\master\lte.o: ../Letter_Shell/Inc/shell_cfg.h

@@ -13,7 +13,7 @@
 #define Slave_ADDRESS 0x02
 #define MOD_RX_BUF_SIZE 64U
 #define MOD_TX_BUF_SIZE 64U
-#define REG_POOL_SIZE 32U
+#define REG_POOL_SIZE 40U
 
 #define COIL_OFFSET (1)
 #define INPUT_COIL_OFFSET (10001)

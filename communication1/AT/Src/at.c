@@ -24,6 +24,7 @@
 #include "comdef.h"
 #include "main.h"
 #include "Modbus.h"
+#include "lora.h"
 #if defined(USING_RTTHREAD)
 #include "rtthread.h"
 #else
@@ -84,10 +85,7 @@ Style：ascii、hex（默认 ascii）。*/
 
 extern UART_HandleTypeDef huart1;
 
-extern osThreadId shellHandle;
-extern osThreadId mdbusHandle;
-extern osTimerId Timer1Handle;
-extern osSemaphoreId ReciveHandle;
+bool g_At_mutex = false;
 
 typedef enum
 {
@@ -143,7 +141,7 @@ typedef struct
 
 // static uint16_t g_ATWait_Times = AT_WAITTIMES;
 
-At_HandleTypeDef At_Table[] = {
+static At_HandleTypeDef const At_Table[] = {
     {.Name = CMD_MODE, .pSend = "+++", "a", NULL},
     {.Name = CMD_SURE, .pSend = "a", AT_CMD_OK, NULL},
     {.Name = EXIT_CMD, .pSend = "AT+ENTM", NULL, NULL},                                  /*退出命令模式，恢复原工作模式*/
@@ -216,7 +214,7 @@ static const char *atText[] = {
  * @param[in]   resp    - 期待待接收串(如"OK",">")
  * @param[in]   timeout - 等待超时时间
  */
-At_InfoList Wait_Recv(Shell *const shell, const pModbusHandle pb, const char *resp, uint16_t timeout)
+At_InfoList Wait_Recv(Shell *const shell, const pLoraHandle pb, const char *resp, uint16_t timeout)
 {
     At_InfoList ret = CONF_TOMEOUT;
     //    SET_HAL_TICK(0U);
@@ -235,11 +233,12 @@ At_InfoList Wait_Recv(Shell *const shell, const pModbusHandle pb, const char *re
     // portENABLE_INTERRUPTS();
     while (!pb->Slave.RxCount)
     {
-
+        // __enable_irq();
         // if (HAL_GetTick() - timer > timeout)
+        // __HAL_UART_ENABLE_IT(pb->huart, UART_IT_IDLE);
         if (GET_TIMEOUT_FLAG(timer, HAL_GetTick(), timeout, HAL_MAX_DELAY))
             break;
-        osDelay(1);
+        // osDelay(1);
     }
     // portDISABLE_INTERRUPTS();
 #if defined(USING_DEBUG)
@@ -247,16 +246,16 @@ At_InfoList Wait_Recv(Shell *const shell, const pModbusHandle pb, const char *re
     // shellPrint(shell, "pb:%p\r\n", pb);
     // shellPrint(shell, "tick = :%d\r\n", HAL_GetTick());
 #endif
-    if (pb->count)
+    if (pb->Slave.RxCount)
     {
-        pb->buf[pb->count] = '\0';
-        ret = strstr((const char *)&(pb->buf), resp) ? CONF_SUCCESS : (strstr((const char *)&(pb->buf), AT_CMD_ERROR) ? CONF_ERROR : CONF_TOMEOUT);
-#if defined(USING_DEBUG)
+        pb->Slave.pRbuf[pb->Slave.RxCount] = '\0';
+        ret = strstr((const char *)(pb->Slave.pRbuf), resp) ? CONF_SUCCESS : (strstr((const char *)&(pb->Slave.pRbuf), AT_CMD_ERROR) ? CONF_ERROR : CONF_TOMEOUT);
+        // #if defined(USING_DEBUG)
         // shellPrint(shell, ">[MCU<-L101]:%s, timer = %d\r\n", pb->buf, timer);
-        shellPrint(shell, ">[MCU<-L101]:%s\r\n", pb->buf);
-#endif
+        shellPrint(shell, ">[MCU<-L101]:%s\r\n", pb->Slave.pRbuf);
+        // #endif
     }
-    mdClearReceiveBuffer(pb);
+    Clear_LoraBuffer(pb, Slave, R);
 
     return ret;
 }
@@ -267,7 +266,7 @@ At_InfoList Wait_Recv(Shell *const shell, const pModbusHandle pb, const char *re
  * @param  data  接收的数据
  * @retval None
  */
-At_HandleTypeDef *Get_AtCmd(At_HandleTypeDef *pAt, At_InfoList list, uint16_t size)
+At_HandleTypeDef const *Get_AtCmd(At_HandleTypeDef const *pAt, At_InfoList list, uint16_t size)
 {
     for (uint16_t i = 0; i < size; i++)
     {
@@ -300,8 +299,9 @@ void Free_Mode(Shell *shell, char *pData)
     char pbuf[64U] = {0};
 #endif
     // ModbusRTUSlaveHandler pH = Master_Object;
-    pModbusHandle pH = &Modbus_Object;
-    At_HandleTypeDef *pAt = At_Table, *pS = NULL;
+    // pModbusHandle pH = &Modbus_Object;
+    pLoraHandle pH = Lora_Object;
+    At_HandleTypeDef const *pAt = At_Table, *pS = NULL;
     At_InfoList result = CONF_SUCCESS;
     char *pRe = NULL, *pDest = NULL;
     uint16_t len = 0;
@@ -319,9 +319,9 @@ void Free_Mode(Shell *shell, char *pData)
             {
                 pbuf[len] = '\0';
                 len = 0U;
-#if defined(USING_DEBUG)
+                // #if defined(USING_DEBUG)
                 shellPrint(shell, "\r\nInput:%s\r\n", pbuf);
-#endif
+                // #endif
                 /*进入命令模式，并关闭回显*/
                 for (At_InfoList at_cmd = CMD_MODE; at_cmd < POWER_MODE; at_cmd++)
                 { /*执行完毕后退出指令模式*/
@@ -340,13 +340,13 @@ void Free_Mode(Shell *shell, char *pData)
                                 strcat(pStr, AT_CMD_END_MARK_CRLF);
                             }
                             pDest = (at_cmd != SET_UART) ? pStr : strcat(pbuf, AT_CMD_END_MARK_CRLF);
-#if defined(USING_DEBUG)
+                            // #if defined(USING_DEBUG)
                             // SHELL_LOCK(shell);
                             shellPrint(shell, "\r\n%s", atText[at_cmd]);
                             shellPrint(shell, ">[MCU->L101]:%s\r\n", pDest);
                             // SHELL_UNLOCK(shell);
-#endif
-                            pH->mdRTUSendString(pH, (uint8_t *)pDest, strlen(pDest));
+                            // #endif
+                            pH->Loara_Send(pH, (uint8_t *)pDest, strlen(pDest));
                         }
                         CUSTOM_FREE(pStr);
 #else
@@ -358,7 +358,7 @@ void Free_Mode(Shell *shell, char *pData)
                         }
 #endif
                     }
-                    result = Wait_Recv(shell, pH->receiveBuffer, pRe, MAX_URC_RECV_TIMEOUT);
+                    result = Wait_Recv(shell, pH, pRe, MAX_URC_RECV_TIMEOUT);
                     shellWriteString(shell, atText[result]);
                     if ((result != CONF_SUCCESS) || (at_cmd == RESTART))
                     {
@@ -406,8 +406,9 @@ __exit:
  */
 static void Config_Mode(Shell *shell, char *pData)
 {
-    pModbusHandle pH = &Modbus_Object;
-    At_HandleTypeDef *pAt = At_Table, *pS = NULL;
+    // pModbusHandle pH = &Modbus_Object;
+    pLoraHandle pH = Lora_Object;
+    At_HandleTypeDef const *pAt = At_Table, *pS = NULL;
     char *pRe = NULL;
     At_InfoList result = CONF_SUCCESS;
     bool at_mutex = false;
@@ -424,12 +425,12 @@ static void Config_Mode(Shell *shell, char *pData)
             for (At_InfoList at_cmd = CMD_MODE; (at_cmd < SIG_STREN) && (!at_mutex); at_cmd++)
             {
                 pS = Get_AtCmd(pAt, at_cmd, AT_TABLE_SIZE);
-#if defined(USING_DEBUG)
+                // #if defined(USING_DEBUG)
                 // shellPrint(shell, "at_cmd = %d, %s", at_cmd, atText[at_cmd]);
                 // shellPrint(shell, "huart->RxState = %d\r\n", huart1.RxState);
                 shellPrint(shell, "\r\n%s", atText[at_cmd]);
                 shellPrint(shell, ">[MCU->L101]:%s\r\n", pS->pSend);
-#endif
+                // #endif
                 if (pS->pSend)
                 {
 #if defined(USING_FREERTOS)
@@ -442,8 +443,10 @@ static void Config_Mode(Shell *shell, char *pData)
                             strcat(pStr, AT_CMD_END_MARK_CRLF);
                         }
                         // pH->mdRTUSendString(pH, (uint8_t *)pStr, strlen(pStr));
-                        memcpy(pH->Master.pTbuf, (uint8_t *)pStr, strlen(pStr));
-                        pH->Mod_Transmit(pH, NotUsedCrc);
+                        pH->Master.TxCount = strlen(pStr);
+                        memcpy(pH->Master.pTbuf, (uint8_t *)pStr, pH->Master.TxCount);
+                        // pH->Mod_Transmit(pH, NotUsedCrc);
+                        pH->Loara_Send(pH, pH->Master.pTbuf, pH->Master.TxCount);
                     }
                     CUSTOM_FREE(pStr);
 #else
@@ -462,7 +465,7 @@ static void Config_Mode(Shell *shell, char *pData)
                     break;
                 }
                 pRe = ((at_cmd == CMD_MODE) || (at_cmd == SET_ECHO)) ? pS->pRecv : AT_CMD_OK;
-                result = Wait_Recv(shell, pH->receiveBuffer, pRe, MAX_URC_RECV_TIMEOUT);
+                result = Wait_Recv(shell, pH, pRe, MAX_URC_RECV_TIMEOUT);
                 // result = Wait_Recv(shell, pH->receiveBuffer, pS->pRecv, MAX_URC_RECV_TIMEOUT);
                 shellWriteString(shell, atText[result]);
                 if ((result != CONF_SUCCESS) || (at_cmd == RESTART))
@@ -474,6 +477,7 @@ static void Config_Mode(Shell *shell, char *pData)
             }
         }
     }
+    Clear_LoraBuffer(pH, Slave, R);
 }
 
 /**
@@ -484,6 +488,7 @@ static void Config_Mode(Shell *shell, char *pData)
 void At_Handle(uint8_t cmd)
 {
     Shell *sh = Shell_Object;
+    pLoraHandle pl = Lora_Object;
     char recive_data = '\0';
 
     if (cmd > FREE_MODE)
@@ -492,29 +497,49 @@ void At_Handle(uint8_t cmd)
         return;
     }
     //    __set_PRIMASK(1); /* 禁止全局中断*/
+    // extern osThreadId shellHandle;
+    extern osThreadId LoraHandle;
     /*挂起mdbusHandle任务*/
-    // osThreadSuspend(mdbusHandle);
-    osThreadSuspendAll();
+    // osThreadSuspend(shellHandle);
+    // osThreadSuspend(LoraHandle);
+    // osThreadSuspendAll();
+    // vTaskEndScheduler();
+    // __enable_irq();
     /*停止发送定时器*/
-    osTimerStop(Timer1Handle);
-    //    __set_PRIMASK(0); /*  使能全局中断 */
+    // osTimerStop(Timer1Handle);
+    // __set_PRIMASK(0); /*  使能全局中断 */
     // __HAL_UART_DISABLE_IT(&huart1, UART_IT_IDLE);
     // HAL_NVIC_DisableIRQ(USART1_IRQn);
     shellWriteString(sh, atText[cmd]);
-    cmd ? Free_Mode(sh, &recive_data) : Config_Mode(sh, &recive_data);
+    if (pl)
+    {
+        g_At_mutex = true;
+        /*使能接收引脚*/
+        HAL_GPIO_WritePin(pl->Cs.pGPIOx, pl->Cs.Gpio_Pin, GPIO_PIN_RESET);
+        cmd ? Free_Mode(sh, &recive_data) : Config_Mode(sh, &recive_data);
+        /*禁止接收引脚*/
+        HAL_GPIO_WritePin(pl->Cs.pGPIOx, pl->Cs.Gpio_Pin, GPIO_PIN_SET);
+        g_At_mutex = false;
+    }
     /*打开发送定时器*/
-    osTimerStart(Timer1Handle, MDTASK_SENDTIMES);
+    // osTimerStart(Timer1Handle, MDTASK_SENDTIMES);
     /*恢复mdbusHandle任务*/
-    // osThreadResume(mdbusHandle);
+    // osThreadResume(shellHandle);
+    // osThreadResume(LoraHandle);
 #if defined(USING_DEBUG)
     // shellPrint(sh, "portNVIC_INT_CTRL_REG = 0x%x\r\n", portNVIC_INT_CTRL_REG);
 #endif
     // __set_PRIMASK(1); /* 禁止全局中断*/
-    osThreadResumeAll();
+    // __disable_irq();
+    // osThreadResumeAll();
+    // vTaskStartScheduler();
+    // shellPrint(Shell_Object, "\r\n\r\nOS remaining heap = %dByte, Mini heap = %dByte\r\n",
+    //            xPortGetFreeHeapSize(), xPortGetMinimumEverFreeHeapSize());
+    // __enable_irq();
     // __HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);
     // HAL_NVIC_EnableIRQ(USART1_IRQn);
     // __set_PRIMASK(0); /*  使能全局中断 */
 }
-#if defined(USING_DEBUG)
+// #if defined(USING_DEBUG)
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC), at, At_Handle, config);
-#endif
+// #endif

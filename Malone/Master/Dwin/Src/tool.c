@@ -138,14 +138,6 @@ ListItem_t *Get_OneListItem(List_t *list, ListItem_t **p)
 }
 #endif
 
-// Range new_Range(int s, int e)
-// {
-//     Range r;
-//     r.start = s;
-//     r.end = e;
-//     return r;
-// }
-
 #if (USING_SWAP_ANY)
 /**
  * @brief	任意元素交换
@@ -291,7 +283,7 @@ __exit:
  */
 static bool Find_SameId(Slave_IRQTableTypeDef *irq, uint8_t target_id)
 {
-    for (IRQ_Code *p = irq->pIRQ; p < irq->pIRQ + irq->TableCount; p++)
+    for (IRQ_Code *p = irq->pIRQ; p < irq->pIRQ + irq->TableCount; ++p)
     {
         if (p->SlaveId == target_id)
         {
@@ -310,7 +302,8 @@ static bool Find_SameId(Slave_IRQTableTypeDef *irq, uint8_t target_id)
  */
 IRQ_Code *Find_TargetSlave_AdoptId(Slave_IRQTableTypeDef *irq, uint8_t target_id)
 {
-    for (IRQ_Code *p = irq->pIRQ; p < irq->pIRQ + irq->TableCount; p++)
+    IRQ_Code *p = irq->pIRQ;
+    for (; p < irq->pIRQ + irq->TableCount; ++p)
     {
         if (p->SlaveId == target_id)
         {
@@ -332,8 +325,7 @@ IRQ_Code *Find_TargetSlave_AdoptType(Slave_IRQTableTypeDef *irq, IRQ_Code *p_cur
     IRQ_Code *p_target = NULL;
     bool first_flag = false;
 
-    // for (IRQ_Code *p = irq->pIRQ; p < irq->pIRQ + irq->TableCount; p++)
-    for (IRQ_Code *p = irq->pIRQ; p < p_current; p++)
+    for (IRQ_Code *p = irq->pIRQ; p < p_current; ++p)
     {
         if (p->TypeCoding == p_current->TypeCoding)
         {
@@ -355,28 +347,45 @@ IRQ_Code *Find_TargetSlave_AdoptType(Slave_IRQTableTypeDef *irq, IRQ_Code *p_cur
     return p_target;
 }
 
+uint16_t Find_TargetSlave_Numbers(Slave_IRQTableTypeDef *irq, IRQ_Code *p_current)
+{
+    uint16_t num = 0;
+
+    for (IRQ_Code *p = irq->pIRQ; p < p_current; ++p)
+    {
+        if (p->TypeCoding == p_current->TypeCoding)
+        {
+            num++;
+        }
+    }
+    return num;
+}
+
 /**
  * @brief  通过板卡类型查找目标从机的slaveid存储到指定位置
  * @note   此处查找的目标对象不唯一;保障从机编号的有序
  * @param  irq 中断表句柄
  * @param  type 目标从机id
  * @param  psave 存储位置
+ * @param  nums  需要查找的目标板卡数量
  * @retval false/true
  */
-bool Save_TargetSlave_Id(Slave_IRQTableTypeDef *irq, Card_Tyte type, R_TargetTypeDef *psave)
+bool Save_TargetSlave_Id(Slave_IRQTableTypeDef *irq, Card_Tyte type, R_TargetTypeDef *psave, uint8_t nums)
 {
     bool ret = false;
     uint8_t *q = psave->p_id;
     /*Find target board*/
     for (IRQ_Code *p = irq->pIRQ; p < irq->pIRQ + irq->TableCount; p++)
     {
-        if ((p->TypeCoding == type) && psave && q)
+        if ((p->TypeCoding == type) && psave && q < psave->p_id + psave->id_size)
         {
-            if (psave->count++ < TARGET_BOARD_NUM)
+            if (nums && (psave->count++ < nums))
             {
                 *q++ = p->SlaveId;
                 ret = true;
             }
+            else
+                break;
         }
     }
     /*按照从机id升序排列*/
@@ -394,8 +403,14 @@ bool Save_TargetSlave_Id(Slave_IRQTableTypeDef *irq, Card_Tyte type, R_TargetTyp
 }
 
 /*获取板卡中断偏移号*/
-#define Get_Card_IRQOffset(__type) \
-    ((__type) == Card_AnalogInput ? 0x00 : ((__type) == Card_DigitalInput ? 0x10 : ((__type) == Card_DigitalOutput ? 0x20 : ((__type) == Card_AnalogOutput ? 0x30 : 0x40))))
+#define Get_Card_IRQOffset(__type)                \
+    ((__type) == Card_AnalogInput                 \
+         ? 0x00                                   \
+         : ((__type) == Card_DigitalInput         \
+                ? 0x10                            \
+                : ((__type) == Card_DigitalOutput \
+                       ? 0x20                     \
+                       : ((__type) == Card_AnalogOutput ? 0x30 : 0x40))))
 /**
  * @brief  进行板卡中断编码
  * @param  irq 中断表句柄
@@ -403,14 +418,13 @@ bool Save_TargetSlave_Id(Slave_IRQTableTypeDef *irq, Card_Tyte type, R_TargetTyp
  */
 void IRQ_Coding(Slave_IRQTableTypeDef *irq, uint8_t code)
 {
-    IRQ_Code *p_current = &irq->pIRQ[irq->TableCount];
-    // IRQ_Code *p_current = NULL;
+    IRQ_Code *p_current = NULL, *p_target = NULL;
     uint8_t temp_slaveid = code & 0x0F;
     Card_Tyte temp_typecoding = (Card_Tyte)(code & 0xF0);
 
     if (irq->TableCount < CARD_NUM_MAX)
     {
-        // p_current = &irq->pIRQ[temp_slaveid];
+        p_current = &irq->pIRQ[irq->TableCount];
         if (Find_SameId(irq, temp_slaveid))
         {
 #if defined(USING_DEBUG)
@@ -425,30 +439,18 @@ void IRQ_Coding(Slave_IRQTableTypeDef *irq, uint8_t code)
 #endif
             return;
         }
-        shellPrint(Shell_Object, "p_current = 0x%p.\r\n", p_current);
+#if defined(USING_DEBUG)
+        // shellPrint(Shell_Object, "p_current = 0x%p.\r\n", p_current);
+#endif
         p_current->SlaveId = temp_slaveid;
         p_current->TypeCoding = temp_typecoding;
 
-        IRQ_Code *p_target = Find_TargetSlave_AdoptType(irq, p_current);
-        /*中断表中已经存在同类型板卡:ID不同，但是类型相同*/
-        if (p_target)
+        uint16_t card_nums = Find_TargetSlave_Numbers(irq, p_current);
+        if (card_nums)
         {
-            p_current->Priority = p_target->Priority + 1U;
+            p_current->Priority = Get_Card_IRQOffset(p_current->TypeCoding) + card_nums;
             /*当前板卡是同类型中第几张板卡*/
-            p_current->Number = p_target->Number + 1U;
-            /*保障从机号在前相同板卡，计数值在前*/
-            if (p_target->SlaveId > p_current->SlaveId)
-            {
-                // p->Number = p_current->Number;
-                SWAP(uint16_t, p_target->Number, p_current->Number);
-            }
-            // else
-            // { /*从机id有序时，再次检测编号是否对应*/
-            //     if (p_target->Number > p_current->Number)
-            //     {
-            //         SWAP(uint16_t, p_target->Number, p_current->Number);
-            //     }
-            // }
+            p_current->Number = card_nums;
         }
         /*首次加入*/
         else
@@ -456,45 +458,14 @@ void IRQ_Coding(Slave_IRQTableTypeDef *irq, uint8_t code)
             p_current->Number = 0;
             p_current->Priority = Get_Card_IRQOffset(p_current->TypeCoding);
 #if defined(USING_DEBUG)
-            shellPrint(Shell_Object, "TypeCoding 0x%02x first Join, Priority is 0x%02x.\r\n",
-                       p_current->TypeCoding, p_current->Priority);
+            shellPrint(Shell_Object, "@success:TypeCoding 0x%02x first Join.\r\n",
+                       p_current->TypeCoding);
 #endif
         }
-        /*有效板卡数加一*/
-        // irq->TableCount++;
-
-        /*有效板卡数加一*/
-        // irq->TableCount++;
-        //         for (IRQ_Code *p = irq->pIRQ; p < irq->pIRQ + irq->TableCount; p++)
-        //         {
-        //             /*中断表中已经存在同类型板卡:ID不同，但是类型相同*/
-        //             if (p->TypeCoding == p_current->TypeCoding) //&& (p->SlaveId != p_current->SlaveId)
-        //             {
-        //                 p_current->Priority = p->Priority + 1U;
-        //                 /*当前板卡是同类型中第几张板卡*/
-        //                 p_current->Number = p->Number + 1U;
-        //                 /*保障从机号在前相同板卡，计数值在前*/
-        //                 if (p->SlaveId > p_current->SlaveId)
-        //                 {
-        //                     // p->Number = p_current->Number;
-        //                     SWAP(uint16_t, p->Number, p_current->Number);
-        //                 }
-        //                 break;
-        //             }
-        //             /*首次加入*/
-        //             else
-        //             {
-        //                 p_current->Priority = Get_Card_IRQOffset(p_current->TypeCoding);
-        // #if defined(USING_DEBUG)
-        //                 shellPrint(Shell_Object, "TypeCoding 0x%02x first Join, Priority is 0x%02x.\r\n",
-        //                            p_current->TypeCoding, p_current->Priority);
-        //                 // break;
-        // #endif
-        //             }
-        //         }
-        /*去掉首次自己和自己类型重合情况*/
-        // p_current->SlaveId = temp_slaveid;
-        // p_current->TypeCoding = temp_typecoding;
+#if defined(USING_DEBUG)
+        shellPrint(Shell_Object, "@Note: The board is coded as 0x%02x, Priority is 0x%02x.\r\n",
+                   code, p_current->Priority);
+#endif
 #if (USING_FREERTOS_LIST)
         if (irq->LReady)
         {
@@ -504,12 +475,25 @@ void IRQ_Coding(Slave_IRQTableTypeDef *irq, uint8_t code)
 #endif
         if (irq->pIRQ && (irq->TableCount++ > 1))
         {
-            // Quick_Sort(irq->pIRQ, irq->TableCount);
             Quick_Sort_Id(irq->pIRQ, irq->TableCount);
         }
         /*标记当前板卡优先级设置完成*/
         // p_current->flag = false;
         // irq->TableCount++;
+        /*序号重新标定，只能出现在排序后*/
+        p_target = Find_TargetSlave_AdoptId(irq, temp_slaveid);
+        if (p_target)
+        {
+            card_nums = 0;
+            /*逆序重编码板卡计数*/
+            for (uint16_t i = 0; i <= irq->TableCount; i++)
+            {
+                if (p_target->TypeCoding == irq->pIRQ[i].TypeCoding)
+                {
+                    irq->pIRQ[i].Number = card_nums++;
+                }
+            }
+        }
     }
     else
     {
@@ -533,7 +517,6 @@ Card_Tyte Find_HighP_Device(Slave_IRQTableTypeDef *irq, IRQ_Request *rp_irq)
     /*从当处理位置开始查找*/
     for (IRQ_Code *p = p_current; p < p_current + irq->TableCount; p++)
     { /*把中断优先级表升序排列*/
-        // IRQ_Code current_Iraq = *p;
         min_priority = min_priority <= p->Priority ? min_priority : p->Priority;
     }
 

@@ -361,14 +361,15 @@ static void shellWritePrompt(Shell *shell, unsigned char newline)
  * @param fmt 格式化字符串
  * @param ... 参数
  */
+char buffer[SHELL_PRINT_BUFFER];
 void shellPrint(Shell *shell, char *fmt, ...)
 {
-    shell->lock(shell);
-#if defined(USING_FREERTOS)
-    char *buffer = (char *)pvPortMalloc(SHELL_PRINT_BUFFER);
-#else
-    char buffer[SHELL_PRINT_BUFFER];
-#endif
+    //     shell->lock(shell);
+    // #if defined(USING_FREERTOS)
+    //     char *buffer = (char *)pvPortMalloc(SHELL_PRINT_BUFFER);
+    // #else
+    //     char buffer[SHELL_PRINT_BUFFER];
+    // #endif
 
     va_list vargs;
 
@@ -379,9 +380,9 @@ void shellPrint(Shell *shell, char *fmt, ...)
     va_end(vargs);
 
     shellWriteString(shell, buffer);
-#if defined(USING_FREERTOS)
-    vPortFree(buffer);
-#endif
+    // #if defined(USING_FREERTOS)
+    //     vPortFree(buffer);
+    // #endif
     shell->unlock(shell);
 }
 #endif
@@ -1757,7 +1758,7 @@ void shellTask(void *param)
 #if defined(USING_RTTHREAD)
         rt_thread_mdelay(1);
 #else
-        osDelay(1);
+        osDelay(10);
 #endif
     }
 #endif

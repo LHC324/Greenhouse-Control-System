@@ -185,7 +185,22 @@ __weak void vApplicationMallocFailedHook(void)
   FreeRTOSConfig.h, and the xPortGetFreeHeapSize() API function can be used
   to query the size of free heap space that remains (although it does not
   provide information on how the remaining heap might be fragmented). */
-  shellPrint(Shell_Object, "memory allocation failed!\r\n");
+  shellPrint(Shell_Object, "@Error:memory allocation failed!\r\n");
+  shellPrint(Shell_Object, "\r\n\r\nOS remaining heap = %dByte, Mini heap = %dByte\r\n",
+             xPortGetFreeHeapSize(), xPortGetMinimumEverFreeHeapSize());
+#if defined(USING_DEBUG)
+#if ((configUSE_TRACE_FACILITY == 1) && (configUSE_STATS_FORMATTING_FUNCTIONS > 0) && (configSUPPORT_DYNAMIC_ALLOCATION == 1))
+  TaskStatus_t *pTable = CUSTOM_MALLOC(uxTaskGetNumberOfTasks() * sizeof(TaskStatus_t));
+  if (pTable)
+  {
+    vTaskList((char *)pTable);
+    shellPrint(Shell_Object, "TaskName\tTaskState Priority   RemainingStack TaskID\r\n");
+    shellPrint(Shell_Object, "%s\r\n", pTable);
+  }
+  CUSTOM_FREE(pTable);
+  shellPrint(Shell_Object, "\r\nremaining heap = %d.\r\n", xPortGetFreeHeapSize());
+#endif
+#endif
 }
 /* USER CODE END 5 */
 
@@ -226,16 +241,9 @@ void Param_WriteBack(Save_HandleTypeDef *ps)
   ps->Param.System_Flag = (*(__IO uint32_t *)UPDATE_SAVE_ADDRESS);
   ps->Param.System_Version = SYSTEM_VERSION();
   /*Parameters are written to the mdbus hold register*/
-  mdSTATUS ret = mdRTU_WriteHoldRegs(Slave1_Object, PARAM_BASE_ADDR, GET_PARAM_SITE(Save_Param, Slave_IRQ_Table, uint16_t),
+  mdSTATUS ret = mdRTU_WriteHoldRegs(Slave1_Object, PARAM_BASE_ADDR,
+                                     GET_PARAM_SITE(Save_Param, Slave_IRQ_Table, uint16_t),
                                      (mdU16 *)&ps->Param);
-  /*Write user name and password*/
-  // ret = mdRTU_WriteHoldRegs(Slave1_Object, MDUSER_NAME_ADDR, 2U, (mdU16 *)&ps->Param.User_Name);
-  //   mdU16 temp_data[2U] = {(mdU16)CURRENT_SOFT_VERSION, (mdU16)((uint32_t)((*(__IO uint32_t *)UPDATE_SAVE_ADDRESS) >> 16U))};
-  // #if defined(USING_DEBUG)
-  //   shellPrint(Shell_Object, "version:%d, flag:%d.\r\n", temp_data[0], temp_data[1]);
-  // #endif
-  //   /*Write software version number and status*/
-  //   ret = mdRTU_WriteHoldRegs(Slave1_Object, SOFT_VERSION_ADDR, 2U, temp_data);
   if (ret == mdFALSE)
   {
 #if defined(USING_DEBUG)
@@ -514,7 +522,7 @@ void MX_FREERTOS_Init(void)
     }
   }
   /*Parameters are stored in the holding register*/
-  Param_WriteBack(ps);
+  // Param_WriteBack(ps);
   /*Turn off the global interrupt in bootloader, and turn it on here*/
   // __set_FAULTMASK(0);
   /*Solve the problem that the background data cannot be received due to the unstable power supply when the Devon screen is turned on*/
@@ -665,14 +673,14 @@ void Screen_Task(void const *argument)
     if ((osOK == osSemaphoreWait(Recive_Rs232Handle, osWaitForever)) && pDewin)
     {
       /*Close the reporting timer*/
-      osTimerStop(ReportHandle);
+      // osTimerStop(ReportHandle);
       /*Suspend reporting task*/
-      osThreadSuspend(TreportHandle);
+      // osThreadSuspend(TreportHandle);
       Dwin_Handler(pDewin);
       /*Resume reporting task*/
-      osThreadResume(TreportHandle);
+      // osThreadResume(TreportHandle);
       // xTimerReset(ReportHandle, 1U);
-      osTimerStart(ReportHandle, REPORRT_TIMERS);
+      // osTimerStart(ReportHandle, REPORRT_TIMERS);
 #if defined(USING_DEBUG)
       // shellPrint(Shell_Object, "Screen received a packet of data .\r\n");
 #endif
@@ -785,17 +793,8 @@ void Master_Task(void const *argument)
     /*https://www.cnblogs.com/w-smile/p/11333950.html*/
     if ((osOK == osSemaphoreWait(Recive_CpuHandle, osWaitForever)) && pMaster)
     {
-      // if (xQueueReceive(SureQueueHandle, &target_slave_id, osWaitForever) == pdPASS)
-      // {
-      //   pMaster->uartId = 0x01;
-      //   pMaster->portRTUMasterHandle(pMaster, (mdU8)target_slave_id);
-      // }
-      // osThreadSuspend(InterruptHandle);
-      // osThreadSuspend(TransimtHandle);
       pMaster->uartId = 0x01;
       pMaster->portRTUMasterHandle(pMaster, (mdU8)target_slave_id);
-      // osThreadResume(InterruptHandle);
-      // osThreadResume(TransimtHandle);
       xTaskNotifyWait(0x00,             /* Don't clear any notification bits on entry. */
                       ULONG_MAX,        /* Reset the notification value to 0 on exit. */
                       &target_slave_id, /* Notified value pass out in ulNotifiedValue. */
@@ -848,9 +847,6 @@ void IRQ_Task(void const *argument)
       // shellPrint(Shell_Object, "Note: Generate an interrupt: 0x%x.\r\n", interrupt_id);
 #endif
       /*Separate the interrupt number and count the interrupt source*/
-      // while ((interrupt_id) && (sp_irq->SiteCount < CARD_NUM_MAX) &&
-      //        /*Ensure that the previous round of interrupt has been handled correctly*/
-      //        (!p_current->flag))
       while ((interrupt_id) && (sp_irq->SiteCount++ < CARD_NUM_MAX))
       /*Ensure that the previous round of interrupt has been handled correctly*/
       {
@@ -874,7 +870,6 @@ void IRQ_Task(void const *argument)
 #if defined(USING_DEBUG)
         // shellPrint(Shell_Object, "Note: re_irq[%d]_id = 0x%x.\r\n", sp_irq->SiteCount, p_current->site);
 #endif
-        // p_current = &sp_irq->pReIRQ[++sp_irq->SiteCount];
         p_current++;
       }
       /*Record in the interrupt list. When the board sends an
@@ -901,7 +896,7 @@ void IRQ_Task(void const *argument)
  * @param  size  Detection length
  * @retval true/false
  */
-bool Check_Vx_State(mdBit *p_current, mdBit *p_last, uint8_t size)
+bool Check_Qx_State(mdBit *p_current, mdBit *p_last, uint8_t size)
 {
   bool ret = false;
   if (p_current && p_last && size)
@@ -914,15 +909,6 @@ bool Check_Vx_State(mdBit *p_current, mdBit *p_last, uint8_t size)
         ret = true;
       }
     }
-
-    // for (mdBit *p = p_current, *q = p_last; p < p_current + size; p++, q++)
-    // {
-    //   if (*p != *q)
-    //   {
-    //     *q = *p;
-    //     ret = true;
-    //   }
-    // }
   }
   return ret;
 }
@@ -932,19 +918,20 @@ bool Check_Vx_State(mdBit *p_current, mdBit *p_last, uint8_t size)
  * @param argument: Not used
  * @retval None
  */
-#define DELAY_TIMES 5U
 /* USER CODE END Header_Control_Task */
 void Control_Task(void const *argument)
 {
   /* USER CODE BEGIN Control_Task */
-  mdBit sbit = mdLow, mode = mdLow, bitx = mdLow, rbit = mdLow;
+  mdBit sbit = mdLow, mode = mdLow, bitx = mdLow;
   mdSTATUS ret = mdFALSE;
   mdBit wbit[VX_SIZE];
   float Ptank = 0, Pcarburetor = 0;
+#if (USING_USERTIMER0 || USING_USERTIMER1)
   static Soft_Timer_HandleTypeDef timer[] = {
       {.counts = 0, .flag = false},
       {.counts = 0, .flag = false},
   };
+#endif
   // bool flag_group[] = {false, false};
   Save_HandleTypeDef *ps = (Save_HandleTypeDef *)argument;
   Save_User usinfo;
@@ -955,12 +942,11 @@ void Control_Task(void const *argument)
   /* Infinite loop */
   for (;;)
   {
-    sbit = mdLow;
     uint16_t error_code = 0;
     /*Initialize WBIT*/
     memset(wbit, false, VX_SIZE);
     /*The default state of the initialization electric valve is off*/
-    Close_Qx(5U), Open_Qx(6U), Close_Qx(7U), Open_Qx(8U);
+    // Close_Qx(5U), Open_Qx(6U), Close_Qx(7U), Open_Qx(8U);
 #define __USER_CONTRL_PARAMTER_CALCULATION
     {
       ret = mdRTU_ReadInputRegisters(Slave1_Object, INPUT_ANALOG_START_ADDR, BX_SIZE * 2U, (mdU16 *)&ps->User);
@@ -982,8 +968,6 @@ void Control_Task(void const *argument)
         goto __no_action;
       }
       // taskENTER_CRITICAL();
-      // for (float *p = &ps->User.Ptank_M, *pu = &ps->Param.Ptank_max, *pinfo = (float *)&usinfo;
-      //      p < &ps->User.Ptank_M + BX_SIZE; p++, pu += 2U, pinfo++)
       for (float *p = &ps->User.Ptank_M, *pu = &ps->Param.Ptank_max, *pinfo = (float *)&usinfo;
            p < &ps->User.Ptank_M + BX_SIZE; p++, pinfo++)
       {
@@ -995,7 +979,8 @@ void Control_Task(void const *argument)
         /*User sensor access error check*/
 #define ERROR_CHECK
         {
-          if (!error_code)
+          /*Filter sub sensor error detection*/
+          if (!error_code && (!site || (site % 2)))
           {
             error_code = *p <= 0.0F ? (3U * site + ERROR_BASE_CODE) : (*p < CURRENT_LOWER ? (3U * site + ERROR_BASE_CODE + 1U) : (*p > (CURRENT_LOWER + CURRENT_UPPER + 1.0F) ? (3U * site + ERROR_BASE_CODE + 2U) : 0));
           }
@@ -1027,8 +1012,7 @@ void Control_Task(void const *argument)
         Pcarburetor = enable_sate[1] ? ps->Param.Error_Code = 0, ps->User.Pgas_soutlet : ps->User.Pvap_outlet;
       }
       // taskEXIT_CRITICAL();
-      if (xQueueSend(UserQueueHandle, &usinfo, 2) != pdPASS)
-      // if (osMailPut(UserQueueHandle, &usinfo) != osOK)
+      if (xQueueSend(UserQueueHandle, &usinfo, 0) != pdPASS)
       {
 #if defined(USING_DEBUG)
         shellPrint(Shell_Object, "Error: Failed to send user parameters!\r\n");
@@ -1039,20 +1023,20 @@ void Control_Task(void const *argument)
 #if defined(USING_DEBUG)
     // shellPrint(Shell_Object, "ps->User.Ptank = %.3f\r\n", ps->User.Ptank);
 #endif
-    rbit = mdLow;
+    sbit = mdLow;
     /*Read start signal:0-N,As long as one start signal is valid, it is valid*/
     for (uint8_t i = 0; i < START_SIGNAL_MAX; i++)
     {
       ret = mdRTU_ReadInputCoil(Slave1_Object, INPUT_DIGITAL_START_ADDR + i, bitx);
       sbit += bitx;
-      rbit |= (uint8_t)(bitx << i);
+      // rbit |= (uint8_t)(bitx << i);
 #if defined(USING_DEBUG)
-      shellPrint(Shell_Object, "bitx[%d] = 0x%d\r\n", i, bitx);
+      // shellPrint(Shell_Object, "bitx[%d] = 0x%d\r\n", i, bitx);
 #endif
       /*When the start signal is valid, the corresponding user valve is also valid.*/
 #define __OPEN_USER_VALVE
       {
-        // wbit[USER_COIL_OFFSET + i] = bitx;
+        wbit[USER_COIL_OFFSET + i] = bitx;
       }
       if (ret == mdFALSE)
       {
@@ -1081,125 +1065,115 @@ void Control_Task(void const *argument)
       goto __exit;
     }
     /*Safe operation guarantee*/
-#define SAFETY
+#define SAFETY____________________________________________________________________Start
+    if ((Ptank <= ps->Param.Ptank_limit) || (ps->User.Ltank <= ps->Param.Ltank_limit) ||
+        (ps->Param.Error_Code))
     {
-      if ((Ptank <= ps->Param.Ptank_limit) || (ps->User.Ltank <= ps->Param.Ltank_limit) ||
-          (ps->Param.Error_Code))
-      {
-/*close Q0、Q1、Q3、Q4*/
-// Close_Qx(0U), Close_Qx(1U), Close_Qx(3U), Close_Qx(4U);
+      /*close Q0、Q1、Q3、Q4*/
+      // Close_Qx(0U), Close_Qx(1U), Close_Qx(3U), Close_Qx(4U);
+      memset(wbit, false, VX_SIZE);
 /*reset timer*/
 #if (USING_USERTIMER0)
-        Reset_SoftTimer(&timer[0U], T_5S);
+      Reset_SoftTimer(&timer[0U], T_5S);
 #endif
 #if (USING_USERTIMER1)
-        Reset_SoftTimer(&timer[1U], T_5S); //######
+      Reset_SoftTimer(&timer[1U], T_5S); //######
 #endif
 #if defined(USING_DEBUG_APPLICATION)
-        shellPrint(Shell_Object, "@SAF: close Q0 Q1 Q3 Q4 Q5 Q7 open Q6 Q8.\r\n");
+      shellPrint(Shell_Object, "@SAF: close Q0 Q1 Q2 Q3.\r\n");
 #endif
-        goto __no_action;
-      }
+      goto __no_action;
     }
+#define SAFETY____________________________________________________________________End
 #if defined(USING_DEBUG_APPLICATION)
     shellPrint(Shell_Object, "sbit = 0x%d\r\n", sbit);
 #endif
     /*Start mode: The sbit value is valid if it is not 0.*/
     if (sbit)
     {
-#define D1
-      {
-        /*close Q3*/
-        // Close_Qx(3U);
+/*Action condition set of pressure relief solenoid valve and gas phase valve*/
+#define A1____________________________________________________________________Start
 #if defined(USING_DEBUG_APPLICATION)
-        shellPrint(Shell_Object, "@D1-1: close Q3.\r\n");
+      // shellPrint(Shell_Object, "ps->User.Ptank = %.3f, ps->Param.PSspf_start = %.3f\r\n", ps->User.Ptank, ps->Param.PSspf_start);
 #endif
-      }
-#define A1
+      /*The pressure of the storage tank is protected in the safe mode,
+      as long as the outlet pressure conditions of the vaporizer are met here*/
+      if (Pcarburetor > ps->Param.PSvap_outlet_Start)
       {
-#if defined(USING_DEBUG_APPLICATION)
-        // shellPrint(Shell_Object, "ps->User.Ptank = %.3f, ps->Param.PSspf_start = %.3f\r\n", ps->User.Ptank, ps->Param.PSspf_start);
-#endif
-        /*The pressure of the storage tank is protected in the safe mode,
-        as long as the outlet pressure conditions of the vaporizer are met here*/
-        if (Pcarburetor > ps->Param.PSvap_outlet_Start)
-        {
 #if (USING_USERTIMER0)
-          SoftTimer_IsTrue(&timer[0U]); //#######
+        SoftTimer_IsTrue(&timer[0U]); //#######
 #endif
 #if (USING_USERTIMER1)
-          SoftTimer_IsTrue(&timer[1U]); //#######
+        SoftTimer_IsTrue(&timer[1U]); //#######
 #endif
-          (rbit & 0x03) ? Open_Qx(5U), Close_Qx(6U) : false;
-          (rbit & 0x04) ? Open_Qx(7U), Close_Qx(8U) : false;
+        Open_Qx(3U);
 #if defined(USING_DEBUG_APPLICATION)
-          shellPrint(Shell_Object, "@A1-1: open Q5 or Q7;close Q6 or Q8.\r\n");
+        shellPrint(Shell_Object, "@A1-1: open Q3.\r\n");
 #endif
-        }
-        (Ptank >= ps->Param.PSspf_start)  ? mutex_flag[0] = true
-        : (Ptank <= ps->Param.PSspf_stop) ? mutex_flag[0] = false
-                                          : false;
-        /*Pressure relief*/
-        if (mutex_flag[0])
-        {
-          Open_Qx(1U);
-#if (USING_USERTIMER0)
-          /*reset timer*/
-          // Reset_SoftTimer(&timer[0U], T_5S);
-#endif
-#if defined(USING_DEBUG_APPLICATION)
-          shellPrint(Shell_Object, "@A1-2: open Q1 Q5 or Q7;close Q0 Q6 or Q8.\r\n");
-#endif
-          goto __no_action;
-        }
-        else
-        {
-#if defined(USING_DEBUG_APPLICATION)
-          shellPrint(Shell_Object, "@A1-3: open Q0;close Q1 Q3.\r\n");
-#endif
-        }
       }
-#define B1C1
+      (Ptank >= ps->Param.PSspf_start)  ? mutex_flag[0] = true
+      : (Ptank <= ps->Param.PSspf_stop) ? mutex_flag[0] = false
+                                        : false;
+      /*Pressure relief*/
+      if (mutex_flag[0])
       {
-        if (Pcarburetor >= ps->Param.PSvap_outlet_Start)
-        {
-          // SoftTimer_IsTrue(&timer[1U]); //#######
-          /*open V1 、close V2*/
-          Open_Qx(0U);
-#if defined(USING_DEBUG_APPLICATION)
-          shellPrint(Shell_Object, "@B1C1-1: open Q0 close Q1\r\n");
-#endif
+        Open_Qx(0U);
 #if (USING_USERTIMER0)
-          Set_SoftTimer_Count(&timer[0U], T_5S); //#####
+        /*reset timer*/
+        // Reset_SoftTimer(&timer[0U], T_5S);
 #endif
-#if (USING_USERTIMER1)
-          Set_SoftTimer_Flag(&timer[1U], false); //######
-#endif
-              // SoftTimer_IsTrue(&timer[0U]);
-          /*open outlet valve*/
-          // (rbit & 0x03) ? Open_Qx(5U), Close_Qx(6U) : false;
-          // (rbit & 0x04) ? Open_Qx(7U), Close_Qx(8U) : false;
 #if defined(USING_DEBUG_APPLICATION)
-          shellPrint(Shell_Object, "@B1C1-2: open Q5 or Q7 Close Q6 or Q8.\r\n");
+        shellPrint(Shell_Object, "@A1-2: open Q0 Q3.\r\n");
 #endif
-        }
-        else if (Pcarburetor <= ps->Param.PSvap_outlet_stop &&
-                 Ptank > ps->Param.PStank_supplement)
-        {
-#if (USING_USERTIMER0)
-          /*reset timer*/
-          Reset_SoftTimer(&timer[0U], T_5S);
-#endif
-#if (USING_USERTIMER1)
-          Set_SoftTimer_Count(&timer[1U], T_5S); //#######
-#endif
-          /*close Q0 and outlet valve*/
-          Open_Qx(1U);
-#if defined(USING_DEBUG_APPLICATION)
-          shellPrint(Shell_Object, "@B1C1-3: open  Q1  Q5 or Q7;close Q0 Q6 or Q8.\r\n");
-#endif
-        }
+        goto __no_action;
       }
+      else
+      {
+#if defined(USING_DEBUG_APPLICATION)
+        shellPrint(Shell_Object, "@A1-3: close Q0 Q2.\r\n");
+#endif
+      }
+#define A1____________________________________________________________________End
+/*Logic during normal operation of gas station*/
+#define B1C1____________________________________________________________________Start
+      if (Pcarburetor >= ps->Param.PSvap_outlet_Start)
+      {
+        // SoftTimer_IsTrue(&timer[1U]); //#######
+        /*open V1 、close V2*/
+        Open_Qx(1U);
+#if defined(USING_DEBUG_APPLICATION)
+        shellPrint(Shell_Object, "@B1C1-1: open Q1 close Q0\r\n");
+#endif
+#if (USING_USERTIMER0)
+        Set_SoftTimer_Count(&timer[0U], T_5S); //#####
+#endif
+#if (USING_USERTIMER1)
+        Set_SoftTimer_Flag(&timer[1U], false); //######
+#endif
+            // SoftTimer_IsTrue(&timer[0U]);
+        /*open outlet valve*/
+        Open_Qx(3U);
+#if defined(USING_DEBUG_APPLICATION)
+        shellPrint(Shell_Object, "@B1C1-2: open Q3.\r\n");
+#endif
+      }
+      else if (Pcarburetor <= ps->Param.PSvap_outlet_stop &&
+               Ptank > ps->Param.PStank_supplement)
+      {
+#if (USING_USERTIMER0)
+        /*reset timer*/
+        Reset_SoftTimer(&timer[0U], T_5S);
+#endif
+#if (USING_USERTIMER1)
+        Set_SoftTimer_Count(&timer[1U], T_5S); //#######
+#endif
+        /*close Q0 and outlet valve*/
+        Open_Qx(0U);
+#if defined(USING_DEBUG_APPLICATION)
+        shellPrint(Shell_Object, "@B1C1-3: open  Q0 Q3;close Q1.\r\n");
+#endif
+      }
+#define B1C1____________________________________________________________________End
       /*Ensure that after the startup mode is switched to the shutdown mode*/
       mutex_flag[1] ? mutex_flag[1] = false : false;
       mutex_flag[2] ? mutex_flag[2] = false : false;
@@ -1216,73 +1190,65 @@ void Control_Task(void const *argument)
 #endif
       /*Check whether the pressure relief operation is on*/
       mutex_flag[0] ? mutex_flag[0] = false : false;
-#define A2
+      /*Carburetor back pressure to storage tank*/
+#define A2____________________________________________________________________Start
+      if (Pcarburetor > ps->Param.Pback_difference && (Ptank < ps->Param.Ptank_difference))
       {
-        // if (((Pcarburetor - Ptank) >= ps->Param.Pback_difference) && (Ptank < ps->Param.Ptank_difference))
-        if (Pcarburetor > ps->Param.Pback_difference && (Ptank < ps->Param.Ptank_difference))
-        {
-          /*open Q1*/
-          Open_Qx(1U);
+        /*open Q0*/
+        Open_Qx(0U);
 #if defined(USING_DEBUG_APPLICATION)
-          shellPrint(Shell_Object, "@A2-1: open Q1.\r\n");
-#endif
-        }
-        else
-        {
-          /*Close Q1*/
-          // Close_Qx(1U);
-#if defined(USING_DEBUG_APPLICATION)
-          shellPrint(Shell_Object, "@A2-2: Close Q1.\r\n");
-#endif
-        }
-      }
-#define B2
-      {
-        (Pcarburetor >= ps->Param.PPvap_outlet_Start)  ? mutex_flag[1] = true
-        : (Pcarburetor <= ps->Param.PPvap_outlet_stop) ? mutex_flag[1] = false
-                                                       : false;
-        if (mutex_flag[1])
-        {
-          Open_Qx(5U), Close_Qx(6U);
-          Open_Qx(4U);
-#if defined(USING_DEBUG_APPLICATION)
-          shellPrint(Shell_Object, "@B2-1: open Q4 Q5 or Q7;close Q1 Q6 or Q8.\r\n");
-#endif
-        }
-        else
-        {
-#if defined(USING_DEBUG_APPLICATION)
-          shellPrint(Shell_Object, "@B2-2: open Q5 or Q7 close Q4 Q6 or Q8.\r\n");
-#endif
-        }
-      }
-#define C2
-      {
-        (Ptank >= ps->Param.PPspf_start)  ? mutex_flag[2] = true
-        : (Ptank <= ps->Param.PPspf_stop) ? mutex_flag[2] = false
-                                          : false;
-        if (mutex_flag[2])
-        {
-          Open_Qx(3U);
-#if defined(USING_DEBUG_APPLICATION)
-          shellPrint(Shell_Object, "@C2-1: open Q3.\r\n");
-#endif
-        }
-        else
-        {
-#if defined(USING_DEBUG_APPLICATION)
-          shellPrint(Shell_Object, "@C2-2: close Q3.\r\n");
-#endif
-        }
-      }
-#define D2
-      {
-        /*close V1*/
-        // Close_Qx(0U);
-#if defined(USING_DEBUG_APPLICATION)
-        shellPrint(Shell_Object, "@D2-1: close Q0.\r\n");
+        shellPrint(Shell_Object, "@A2-1: open Q0.\r\n");
 #endif
       }
+      else
+      {
+        /*Close Q0*/
+        // Close_Qx(1U);
+#if defined(USING_DEBUG_APPLICATION)
+        shellPrint(Shell_Object, "@A2-2: Close Q0.\r\n");
+#endif
+      }
+#define A2____________________________________________________________________End
+      /*Pressure relief of vaporizer to designated greenhouse*/
+#define B2____________________________________________________________________Start
+      (Pcarburetor >= ps->Param.PPvap_outlet_Start)  ? mutex_flag[1] = true
+      : (Pcarburetor <= ps->Param.PPvap_outlet_stop) ? mutex_flag[1] = false
+                                                     : false;
+      if (mutex_flag[1])
+      {
+        // Open_Qx(5U), Close_Qx(6U);
+        Open_Qx(3U);
+        Open_Qx(4U);
+#if defined(USING_DEBUG_APPLICATION)
+        shellPrint(Shell_Object, "@B2-1: open Q3 Q4.\r\n");
+#endif
+      }
+      else
+      {
+#if defined(USING_DEBUG_APPLICATION)
+        shellPrint(Shell_Object, "@B2-2: close Q3 Q4.\r\n");
+#endif
+      }
+#define B2____________________________________________________________________End
+/*The storage tank pressure is leaked through the vent valve*/
+#define C2____________________________________________________________________Start
+      (Ptank >= ps->Param.PPspf_start)  ? mutex_flag[2] = true
+      : (Ptank <= ps->Param.PPspf_stop) ? mutex_flag[2] = false
+                                        : false;
+      if (mutex_flag[2])
+      {
+        Open_Qx(2U);
+#if defined(USING_DEBUG_APPLICATION)
+        shellPrint(Shell_Object, "@C2-1: open Q2.\r\n");
+#endif
+      }
+      else
+      {
+#if defined(USING_DEBUG_APPLICATION)
+        shellPrint(Shell_Object, "@C2-2: close Q2.\r\n");
+#endif
+      }
+#define C2____________________________________________________________________End
     }
   __no_action:
 #if defined(USING_DEBUG_APPLICATION)
@@ -1300,164 +1266,229 @@ void Control_Task(void const *argument)
 #endif
     }
   __exit:
-    osDelay(1000);
+    osDelay(ACTION_TIMES);
   }
   /* USER CODE END Control_Task */
 }
 
 /* USER CODE BEGIN Header_Transimt_Task */
 /**
+ * @brief Transmission processing.
+ * @param tp_irq: Slave Interrupt Table Pointer
+ * @param rp_irq: Slave Interrupt Request Table Pointer
+ * @param ps:Store parameter handle
+ * @retval None
+ */
+static void DataTransmit_Handle(Slave_IRQTableTypeDef *sp_irq, IRQ_Request *rp_irq, Save_HandleTypeDef *ps)
+{
+  static uint16_t interrupt_record = 0xFFFF;
+  uint16_t first_interrupt = 0;
+  uint8_t slave_id = 0x00;
+  IRQ_Code *pt_irq = NULL;
+
+  if (rp_irq && rp_irq->site)
+  {
+    /*Get the slave ID according to the interrupt number*/
+    slave_id = (uint8_t)(log(rp_irq->site) / log(2.0));
+    /*Set data transmission target channel*/
+    MASTER_OBJECT->uartId = 0x01;
+    /*Detect whether it is interrupted for the first time*/
+    first_interrupt = interrupt_record & rp_irq->site;
+    /*Check the first access backplane sign*/
+    if (first_interrupt)
+    {
+      /*Read card type*/
+      mdRTU_Master_Codex(MASTER_OBJECT, MODBUS_CODE_17, slave_id, NULL, 0);
+    }
+    /*The board is not connected to the backplane for the first time*/
+    else
+    { /*Interrupt device table is not empty*/
+      if (sp_irq->TableCount)
+      { /*Look for known slaves in the interrupt table*/
+        pt_irq = Find_TargetSlave_AdoptId(sp_irq, slave_id);
+
+        if (pt_irq)
+        {
+          /*Interrupt priority sorting is performed when the board is read back*/
+          switch (pt_irq->TypeCoding)
+          {
+          case Card_AnalogInput:
+          {
+            mdRTU_Master_Codex(MASTER_OBJECT, MODBUS_CODE_4, pt_irq->SlaveId, NULL, CARD_SIGNAL_MAX * 2U);
+          }
+          break;
+          case Card_DigitalInput:
+          {
+            mdRTU_Master_Codex(MASTER_OBJECT, MODBUS_CODE_2, pt_irq->SlaveId, NULL, CARD_SIGNAL_MAX);
+          }
+          break;
+          case Card_Lora1:
+          case Card_Lora2:
+          {
+            mdRTU_Master_Codex(MASTER_OBJECT, MODBUS_CODE_2, pt_irq->SlaveId, NULL, CARD_SIGNAL_MAX * 4U);
+          }
+          break;
+          /*Invalid board, remove interrupt record table*/
+          default:
+          {
+            /*Read card type*/
+            mdRTU_Master_Codex(MASTER_OBJECT, MODBUS_CODE_17, slave_id, NULL, 0);
+          }
+          break;
+          }
+        }
+      }
+    }
+    /*Clear the flag after the slave responds correctly*/
+    if (xTaskNotify(MasterHandle, slave_id, eSetValueWithoutOverwrite) == pdPASS)
+    {
+      if (first_interrupt)
+      {
+        /*Clear first access flag*/
+        interrupt_record &= ~rp_irq->site;
+      }
+      /*Process the next interrupt in the interrupt table*/
+    }
+    /*no response from slave*/
+    else
+    {
+      if (ps && ps->Param.Slave_IRQ_Table.IRQ_Table_SetFlag == SAVE_SURE_CODE)
+      {
+#define CARD_ERROR_CODE 23U
+        /*Record error code*/
+        ps->Param.Error_Code = CARD_ERROR_CODE;
+      }
+      /*Read card type*/
+#if defined(USING_DEBUG)
+      // shellPrint(Shell_Object, "Error: Interrupt Slave 0x%02x No Answer!"__INFORMATION(),
+      //            slave_id);
+      shellPrint(Shell_Object, "Error: Interrupt Slave 0x%02x No Answer!\r\n",
+                 slave_id);
+#endif
+    }
+    /*Task notification delay leads to decrease in recognition success rate*/
+    osDelay(30);
+  }
+  else
+  {
+    /*Slave error handling*/
+#if defined(USING_DEBUG)
+    // shellPrint(Shell_Object, "Error: Invalid interrupt source: 0x%x."__INFORMATION(),
+    //            sp_irq->pReIRQ[sp_irq->SiteCount].site);
+    shellPrint(Shell_Object, "Error: Invalid interrupt source: 0x%x, table_site :0x%p\r\n.",
+               rp_irq->site, rp_irq);
+#endif
+  }
+}
+
+/**
+ * @brief Digital output scheduler.
+ * @param sp: Slave Interrupt Table Pointer
+ * @param pr: Reporting object pointer
+ * @param ctype: Target board type with lookup
+ * @retval None
+ */
+static void Digital_Output(Report_TypeDef *pdr)
+{
+  uint16_t num, count, bit;
+  // uint8_t *pdest = NULL;
+  if (pdr && pdr->pr && pdr->sp && pdr->pwbit && (pdr->ctype != Card_None))
+  {
+    pdr->pr->count = 0;
+    if (Save_TargetSlave_Id(pdr->sp, pdr->ctype, pdr->pr, pdr->nums))
+    {
+      uint8_t target_value[pdr->pr->id_size], len = 0, counts = 0, base_offset = 0;
+      for (num = 0; num < pdr->nums; ++num)
+      {
+        /*Integrated signal source*/
+        memset(target_value, 0x00, pdr->pr->id_size);
+
+        switch (pdr->ctype)
+        {
+        case Card_DigitalOutput:
+        {
+          counts = 0x01, base_offset = num * CARD_SIGNAL_MAX, len = 0x01;
+          // pdest = target_value;
+        }
+        break;
+        case Card_Lora1:
+        {
+          counts = 0x04, base_offset = num * (CARD_SIGNAL_MAX * 4U), len = 0x04;
+          // pdest = &target_value[4U];
+          // memcpy(target_value, &target_value[4U], pdr->pr->id_size - 4U);
+          /*前移4bit:去掉气站部分有线阀数据,最后8bit数据重复*/
+          memcpy(pdr->pwbit, &pdr->pwbit[4U], VX_SIZE - 4U);
+        }
+        break;
+        default:
+          break;
+        }
+        if (counts && num < pdr->pr->count)
+        {
+          for (count = 0; count < counts; ++count)
+          {
+            for (bit = 0; bit < CARD_SIGNAL_MAX; ++bit)
+            {
+              target_value[count] |= (uint8_t)pdr->pwbit[bit + count * CARD_SIGNAL_MAX + base_offset] << bit;
+            }
+          }
+          mdRTU_Master_Codex(MASTER_OBJECT, MODBUS_CODE_15, pdr->pr->p_id[num], (mdU8 *)target_value, len);
+          xTaskNotify(MasterHandle, pdr->pr->p_id[num], eSetValueWithOverwrite);
+          osDelay(50);
+        }
+        else
+          break;
+      }
+    }
+  }
+}
+
+/**
  * @brief Function implementing the Transimt thread.
  * @param argument: Not used
  * @retval None
  */
-#define INCREMENT_COUNT()                                                           \
-  do                                                                                \
-  {                                                                                 \
-    rp_irq->flag = false;                                                           \
-    sp_irq->SiteCount = sp_irq->SiteCount ? rp_irq++, (sp_irq->SiteCount - 1U) : 0; \
-  } while (0)
-
-#define RESET_POINTER()      \
-  do                         \
-  {                          \
-    rp_irq = sp_irq->pReIRQ; \
-  } while (0)
-// sp_irq->SiteCount = 0;
-// tp_irq = sp_irq->pIRQ;
 /* USER CODE END Header_Transimt_Task */
 void Transimt_Task(void const *argument)
 {
   /* USER CODE BEGIN Transimt_Task */
-  // static uint16_t interrupt_record = 0xFFFF, first_interrupt;
-  // static Slave_IRQTableTypeDef *sp_irq = &IRQ_Table;
-  // static IRQ_Code *tp_irq = NULL;
-  // tp_irq = sp_irq->pIRQ;
-  // static IRQ_Request *rp_irq = NULL;
-  // rp_irq = sp_irq->pReIRQ;
-  uint16_t interrupt_record = 0xFFFF, first_interrupt;
   Slave_IRQTableTypeDef *sp_irq = (Slave_IRQTableTypeDef *)argument;
   Save_HandleTypeDef *ps = &Save_Flash;
-  IRQ_Code *tp_irq = sp_irq->pIRQ;
-  IRQ_Request *rp_irq = sp_irq->pReIRQ;
-  uint8_t slave_id = 0x00;
+  IRQ_Request requset_irq = {0};
   mdSTATUS ret = mdFALSE;
-  // static mdBit wbit[] = {false, false, false, false, false};
   mdBit wbit[VX_SIZE], copy_wbit[VX_SIZE];
-  uint8_t target_type[TARGET_BOARD_NUM];
+  uint8_t target_type[__Get_TargetBoardNum(CARD_SIGNAL_MAX)];
   R_TargetTypeDef record_type = {
       .count = 0,
       .p_id = target_type,
+      .id_size = sizeof(target_type),
+  };
+  Report_TypeDef di_report[2] = {
+      {
+          .ctype = Card_DigitalOutput,
+          .pr = &record_type,
+          .sp = sp_irq,
+          .nums = __Get_TargetBoardNum(CARD_SIGNAL_MAX),
+          .pwbit = wbit,
+      },
+      {
+          .ctype = Card_Lora1,
+          .pr = &record_type,
+          .sp = sp_irq,
+          .nums = __Get_TargetBoardNum((CARD_SIGNAL_MAX * 4U)),
+          .pwbit = wbit,
+      },
   };
   /* Infinite loop */
   for (;;)
   {
     /*Interrupt request count is not empty*/
-    if (xQueueReceive(SureQueueHandle, rp_irq, 0) == pdPASS)
-    // if ((sp_irq->SiteCount) && (rp_irq < sp_irq->pReIRQ + sp_irq->SiteCount))
+    if (xQueueReceive(SureQueueHandle, &requset_irq, 2) == pdPASS)
     {
       /*Suspend interrupt processing task*/
       // osThreadSuspend(InterruptHandle);
-      // sp_irq->SiteCount = sp_irq->SiteCount ? (sp_irq->SiteCount - 1U) : 0;
       /*Check if the interrupt source is valid*/
-      // if ((rp_irq->site) && (rp_irq->flag))
-      if (rp_irq && rp_irq->site)
-      {
-        /*Get the slave ID according to the interrupt number*/
-        // slave_id = rp_irq->site - 1U;
-        slave_id = (uint8_t)(log(rp_irq->site) / log(2.0));
-        /*Set data transmission target channel*/
-        MASTER_OBJECT->uartId = 0x01;
-        /*Detect whether it is interrupted for the first time*/
-        first_interrupt = interrupt_record & rp_irq->site;
-        /*Check the first access backplane sign*/
-        if (first_interrupt)
-        {
-          /*Read card type*/
-          mdRTU_Master_Codex(MASTER_OBJECT, MODBUS_CODE_17, slave_id, NULL, 0);
-        }
-        /*The board is not connected to the backplane for the first time*/
-        else
-        { /*Interrupt device table is not empty*/
-          if (sp_irq->TableCount)
-          { /*Look for known slaves in the interrupt table*/
-            tp_irq = Find_TargetSlave_AdoptId(sp_irq, slave_id);
-
-            /*如果是sp_irq->SiteCount >1,则需要按优先级排序（�???????????????????????个周期仅排序�???????????????????????次），否则直接根据板卡类型处�???????????????????????*/
-            /*Interrupt priority sorting is performed when the board is read back*/
-            // switch (sp_irq->pIRQ->TypeCoding)
-            switch (tp_irq->TypeCoding)
-            {
-            case Card_AnalogInput:
-            {
-              mdRTU_Master_Codex(MASTER_OBJECT, MODBUS_CODE_4, tp_irq->SlaveId, NULL, 0);
-            }
-            break;
-            case Card_DigitalInput:
-            {
-              mdRTU_Master_Codex(MASTER_OBJECT, MODBUS_CODE_2, tp_irq->SlaveId, NULL, 0);
-            }
-            break;
-            /*Invalid board, remove interrupt record table*/
-            default:
-            {
-              /*Read card type*/
-              // MASTER_OBJECT->mdRTU_MasterCodex(MASTER_OBJECT, MODBUS_CODE_17, slave_id, NULL, 0);
-              mdRTU_Master_Codex(MASTER_OBJECT, MODBUS_CODE_17, slave_id, NULL, 0);
-              // INCREMENT_COUNT();
-            }
-            break;
-            }
-          }
-        }
-        /*Clear the flag after the slave responds correctly*/
-        if (xTaskNotify(MasterHandle, slave_id, eSetValueWithoutOverwrite) == pdPASS)
-        // if (xQueueSend(SureQueueHandle, &slave_id, 10) == pdPASS)
-        {
-          if (first_interrupt)
-          {
-            /*Clear first access flag*/
-            interrupt_record &= ~rp_irq->site;
-          }
-          /*Process the next interrupt in the interrupt table*/
-          // INCREMENT_COUNT();
-        }
-        /*no response from slave*/
-        else
-        {
-          if (ps->Param.Slave_IRQ_Table.IRQ_Table_SetFlag == SAVE_SURE_CODE)
-          {
-#define CARD_ERROR_CODE 23U
-            /*Record error code*/
-            ps->Param.Error_Code = CARD_ERROR_CODE;
-          }
-          // INCREMENT_COUNT();
-          /*Read card type*/
-          // MASTER_OBJECT->mdRTU_MasterCodex(MASTER_OBJECT, MODBUS_CODE_17, slave_id);
-          // INCREMENT_COUNT();
-#if defined(USING_DEBUG)
-          // shellPrint(Shell_Object, "Error: Interrupt Slave 0x%02x No Answer!"__INFORMATION(),
-          //            slave_id);
-          shellPrint(Shell_Object, "Error: Interrupt Slave 0x%02x No Answer!\r\n",
-                     slave_id);
-#endif
-        }
-        /*Task notification delay leads to decrease in recognition success rate*/
-        osDelay(20);
-      }
-      else
-      {
-        /*Slave error handling*/
-#if defined(USING_DEBUG)
-        // shellPrint(Shell_Object, "Error: Invalid interrupt source: 0x%x."__INFORMATION(),
-        //            sp_irq->pReIRQ[sp_irq->SiteCount].site);
-        shellPrint(Shell_Object, "Error: Invalid interrupt source: 0x%x, table_site :0x%p\r\n.",
-                   rp_irq->site, rp_irq);
-#endif
-        // RESET_POINTER();
-        // INCREMENT_COUNT();
-        // rp_irq->flag = true;
-      }
+      DataTransmit_Handle(sp_irq, &requset_irq, ps);
       /*Resume interrupt processing task*/
       // osThreadResume(InterruptHandle);
       // osDelay(100);
@@ -1465,8 +1496,6 @@ void Transimt_Task(void const *argument)
     /*One cycle processing completed*/
     else
     {
-      // RESET_POINTER();
-
       ret = mdRTU_ReadCoils(Slave1_Object, OUT_DIGITAL_START_ADDR, VX_SIZE, wbit);
       if (ret == mdFALSE)
       {
@@ -1476,47 +1505,23 @@ void Transimt_Task(void const *argument)
       }
       else
       {
-        if (Check_Vx_State(wbit, copy_wbit, VX_SIZE) && sp_irq->TableCount && record_type.p_id)
-        // if (sp_irq->TableCount && record_type.p_id)
+#define Board_DigitalOutput_______________________________________________________________________Start
+        if (Check_Qx_State(wbit, copy_wbit, VX_SIZE) && sp_irq->TableCount && record_type.p_id)
         {
-          record_type.count = 0;
-          if (Save_TargetSlave_Id(sp_irq, Card_DigitalOutput, &record_type))
-          {
-            /*Set data transmission target channel*/
-            MASTER_OBJECT->uartId = 0x01;
-            for (uint8_t num = 0; num < TARGET_BOARD_NUM; num++)
-            {
-              /*Integrated signal source*/
-              uint8_t target_value = 0;
-              for (uint8_t bit = 0; bit < CARD_SIGNAL_MAX; bit++)
-              {
-                target_value |= (uint8_t)wbit[bit + num * CARD_SIGNAL_MAX] << bit;
-                // target_value = 0xFF;
-              }
-              if (num < record_type.count)
-              {
-                mdRTU_Master_Codex(MASTER_OBJECT, MODBUS_CODE_15, record_type.p_id[num], &target_value, 0);
-                // // if (xTaskNotify(MasterHandle, record_type.p_id[num], eSetValueWithoutOverwrite) == pdPASS)
-                // if (xTaskNotify(MasterHandle, record_type.p_id[num], eSetValueWithOverwrite) == pdPASS)
-                // {
-                // osDelay(10);
-                // }
-                xTaskNotify(MasterHandle, record_type.p_id[num], eSetValueWithOverwrite);
-                osDelay(50);
-                // xQueueSend(SureQueueHandle, &slave_id, 10);
-              }
-              else
-                break;
-            }
-            // osDelay(200);
-          }
+          /*Set data transmission target channel*/
+          MASTER_OBJECT->uartId = 0x01;
+
+          for (uint8_t i = 0; i < sizeof(di_report) / sizeof(Report_TypeDef); ++i)
+            Digital_Output(&di_report[i]);
         }
+#define Board_DigitalOutput_______________________________________________________________________End
       }
     }
     // /*Resume interrupt processing task*/
     // osThreadResume(InterruptHandle);
 
-    osDelay(10);
+    // osDelay(10);
+    // osDelay(1);
   }
   /* USER CODE END Transimt_Task */
 }
@@ -1527,37 +1532,29 @@ void Transimt_Task(void const *argument)
  * @param argument: Not used
  * @retval None
  */
-#define Get_Board_Icon(__type)                                 \
-  ((__type) == Card_None ? 0x00 : (__type) >= Card_Wifi ? 0x05 \
-                                                        : ((__type) / 0x10 + 1U))
 /* USER CODE END Header_Report_Task */
 void Report_Task(void const *argument)
 {
   /* USER CODE BEGIN Report_Task */
-
   mdSTATUS ret = mdFALSE;
-  mdU16 crbit = mdLow, cwbit = mdLow;
-  mdU16 at_state = mdLow;
   mdBit bit = mdLow;
-  uint16_t value = 0x0000;
   static bool first_flag = false;
   Save_HandleTypeDef *ps = (Save_HandleTypeDef *)argument;
   Save_User urinfo;
-  // osEvent user_event = {
-  //     .status = osOK,
-  //     .value.p = &urinfo,
-  // };
+  mdU16 buf[3U] = {0, 0, 0};
   /* Infinite loop */
   for (;;)
   {
     /*Clear last status*/
-    crbit = cwbit = 0;
-    for (uint16_t i = 0; i < VX_SIZE; i++)
+    memset(buf, 0x00, sizeof(buf));
+    for (uint16_t i = 0; i < DWIN_ADDR_SIZE; i++)
     {
       ret = mdRTU_ReadInputCoil(Slave1_Object, INPUT_DIGITAL_START_ADDR + i, bit);
-      crbit |= i > (CARD_SIGNAL_MAX - 1U) ? (mdU8)(bit << (i - CARD_SIGNAL_MAX)) : (mdU16)(bit << ((i % CARD_SIGNAL_MAX) + CARD_SIGNAL_MAX));
+      buf[0] |= i > (CARD_SIGNAL_MAX - 1U) ? (mdU8)(bit << (i - CARD_SIGNAL_MAX))
+                                           : (mdU16)(bit << ((i % CARD_SIGNAL_MAX) + CARD_SIGNAL_MAX));
       ret = mdRTU_ReadCoil(Slave1_Object, OUT_DIGITAL_START_ADDR + i, bit);
-      cwbit |= i > (CARD_SIGNAL_MAX - 1U) ? (mdU8)(bit << (i - CARD_SIGNAL_MAX)) : (mdU16)(bit << ((i % CARD_SIGNAL_MAX) + CARD_SIGNAL_MAX));
+      buf[2] |= i > (CARD_SIGNAL_MAX - 1U) ? (mdU8)(bit << (i - CARD_SIGNAL_MAX))
+                                           : (mdU16)(bit << ((i % CARD_SIGNAL_MAX) + CARD_SIGNAL_MAX));
       if (ret == mdFALSE)
       {
 #if defined(USING_DEBUG)
@@ -1569,18 +1566,10 @@ void Report_Task(void const *argument)
     // shellPrint(Shell_Object, "rbit = 0x%02x.\r\n", rbit);
 #endif
     /*Start signal*/
-    Dwin_Object->Dw_Write(Dwin_Object, SS_SIGNAL_ADDR, (uint8_t *)&crbit, sizeof(crbit));
-    osDelay(DELAY_TIMES);
-    /*User valve*/
-    Dwin_Object->Dw_Write(Dwin_Object, USER_TAP_ADDR, (uint8_t *)&cwbit, sizeof(cwbit));
-    osDelay(DELAY_TIMES);
-    /*Report the status of at module*/
-    at_state = Read_ATx_State() << 8U;
-    Dwin_Object->Dw_Write(Dwin_Object, ATX_STATE_ADDR, (uint8_t *)&at_state, sizeof(at_state));
+    buf[1] = Read_ATx_State() << 8U;
+    Dwin_Object->Dw_Write(Dwin_Object, SS_SIGNAL_ADDR, (uint8_t *)buf, sizeof(buf));
     osDelay(DELAY_TIMES);
     if (xQueueReceive(UserQueueHandle, &urinfo, 0) != pdPASS)
-    // user_event = osMailGet(UserQueueHandle, osWaitForever);
-    // if (user_event.status == osOK)
     {
 #if defined(USING_DEBUG)
       shellPrint(Shell_Object, "Error: Failed to receive user parameters!\r\n");
@@ -1601,15 +1590,12 @@ void Report_Task(void const *argument)
     /*Report error code*/
     if (ps->Param.Error_Code && (ps->Param.Slave_IRQ_Table.IRQ_Table_SetFlag == SAVE_SURE_CODE))
     {
-      value = (uint16_t)ps->Param.Error_Code;
-      value = (value >> 8U) | (value << 8U);
-      Dwin_Object->Dw_Write(Dwin_Object, ERROR_CODE_ADDR, (uint8_t *)&value, sizeof(value));
-      value = 0x0100;
+      buf[0] = (uint16_t)ps->Param.Error_Code;
+      buf[0] = (buf[0] >> 8U) | (buf[0] << 8U);
+      buf[1] = 0x0100;
+      Dwin_Object->Dw_Write(Dwin_Object, ERROR_CODE_ADDR, (uint8_t *)buf, sizeof(buf[0]) + sizeof(buf[1]));
       osDelay(DELAY_TIMES);
       Dwin_Object->Dw_Page(Dwin_Object, ERROR_PAGE);
-      osDelay(DELAY_TIMES);
-      /*Open error animation*/
-      Dwin_Object->Dw_Write(Dwin_Object, ERROR_ANMATION, (uint8_t *)&value, sizeof(value));
       first_flag = false;
     }
     else
@@ -1620,10 +1606,8 @@ void Report_Task(void const *argument)
         Dwin_Object->Dw_Page(Dwin_Object, MAIN_PAGE);
       }
     }
-#if defined(USING_FREERTOS)
-    // __exit:
-    // CUSTOM_FREE(pdata);
-#endif
+    /*Parameters are periodically written back to the holding registers*/
+    Param_WriteBack(ps);
     osDelay(1000);
   }
   /* USER CODE END Report_Task */
@@ -1633,6 +1617,10 @@ void Report_Task(void const *argument)
 void Report_Callback(void const *argument)
 {
   /* USER CODE BEGIN Report_Callback */
+
+#define Get_Board_Icon(__type)                                 \
+  ((__type) == Card_None ? 0x00 : (__type) >= Card_Wifi ? 0x05 \
+                                                        : ((__type) / 0x10 + 1U))
   /*Special attention should be paid here:
   the parameter transfer in the timer is only the timer identifier
   and cannot be used for other parameter pointer transfer*/
@@ -1647,7 +1635,8 @@ void Report_Callback(void const *argument)
   {
 #define BOARD_REPORT_SIZE (sizeof(uint16_t) * CARD_NUM_MAX)
 #if defined(USING_FREERTOS)
-    uint16_t *pBoard = (uint16_t *)CUSTOM_MALLOC(BOARD_REPORT_SIZE);
+    uint16_t board_buf[BOARD_REPORT_SIZE], *pBoard = board_buf;
+    // uint16_t *pBoard = (uint16_t *)CUSTOM_MALLOC(BOARD_REPORT_SIZE);
     if (pBoard)
     {
 #endif
@@ -1666,7 +1655,7 @@ void Report_Callback(void const *argument)
       Dwin_Object->Dw_Write(Dwin_Object, BOARD_TYPE_ADDR, (uint8_t *)pBoard, BOARD_REPORT_SIZE);
 #if defined(USING_FREERTOS)
     }
-    CUSTOM_FREE(pBoard);
+    // CUSTOM_FREE(pBoard);
 #endif
   }
   /*When not configured, update the board information at any time, otherwise it will

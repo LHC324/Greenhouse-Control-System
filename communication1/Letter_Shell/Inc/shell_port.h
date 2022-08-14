@@ -2,7 +2,7 @@
 #define _SHELL__PORT_H_
 
 #include "shell.h"
-#define USING_FREERTOS
+// #define USING_FREERTOS
 //#define USING_RTTHREAD
 
 /*定义shell缓冲区尺寸*/

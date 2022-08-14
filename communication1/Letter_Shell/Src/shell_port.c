@@ -5,8 +5,7 @@
  */
 #include "shell_port.h"
 #include "usart.h"
-//#include "io_uart.h"
-
+#include "io_uart.h"
 /*定义shell目标端口*/
 #if defined(USING_IO_UART)
 #define SHELL_TARGET_UART S_Uart1

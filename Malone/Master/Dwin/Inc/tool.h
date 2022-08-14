@@ -89,12 +89,15 @@ extern float sidefilter(SideParm *side, float input);
 
 /*是否使用用户定时器*/
 #define USING_USERTIMER0 0
-#define USING_USERTIMER1 1
-#define START_SIGNAL_MAX 3U
+#define USING_USERTIMER1 0
+#define START_SIGNAL_MAX 10U
 #define USER_COIL_OFFSET 4U
 #define BX_SIZE 7U
-#define VX_SIZE 16U // 5U
-#define T_5S 5U
+#define VX_SIZE 32U // 5U
+#define DWIN_ADDR_SIZE 16U
+#define DELAY_TIMES 5U
+#define ACTION_TIMES 800U
+#define T_5S (5U * 1000U / ACTION_TIMES)
 #define CURRENT_UPPER 16.0F
 #define CURRENT_LOWER 4.0F
 #define PI acosf(-1.0F)
@@ -127,13 +130,23 @@ extern float sidefilter(SideParm *side, float input);
 #define Open_Qx(__x) ((__x) < VX_SIZE ? wbit[__x] = true : false)
 #define Close_Qx(__x) ((__x) < VX_SIZE ? wbit[__x] = false : false)
 #define TARGET_BOARD_NUM ((VX_SIZE + (CARD_SIGNAL_MAX - 1U)) / CARD_SIGNAL_MAX)
+#define __Get_TargetBoardNum(card_size) \
+    ((VX_SIZE + (card_size - 1U)) / card_size)
     typedef struct
     {
         // IRQ_Code *pTIRQ;
-        // uint8_t size;
         uint8_t *p_id;
+        uint8_t id_size;
         uint8_t count;
     } R_TargetTypeDef;
+
+    typedef struct
+    {
+        Slave_IRQTableTypeDef *sp;
+        R_TargetTypeDef *pr;
+        Card_Tyte ctype;
+        uint8_t nums, *pwbit;
+    } Report_TypeDef;
 
     extern IRQ_Code IRQ[CARD_NUM_MAX];
     extern Slave_IRQTableTypeDef IRQ_Table;
@@ -145,7 +158,7 @@ extern float sidefilter(SideParm *side, float input);
     extern ListItem_t *Get_OneListItem(List_t *list, ListItem_t **p);
     extern IRQ_Code *Find_TargetSlave_AdoptId(Slave_IRQTableTypeDef *irq, uint8_t target_id);
     extern IRQ_Code *Find_TargetSlave_AdoptType(Slave_IRQTableTypeDef *irq, IRQ_Code *p_current);
-    extern bool Save_TargetSlave_Id(Slave_IRQTableTypeDef *irq, Card_Tyte type, R_TargetTypeDef *psave);
+    extern bool Save_TargetSlave_Id(Slave_IRQTableTypeDef *irq, Card_Tyte type, R_TargetTypeDef *psave, uint8_t nums);
     extern void IRQ_Coding(Slave_IRQTableTypeDef *irq, uint8_t code);
     extern uint16_t Get_Crc16(uint8_t *ptr, uint16_t length, uint16_t init_dat);
     extern void Endian_Swap(uint8_t *pData, uint8_t start, uint8_t length);

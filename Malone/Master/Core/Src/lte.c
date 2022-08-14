@@ -1,5 +1,6 @@
 #include "lte.h"
 #include "usart.h"
+#include "mdrtuslave.h"
 #include "shell_port.h"
 #if defined(USING_FREERTOS)
 #include "cmsis_os.h"
@@ -39,39 +40,38 @@ AT_Command Lte_list[] = {
 #define LTE_CMD_SIZE (sizeof(Lte_list) / sizeof(AT_Command))
 
 /*USR-C210模块AT指令列表*/
-AT_Command Wifi_list[] =
-	{
-		/*WIFI模块推出透传模式进入AT指令模式*/
-		{"+++", "a", Get_Ms(0.2F)},
-		/*WIFI模块响应后，主动发送”a“*/
-		{"a", "+Ok", Get_Ms(0.2F)},
-		/*关闭回显*/
-		//{"AT+E=OFF\r\n", "+OK", 500},
-		/*显示SSID*/
-		//{"AT+HSSID = OFF\r\n", "+OK", 500},
-		/*WIFI工作模式：AP + STA*/
-		{AP_STA_MODE, "+OK", Get_Ms(0.02F)},
-		/*设置路由器名称*/
-		{AP_NAME, "+OK", Get_Ms(0.02F)},
-		/*设置心跳数据:www.ynpax.com*/
-		{"AT+HEARTDT=7777772E796E7061782E636F6D\r\n", "+OK", Get_Ms(0.02F)},
-		/*SSID和密码不能程序输入，需要在现场根据用户方的WIFI设置通过WEB方式修改*/
-		/*设置WIFI登录SSID，密码*/
-		{"AT+WSTA=union,*!ynzfkj20091215!*\r\n", "+OK", Get_Ms(0.02F)},
-		/*透传云设置*/
-		{"AT+REGENA=CLOUD,FIRST\r\n", "+OK", Get_Ms(0.02F)},
-		/*设置STOCKA参数*/
-		{"AT+SOCKA=TCPC,cloud.usr.cn,15000\r\n", "+OK", Get_Ms(0.02F)},
-		/*设置搜索服务器和端口*/
-		{"AT+SEARCH=15000,cloud.usr.cn\r\n", "+OK", Get_Ms(0.02F)},
-		/*透传云ID，透传云密码*/
-		{WIFI_CLOUD_ID, "+OK", Get_Ms(0.02F)},
-		/*设置DHCP*/
-		{"AT+WANN=DHCP\r\n", "+OK", Get_Ms(0.02F)},
-		/*软件重启USR-C210*/
-		{"AT+Z\r\n", "+OK", Get_Ms(0.02F)},
-		/*设置透传模式*/
-		// {"AT+ENTM\r\n", "+OK", 50U}
+AT_Command Wifi_list[] = {
+	/*WIFI模块推出透传模式进入AT指令模式*/
+	{"+++", "a", Get_Ms(0.2F)},
+	/*WIFI模块响应后，主动发送”a“*/
+	{"a", "+Ok", Get_Ms(0.2F)},
+	/*关闭回显*/
+	//{"AT+E=OFF\r\n", "+OK", 500},
+	/*显示SSID*/
+	//{"AT+HSSID = OFF\r\n", "+OK", 500},
+	/*WIFI工作模式：AP + STA*/
+	{AP_STA_MODE, "+OK", Get_Ms(0.02F)},
+	/*设置路由器名称*/
+	{AP_NAME, "+OK", Get_Ms(0.02F)},
+	/*设置心跳数据:www.ynpax.com*/
+	{"AT+HEARTDT=7777772E796E7061782E636F6D\r\n", "+OK", Get_Ms(0.02F)},
+	/*SSID和密码不能程序输入，需要在现场根据用户方的WIFI设置通过WEB方式修改*/
+	/*设置WIFI登录SSID，密码*/
+	{"AT+WSTA=union,*!ynzfkj20091215!*\r\n", "+OK", Get_Ms(0.02F)},
+	/*透传云设置*/
+	{"AT+REGENA=CLOUD,FIRST\r\n", "+OK", Get_Ms(0.02F)},
+	/*设置STOCKA参数*/
+	{"AT+SOCKA=TCPC,cloud.usr.cn,15000\r\n", "+OK", Get_Ms(0.02F)},
+	/*设置搜索服务器和端口*/
+	{"AT+SEARCH=15000,cloud.usr.cn\r\n", "+OK", Get_Ms(0.02F)},
+	/*透传云ID，透传云密码*/
+	{WIFI_CLOUD_ID, "+OK", Get_Ms(0.02F)},
+	/*设置DHCP*/
+	{"AT+WANN=DHCP\r\n", "+OK", Get_Ms(0.02F)},
+	/*软件重启USR-C210*/
+	{"AT+Z\r\n", "+OK", Get_Ms(0.02F)},
+	/*设置透传模式*/
+	// {"AT+ENTM\r\n", "+OK", 50U}
 };
 
 #define WIFI_CMD_SIZE sizeof(Wifi_list) / sizeof(AT_Command)
@@ -100,6 +100,7 @@ static void Creat_AtObject(pAtHandle *pa, pAtHandle ps)
 #endif
 	(*pa)->Id = ps->Id;
 	(*pa)->huart = ps->huart;
+	(*pa)->pHandle = ps->pHandle;
 	(*pa)->Table = ps->Table;
 	(*pa)->Gpio = ps->Gpio;
 	(*pa)->Free_AtObject = Free_AtObject;
@@ -144,6 +145,7 @@ void MX_AtInit(void)
 		.Gpio = lte_gpio,
 		.Table = lte_table,
 		.huart = &huart2,
+		.pHandle = Slave1_Object->receiveBuffer,
 	};
 	Creat_AtObject(&Lte_Object, &lte);
 
@@ -161,6 +163,7 @@ void MX_AtInit(void)
 		.Gpio = wifi_gpio,
 		.Table = wifi_table,
 		.huart = &huart5,
+		.pHandle = Slave1_Object->receiveBuffer,
 	};
 	Creat_AtObject(&Wifi_Object, &wifi);
 }
@@ -191,6 +194,10 @@ static void At_SetDefault(pAtHandle pa)
 		{
 			if (!pa->AT_ExeAppointCmd(pa, pat))
 			{
+				pat = pa->Table.pList + pa->Table.Comm_Num - 1U;
+				shellPrint(Shell_Object, "@Error:Module configuration failed.Module is restarting...\r\n");
+				/*执行一次重启指令：防止卡死在AT模式下*/
+				pa->AT_ExeAppointCmd(pa, pat);
 				break;
 			}
 		}
@@ -207,52 +214,74 @@ static bool At_ExeAppointCmd(pAtHandle pa, AT_Command *pat)
 {
 #define RETRY_COUNTS 3U
 #define AT_CMD_ERROR "ERR"
+	ReceiveBufferHandle pb = (ReceiveBufferHandle)pa->pHandle;
 	uint8_t counts = 0;
 	bool result = true;
-	if (pa && pat)
+	if (pa && pat && pb)
 	{
-		uint8_t rx_size = strlen(pat->pRecv);
-		uint8_t *prdata = (uint8_t *)CUSTOM_MALLOC(rx_size);
-		if (prdata && rx_size)
+		while (result)
 		{
-			while (result)
+			mdClearReceiveBuffer(pb);
+			HAL_UART_Transmit(pa->huart, (uint8_t *)pat->pSend, strlen(pat->pSend), pat->WaitTimes);
+			uint32_t timer = HAL_GetTick();
+
+			while (!pb->count)
 			{
-				HAL_UART_Transmit(pa->huart, (uint8_t *)pat->pSend, strlen(pat->pSend), pat->WaitTimes);
-				if (HAL_UART_Receive(pa->huart, prdata, rx_size, pa->Table.pList->WaitTimes) == HAL_OK)
+				if (GET_TIMEOUT_FLAG(timer, HAL_GetTick(), pa->Table.pList->WaitTimes, HAL_MAX_DELAY))
+					break;
+				// osDelay(1);
+			}
+			if (pb->count)
+			{
+				pb->buf[pb->count] = '\0';
+				if (strstr((const char *)&(pb->buf), (const char *)pat->pRecv) == NULL)
 				{
-					if (strstr((const char *)prdata, (const char *)pat->pSend) == NULL)
-					{
-						counts++;
-#if defined(USING_DEBUG)
-						shellPrint(Shell_Object, "Response instruction:%s and %s mismatch.\r\n",
-								   prdata, pat->pSend);
-#endif
-					}
-					else
-					{
-#if defined(USING_DEBUG)
-						shellPrint(Shell_Object, "Command sent successfully.\r\n");
-#endif
-						break;
-					}
+					counts++;
+					shellPrint(Shell_Object, "Send:%sResponse instruction:%s and %s mismatch.\r\n",
+							   pat->pSend, pb->buf, pat->pRecv);
 				}
 				else
 				{
-					counts++;
-#if defined(USING_DEBUG)
-					shellPrint(Shell_Object, "At module does not respond!\r\n");
-#endif
-				}
-				if (counts >= RETRY_COUNTS)
-				{
-					result = false;
-#if defined(USING_DEBUG)
-					shellPrint(Shell_Object, "Retransmission exceeds the maximum number of times!\r\n");
-#endif
+					shellPrint(Shell_Object, "Command:%ssent successfully,Recive:%s",
+							   pat->pSend, pb->buf);
+					break;
 				}
 			}
+			else
+			{
+				counts++;
+				shellPrint(Shell_Object, "At module does not respond!data:%s.\r\n", pb->buf);
+			}
+			if (counts >= RETRY_COUNTS)
+			{
+				result = false;
+				shellPrint(Shell_Object, "@Error:Retransmission exceeds the maximum number of times!\r\n");
+			}
 		}
-		CUSTOM_FREE(prdata);
 	}
 	return result;
 }
+
+/**
+ * @brief	配置AT模块参数
+ * @details
+ * @param	None
+ * @retval	None
+ */
+void At_Config(void)
+{
+	osThreadSuspendAll();
+	MX_AtInit();
+
+	/*关闭4G模块空闲中断*/
+	if (Lte_Object)
+	{
+		shellPrint(Shell_Object, "@Success:At object allocation succeeded.\r\n");
+		Lte_Object->AT_SetDefault(Lte_Object);
+		Lte_Object->Free_AtObject(&Lte_Object);
+	}
+	else
+		shellPrint(Shell_Object, "@Error:At object allocation failed!\r\n");
+	osThreadResumeAll();
+}
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC), at_config, At_Config, configure);

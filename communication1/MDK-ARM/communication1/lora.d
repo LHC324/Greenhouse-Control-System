@@ -1,5 +1,6 @@
 communication1\lora.o: ..\Core\Src\lora.c
 communication1\lora.o: ../Core/Inc/lora.h
+communication1\lora.o: ../Core/Inc/tool.h
 communication1\lora.o: ../Core/Inc/main.h
 communication1\lora.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal.h
 communication1\lora.o: ../Core/Inc/stm32f0xx_hal_conf.h
@@ -27,6 +28,7 @@ communication1\lora.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_flash.h
 communication1\lora.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_flash_ex.h
 communication1\lora.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_i2c.h
 communication1\lora.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_i2c_ex.h
+communication1\lora.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_iwdg.h
 communication1\lora.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_pwr.h
 communication1\lora.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_pwr_ex.h
 communication1\lora.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_tim.h
@@ -54,7 +56,6 @@ communication1\lora.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/queue.
 communication1\lora.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/semphr.h
 communication1\lora.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/event_groups.h
 communication1\lora.o: ../Core/Inc/usart.h
-communication1\lora.o: ../Core/Inc/tool.h
 communication1\lora.o: ../Letter_Shell/Inc/shell_port.h
 communication1\lora.o: ../Letter_Shell/Inc/shell.h
 communication1\lora.o: ../Letter_Shell/Inc/shell_cfg.h

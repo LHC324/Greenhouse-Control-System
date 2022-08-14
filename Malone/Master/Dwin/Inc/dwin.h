@@ -124,6 +124,10 @@
 #define CARD_TYPE_BASE_ADDR 0x1080
 /*同类型板卡区分地址*/
 #define CARD_SAMETYPE_DIFF_ADDR 0x1090
+/*通信板卡数据地址*/
+#define CARD_COMM_REPORT_ADDR 0x10D0
+/*提示页面地址*/
+#define NOTE_PAGE_ADDR 0x10D4
 
 typedef struct Dwin_HandleTypeDef *pDwinHandle;
 typedef struct Dwin_HandleTypeDef DwinHandle;

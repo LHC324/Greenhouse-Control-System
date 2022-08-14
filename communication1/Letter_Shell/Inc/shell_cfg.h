@@ -116,7 +116,7 @@
  * @brief shell格式化输出的缓冲大小
  *        为0时不使用shell格式化输出
  */
-#define     SHELL_PRINT_BUFFER          256
+#define     SHELL_PRINT_BUFFER          160
 
 /**
  * @brief shell格式化输入的缓冲大小

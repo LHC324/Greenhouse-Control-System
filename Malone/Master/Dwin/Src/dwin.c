@@ -378,16 +378,22 @@ static void Dwin_Poll(pDwinHandle pd)
 	if ((pd->Uart.pRbuf[0] == 0x5A) && (pd->Uart.pRbuf[1] == 0xA5))
 	{
 		uint16_t addr = Get_Data(pd, 4U, DW_WORD);
+		/*检查CRC是否正确*/
+		uint16_t crc16 = Get_Crc16(&pd->Uart.pRbuf[3U], *pd->Uart.pRxCount - 5U, 0xFFFF);
+		crc16 = (crc16 >> 8U) | (crc16 << 8U);
 #if defined(USING_DEBUG)
 		// shellPrint(Shell_Object, "addr = 0x%x\r\n", addr);
 #endif
-		for (uint8_t i = 0; i < pd->Slave.Events_Size; i++)
+		if (crc16 == Get_Data(pd, *pd->Uart.pRxCount - 2U, DW_WORD))
 		{
-			if (pd->Slave.pMap[i].addr == addr)
+			for (uint8_t i = 0; i < pd->Slave.Events_Size; i++)
 			{
-				if (pd->Slave.pMap[i].event)
-					pd->Slave.pMap[i].event(pd, &i);
-				break;
+				if (pd->Slave.pMap[i].addr == addr)
+				{
+					if (pd->Slave.pMap[i].event)
+						pd->Slave.pMap[i].event(pd, &i);
+					break;
+				}
 			}
 		}
 	}
@@ -511,16 +517,16 @@ static void Restore_Factory(pDwinHandle pd, uint8_t *pSite)
 #if defined(USING_FREERTOS)
 		taskENTER_CRITICAL();
 #endif
-//		FLASH_Write(PARAM_SAVE_ADDRESS, (uint32_t *)&Save_InitPara, sizeof(Save_Param));
-			/*计算crc校验码*/
+		//		FLASH_Write(PARAM_SAVE_ADDRESS, (uint32_t *)&Save_InitPara, sizeof(Save_Param));
+		/*计算crc校验码*/
 		ps->Param.crc16 = Get_Crc16((uint8_t *)&ps->Param, sizeof(Save_Param) - sizeof(ps->Param.crc16), 0xFFFF);
 		FLASH_Write(PARAM_SAVE_ADDRESS, (uint32_t *)&ps->Param, sizeof(Save_Param));
 #if defined(USING_FREERTOS)
 		taskEXIT_CRITICAL();
 #endif
-		extern void Param_WriteBack(Save_HandleTypeDef * ps);
-		/*更新屏幕同时，更新远程参数*/
-		Param_WriteBack(ps);
+		// extern void Param_WriteBack(Save_HandleTypeDef * ps);
+		// /*更新屏幕同时，更新远程参数*/
+		// Param_WriteBack(ps);
 		Report_Backparam(Dwin_Object, &ps->Param);
 #if defined(USING_DEBUG)
 		shellPrint(Shell_Object, "success: Factory settings restored successfully!\r\n");
@@ -613,13 +619,17 @@ static void Password_Handle(pDwinHandle pd, uint8_t *pSite)
 static void Card_Handle(pDwinHandle pd, uint8_t *pSite)
 {
 #define NEXT_DELAT_TIMES 50U
-#define Get_Change_Page(__type)                                                                                                                 \
-	((__type) == Card_AnalogInput ? ANALOG_INPUT_PAGE : (__type) == Card_AnalogOutput ? ANALOG_OUTPUT_PAGE                                      \
-													: (__type) == Card_DigitalInput	  ? DIGITAL_INPUT_PAGE                                      \
-													: (__type) >= Card_Wifi			  ? (__type) <= Card_Lora2 ? COMMUNICATION_PAGE : NONE_PAGE \
-																					  : DIFITAL_OUTPUT_PAGE)
+#define Get_Change_Page(__type)                             \
+	((__type) == Card_AnalogInput	  ? ANALOG_INPUT_PAGE   \
+	 : (__type) == Card_AnalogOutput  ? ANALOG_OUTPUT_PAGE  \
+	 : (__type) == Card_DigitalInput  ? DIGITAL_INPUT_PAGE  \
+	 : (__type) == Card_DigitalOutput ? DIFITAL_OUTPUT_PAGE \
+	 : (__type) > Card_Lora2		  ? NONE_PAGE           \
+									  : COMMUNICATION_PAGE)
 #define Get_Board_Type(__pd) \
-	(!(__pd)->Uart.pRbuf[8U] ? Card_None : ((uint16_t)(__pd)->Uart.pRbuf[7U] << 8U | (__pd)->Uart.pRbuf[8U] - 1U) * 0x10)
+	(!(__pd)->Uart.pRbuf[8U] \
+		 ? Card_None         \
+		 : ((uint16_t)(__pd)->Uart.pRbuf[7U] << 8U | (__pd)->Uart.pRbuf[8U] - 1U) * 0x10)
 
 	TYPEDEF_STRUCT1 *sp_irq = (TYPEDEF_STRUCT1 *)pd->Slave.pHandle1;
 	TYPEDEF_STRUCT2 pSlave = (TYPEDEF_STRUCT2)pd->Slave.pHandle2;
@@ -628,11 +638,14 @@ static void Card_Handle(pDwinHandle pd, uint8_t *pSite)
 	Card_Tyte card_type = (Card_Tyte)Get_Board_Type(pd);
 	uint16_t report_addr, read_addr;
 	mdSTATUS ret = mdFALSE;
-	float analog_data[CARD_SIGNAL_MAX];
-	mdBit digital_data[CARD_SIGNAL_MAX];
-	mdU16 digital = 0x0000;
+	// float analog_data[CARD_SIGNAL_MAX];
+	// mdBit digital_data[CARD_SIGNAL_MAX * 4U];
+	mdBit temp_data[(CARD_SIGNAL_MAX * 4U * 2U) * 2U];
+	// mdU16 digital = 0x0000;
+	mdU16 digital[] = {0, 0, 0, 0};
 	IRQ_Code *p_target = NULL;
 
+	memset(temp_data, 0x00, sizeof(temp_data));
 #if defined(USING_DEBUG)
 	shellPrint(Shell_Object, "card_site = %d, card_addr = 0x%x.\r\n", card_site, pd->Slave.pMap[*pSite].addr);
 #endif
@@ -653,27 +666,6 @@ static void Card_Handle(pDwinHandle pd, uint8_t *pSite)
 		osDelay(NEXT_DELAT_TIMES);
 	}
 
-	// 	for (IRQ_Code *p = sp_irq->pIRQ; p < sp_irq->pIRQ + sp_irq->TableCount; p++)
-	// 	{
-	// 		if (p->SlaveId == card_site)
-	// 		{
-	// 			/*记录目标板卡句柄*/
-	// 			p_target = p;
-	// 			if (p->Number)
-	// 			{
-	// #if defined(USING_DEBUG)
-	// 				shellPrint(Shell_Object, "The number of boards of current type is:%d.\r\n", p->Number);
-	// #endif
-	// 			}
-	// 			/*交换高低字节*/
-	// 			uint16_t count = (uint16_t)(p->Number >> 8U) | (p->Number << 8U);
-	// 			pd->Dw_Write(pd, CARD_SAMETYPE_DIFF_ADDR, (uint8_t *)&count, sizeof(p->Number));
-	// 			// HAL_Delay(50);
-	// 			osDelay(NEXT_DELAT_TIMES);
-	// 			break;
-	// 		}
-	// 	}
-
 	if (sp_irq && (sp_irq->TableCount) && (card_site < CARD_NUM_MAX))
 	{
 		/*目标板卡在中断表中非空*/
@@ -684,46 +676,58 @@ static void Card_Handle(pDwinHandle pd, uint8_t *pSite)
 #endif
 			return;
 		}
+		/*通信板卡转为lora1*/
+		if (card_type == (Card_Tyte)64U)
+			card_type = Card_Lora1;
 		switch (card_type)
 		{
 		case Card_AnalogInput:
 		{
-			// read_addr = CARD_SIGNAL_MAX * card_site * 2U;
 			read_addr = CARD_SIGNAL_MAX * p_target->Number * 2U;
+			// ret = mdRTU_ReadInputRegisters(pSlave, read_addr, CARD_SIGNAL_MAX * sizeof(float) / 2U,
+			// 							   (mdU16 *)&analog_data);
 			ret = mdRTU_ReadInputRegisters(pSlave, read_addr, CARD_SIGNAL_MAX * sizeof(float) / 2U,
-										   (mdU16 *)&analog_data);
+										   (mdU16 *)&temp_data);
 			report_addr = ANALOG_INPUT_ADDR;
 		}
 		break;
 		case Card_AnalogOutput:
 		{
-			// read_addr = CARD_SIGNAL_MAX * card_site * 2U;
 			read_addr = CARD_SIGNAL_MAX * p_target->Number * 2U;
+			// ret = mdRTU_ReadHoldRegisters(pSlave, read_addr, CARD_SIGNAL_MAX * sizeof(float) / 2U,
+			// 							  (mdU16 *)&analog_data);
 			ret = mdRTU_ReadHoldRegisters(pSlave, read_addr, CARD_SIGNAL_MAX * sizeof(float) / 2U,
-										  (mdU16 *)&analog_data);
+										  (mdU16 *)&temp_data);
 			report_addr = ANALOG_OUTPUT_ADDR;
 		}
 		break;
 		case Card_DigitalInput:
 		{
-			// read_addr = CARD_SIGNAL_MAX * card_site;
 			read_addr = CARD_SIGNAL_MAX * p_target->Number;
-			ret = mdRTU_ReadInputCoils(pSlave, read_addr, CARD_SIGNAL_MAX, digital_data);
+			// ret = mdRTU_ReadInputCoils(pSlave, read_addr, CARD_SIGNAL_MAX, digital_data);
+			ret = mdRTU_ReadInputCoils(pSlave, read_addr, CARD_SIGNAL_MAX, temp_data);
 			report_addr = DIGITAL_INPUT_ADDR;
 		}
 		break;
 		case Card_DigitalOutput:
 		{
-			// read_addr = CARD_SIGNAL_MAX * card_site;
 			read_addr = CARD_SIGNAL_MAX * p_target->Number;
-			ret = mdRTU_ReadCoils(pSlave, read_addr, CARD_SIGNAL_MAX, digital_data);
+			// ret = mdRTU_ReadCoils(pSlave, read_addr, CARD_SIGNAL_MAX, digital_data);
+			ret = mdRTU_ReadCoils(pSlave, read_addr, CARD_SIGNAL_MAX, temp_data);
 			report_addr = DIGITAL_OUTPUT_ADDR;
 		}
 		break;
 		case Card_Lora1:
 		case Card_Lora2:
 		{
+			/*需要同时组合32路数字输入和数字输出*/
+			read_addr = (CARD_SIGNAL_MAX * 4U) * p_target->Number; //数字输入和输出的读取地址
+			ret = mdRTU_ReadInputCoils(pSlave, read_addr, (CARD_SIGNAL_MAX * 4U), temp_data);
+			ret = mdRTU_ReadCoils(pSlave, read_addr, (CARD_SIGNAL_MAX * 4U), &temp_data[CARD_SIGNAL_MAX * 4U]);
+			/*上报地址：以第一张数字输入板卡基地址开始，后续扩展需要重新分配更多迪文屏幕地址*/
+			report_addr = CARD_COMM_REPORT_ADDR;
 		}
+		break;
 		default:
 			break;
 		}
@@ -745,9 +749,11 @@ static void Card_Handle(pDwinHandle pd, uint8_t *pSite)
 			{
 				for (uint8_t i = 0; i < CARD_SIGNAL_MAX; i++)
 				{
-					Endian_Swap((uint8_t *)&analog_data[i], 0U, sizeof(float));
+					// Endian_Swap((uint8_t *)&analog_data[i], 0U, sizeof(float));
+					Endian_Swap((uint8_t *)&temp_data[i * sizeof(float)], 0U, sizeof(float));
 				}
-				pDest = (uint8_t *)&analog_data[0];
+				// pDest = (uint8_t *)&analog_data[0];
+				pDest = &temp_data[0];
 				rSize = CARD_SIGNAL_MAX * sizeof(float);
 			}
 			break;
@@ -756,23 +762,30 @@ static void Card_Handle(pDwinHandle pd, uint8_t *pSite)
 			{
 				for (uint8_t i = 0; i < CARD_SIGNAL_MAX; i++)
 				{
-					// uint8_t bit = digital_data[i] & 0x01;
-					// if (bit)
-					// 	digital |= (bit << i);
-					// else
-					// 	digital &= ~(bit << i);
-
-					digital |= (((mdU8)digital_data[i] & 0x01) << i);
+					// digital |= (((mdU8)digital_data[i] & 0x01) << i);
+					digital[0] |= ((temp_data[i] & 0x01) << i);
 				}
-				digital <<= 8U;
-				pDest = (uint8_t *)&digital;
-				rSize = sizeof(digital);
+				digital[0] <<= 8U;
+				pDest = (uint8_t *)&digital[0];
+				rSize = sizeof(digital[0]);
 			}
 			break;
 			case Card_Lora1:
 			case Card_Lora2:
-			{
+			{ /*组合32bit的DI、DO*/
+				for (uint8_t count = 0; count < sizeof(digital) / sizeof(digital[0]); count++)
+				{
+					for (uint8_t i = 0; i < CARD_SIGNAL_MAX * 2U; i++)
+					{
+						digital[count] |= ((temp_data[count * 16U + i] & 0x01) << i);
+					}
+					digital[count] = (digital[count] >> 8U) | (digital[count] << 8U);
+				}
+				pDest = (uint8_t *)&digital[0];
+				/*32bitDI+32bitDO*/
+				rSize = sizeof(digital);
 			}
+			break;
 			default:
 				// pDest = NULL, rSize = 0;
 				break;

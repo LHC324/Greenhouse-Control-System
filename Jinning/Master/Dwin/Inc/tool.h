@@ -89,7 +89,7 @@ extern float sidefilter(SideParm *side, float input);
 
 /*是否使用用户定时器*/
 #define USING_USERTIMER0 0
-#define USING_USERTIMER1 1
+#define USING_USERTIMER1 0
 #define START_SIGNAL_MAX 3U
 #define USER_COIL_OFFSET 4U
 #define BX_SIZE 7U

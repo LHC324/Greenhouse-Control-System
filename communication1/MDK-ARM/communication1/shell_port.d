@@ -30,6 +30,7 @@ communication1\shell_port.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_f
 communication1\shell_port.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_flash_ex.h
 communication1\shell_port.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_i2c.h
 communication1\shell_port.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_i2c_ex.h
+communication1\shell_port.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_iwdg.h
 communication1\shell_port.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_pwr.h
 communication1\shell_port.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_pwr_ex.h
 communication1\shell_port.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_tim.h
@@ -42,6 +43,7 @@ communication1\shell_port.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\math.h
 communication1\shell_port.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
 communication1\shell_port.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdarg.h
 communication1\shell_port.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
+communication1\shell_port.o: ../Core/Inc/io_uart.h
 communication1\shell_port.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.h
 communication1\shell_port.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
 communication1\shell_port.o: ../Core/Inc/FreeRTOSConfig.h

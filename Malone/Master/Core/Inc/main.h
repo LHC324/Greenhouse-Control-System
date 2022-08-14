@@ -53,7 +53,7 @@ extern "C"
 #define CURRENT_HARDWARE_VERSION 140
 #define CURRENT_SOFT_VERSION 150
 #define SYSTEM_VERSION() ((uint32_t)((CURRENT_HARDWARE_VERSION << 16U) | CURRENT_SOFT_VERSION))
-#define PARAM_BASE_ADDR 0x0008
+#define PARAM_BASE_ADDR 0x0010
 // #define MDUSER_NAME_ADDR  0x0038
 // #define SOFT_VERSION_ADDR 0x003A
 #define SAVE_SIZE 26U
@@ -140,36 +140,36 @@ extern "C"
 
   typedef struct
   {
-    float Ptank_max;
-    float Ptank_min;
-    float Pvap_outlet_max;
-    float Pvap_outlet_min;
-    float Pgas_soutlet_max;
-    float Pgas_soutlet_min;
-    float Ltank_max;
-    float Ltank_min;
-    float Ptoler_upper;
-    float Ptoler_lower;
-    float Ltoler_upper;
-    // float Ltoler_lower;
-    float PStank_supplement;
+    float Ptank_max;        //储槽压力上限
+    float Ptank_min;        //储槽压力下限
+    float Pvap_outlet_max;  //汽化器出口压力上限
+    float Pvap_outlet_min;  //汽化器出口压力下限
+    float Pgas_soutlet_max; //气站出口压力上限
+    float Pgas_soutlet_min; //气站出口压力下限
+    float Ltank_max;        //储槽液位高度上限
+    float Ltank_min;        //储槽液位高度下限
+    float Ptoler_upper;     //流量计量程上限
+    float Ptoler_lower;     //流量计量程下限
+    float Ltoler_upper;     //液位容差上限
+    // float Ltoler_lower; //液位容差下限
+    float PStank_supplement; //启动模式：储槽补压启动值
     /*Threshold 2*/
-    float PSspf_start;
-    float PSspf_stop;
-    float PSvap_outlet_Start;
-    float PSvap_outlet_stop;
-    float Pback_difference;
-    float Ptank_difference;
-    float PPvap_outlet_Start;
-    float PPvap_outlet_stop;
-    float PPspf_start;
-    float PPspf_stop;
-    float Ptank_limit;
-    float Ltank_limit;
-    float Htank;
-    float Rtank;
-    float LEtank;
-    float Dtank;
+    float PSspf_start;        //启动模式：储槽泄压启动值
+    float PSspf_stop;         //启动模式：储槽泄压停止值
+    float PSvap_outlet_Start; //启动模式：汽化器补压停止值
+    float PSvap_outlet_stop;  //启动模式：汽化器补压启动值
+    float Pback_difference;   //汽化器回压阈值
+    float Ptank_difference;   //储槽回压阈值
+    float PPvap_outlet_Start; //停机模式：汽化器泄压启动值
+    float PPvap_outlet_stop;  //停机模式：汽化器泄压停止值
+    float PPspf_start;        //停机模式储槽泄压启动值
+    float PPspf_stop;         //停机模式储槽泄压停止值
+    float Ptank_limit;        //安全策略：储槽压力阈值
+    float Ltank_limit;        //安全策略：储槽液位阈值
+    float Htank;              //储罐参数：储槽封头内高度
+    float Rtank;              //储罐参数：储槽圆柱半径
+    float LEtank;             //储罐参数：储槽圆体长度
+    float Dtank;              //储槽参数：储槽液体密度
 
     uint32_t Error_Code;
     uint16_t User_Name;

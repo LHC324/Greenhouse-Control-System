@@ -26,7 +26,6 @@
             "defines": [
                 "USE_HAL_DRIVER",
                 "STM32F030x8",
-                "USING_DEBUG",
                 "__CC_ARM",
                 "__arm__",
                 "__align(x)=",

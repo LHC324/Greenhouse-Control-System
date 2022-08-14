@@ -23,7 +23,7 @@ extern "C"
 #define WIFI_RELOAD
 
 /*定义设备ID*/
-#define LTE_DRIVERS_ID "76"
+#define LTE_DRIVERS_ID "81"
 #define WIFI_DRIVERS_ID "77"
 /*定义串口参数*/
 #define UART_PARAM "115200,8,1,NONE,NFC"
@@ -52,6 +52,8 @@ extern "C"
 #define RESTART_CMD "AT+Z\r\n"
 
 #define Get_Ms(__sec) ((uint32_t)((__sec)*1000U))
+#define GET_TIMEOUT_FLAG(Stime, Ctime, timeout, MAX) \
+	((Ctime) < (Stime) ? !!((((MAX) - (Stime)) + (Ctime)) > (timeout)) : !!((Ctime) - (Stime) > (timeout)))
 	typedef unsigned char (*event)(void);
 	typedef struct
 	{
@@ -86,6 +88,7 @@ extern "C"
 		AT_Table Table;
 		At_Gpio Gpio;
 		UART_HandleTypeDef *huart;
+		void *pHandle;
 		void (*AT_SetPin)(pAtHandle, Gpiox_info *, GPIO_PinState);
 		void (*AT_SetDefault)(pAtHandle);
 		bool (*AT_ExeAppointCmd)(pAtHandle, AT_Command *);

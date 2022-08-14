@@ -26,6 +26,7 @@ communication1\main.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_flash.h
 communication1\main.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_flash_ex.h
 communication1\main.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_i2c.h
 communication1\main.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_i2c_ex.h
+communication1\main.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_iwdg.h
 communication1\main.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_pwr.h
 communication1\main.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_pwr_ex.h
 communication1\main.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_tim.h
@@ -53,5 +54,8 @@ communication1\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/queue.
 communication1\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/semphr.h
 communication1\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/event_groups.h
 communication1\main.o: ../Core/Inc/dma.h
+communication1\main.o: ../Core/Inc/iwdg.h
+communication1\main.o: ../Core/Inc/tim.h
 communication1\main.o: ../Core/Inc/usart.h
 communication1\main.o: ../Core/Inc/gpio.h
+communication1\main.o: ../Core/Inc/io_uart.h

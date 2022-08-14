@@ -1,0 +1,17 @@
+{
+    "files.associations": {
+        "main.h": "c",
+        "stdbool.h": "c",
+        "shell_port.h": "c",
+        "adc.h": "c",
+        "shell.h": "c",
+        "usart.h": "c",
+        "mdrtuslave.h": "c",
+        "string.h": "c",
+        "mdcrc16.h": "c",
+        "io_signal.h": "c",
+        "cmsis_os.h": "c",
+        "at.h": "c",
+        "stdlib.h": "c"
+    }
+}

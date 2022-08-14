@@ -5,7 +5,7 @@
 extern "C"
 {
 #endif
-#include "main.h"
+#include "tool.h"
 #if defined(USING_RTTHREAD)
 #include "rtthread.h"
 #else
@@ -24,6 +24,10 @@ extern "C"
 #define DIGITAL_INPUT_NUMBERS 8U
 #define DIGITAL_INPUT_OFFSET 1U
 #define DIGITAL_OUTPUT_OFFSET 5U
+/*Lora模块调度时间*/
+#define LORA_SCHEDULE_TIMES 50U
+/*Lora模块无效ID号*/
+#define LORA_NULL_ID 0xFF
 
 /*定义Master发送缓冲区字节数*/
 #define PF_TX_SIZE 64U
@@ -73,6 +77,7 @@ extern "C"
         {
             List_t *Ready;
             List_t *Block;
+            ListItem_t *Ready_Iter, *Block_Iter;
             uint8_t Event_Id;
             uint8_t Period; /*阻塞设备调度周期*/
             bool First_Flag;
@@ -109,7 +114,11 @@ extern "C"
         void (*Lora_Transmit_Poll)(pLoraHandle);
         void (*Lora_TI_Recive)(pLoraHandle, DMA_HandleTypeDef *);
         bool (*Lora_MakeFrame)(pLoraHandle, Lora_Map *);
+        void (*Loara_Send)(pLoraHandle, uint8_t *, uint16_t);
+        bool (*Lora_Check_InputCoilState)(uint8_t *, uint8_t *, uint8_t);
+        void (*Loara_CallBack)(pLoraHandle, void *);
         UART_HandleTypeDef *huart;
+        Gpiox_info Cs;
         /*预留外部接口*/
         void *pHandle;
     } __attribute__((aligned(4)));

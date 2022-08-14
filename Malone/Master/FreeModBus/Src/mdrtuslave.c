@@ -409,8 +409,9 @@ mdVOID mdRTUHandleCode11(ModbusRTUSlaveHandler handler, mdU8 slave_id)
 mdVOID mdRTU_MasterCodex(ModbusRTUSlaveHandler handler, mdU8 fun_code, mdU8 slave_id, mdU8 *pdata, mdU8 len)
 {
     mdU8 data_size = 0, *pdest = NULL, *pBuf = NULL;
-    mdU8 read_data[] = {slave_id, fun_code, 0x00, 0x00, 0x00, 0x08};
-    mdU8 write_data[] = {slave_id, fun_code, 0x00, 0x00, 0x00, 0x08, 0x01, 0x00};
+    // mdU8 read_data[] = {slave_id, fun_code, 0x00, 0x00, 0x00, 0x08};
+    mdU8 read_data[] = {slave_id, fun_code, 0x00, 0x00, 0x00, (len < CARD_SIGNAL_MAX ? 8U : len)};
+    mdU8 write_data[] = {slave_id, fun_code, 0x00, 0x00, 0x00, 0x08, 0x01, 0x00, 0x00, 0x00, 0x00};
     mdU16 crc16;
 
     switch (fun_code)
@@ -426,7 +427,7 @@ mdVOID mdRTU_MasterCodex(ModbusRTUSlaveHandler handler, mdU8 fun_code, mdU8 slav
     case MODBUS_CODE_4:
     {
         data_size = sizeof(read_data);
-        read_data[5U] *= 2U;
+        // read_data[5U] *= 2U;
         pdest = read_data;
     }
     break;
@@ -440,10 +441,12 @@ mdVOID mdRTU_MasterCodex(ModbusRTUSlaveHandler handler, mdU8 fun_code, mdU8 slav
     /*写多个线圈*/
     case MODBUS_CODE_15:
     {
-        data_size = sizeof(write_data);
+        data_size = (len == 0x01) ? (sizeof(write_data) - 3U) : sizeof(write_data);
+
         if (pdata)
         {
-            write_data[7U] = *pdata;
+            // write_data[7U] = *pdata;
+            memcpy(&write_data[7U], pdata, len);
         }
         pdest = write_data;
     }
@@ -505,25 +508,6 @@ mdVOID mdRTUHandleCode46(ModbusRTUSlaveHandler handler, mdU16 regaddr, mdU16 reg
     counter += sizeof(crc16);
 
     handler->mdRTUPopChar(handler, pBuf, counter);
-    // HAL_UART_Transmit(&MDSLAVE1_UART, pBuf, counter, 0xFFFF);
-
-    // uint8_t i;
-    // g_tModS.TxCount = 0;
-    // g_tModS.TxBuf[g_tModS.TxCount++] = slaveaddr;
-    // g_tModS.TxBuf[g_tModS.TxCount++] = 0x46;
-    // g_tModS.TxBuf[g_tModS.TxCount++] = regaddr >> 8;
-    // g_tModS.TxBuf[g_tModS.TxCount++] = regaddr;
-    // g_tModS.TxBuf[g_tModS.TxCount++] = reglength >> 8;
-    // g_tModS.TxBuf[g_tModS.TxCount++] = reglength;
-    // g_tModS.TxBuf[g_tModS.TxCount++] = datalength;
-
-    // for (i = 0; i < datalength; i++)
-    // {
-    //     g_tModS.TxBuf[g_tModS.TxCount++] = dat[i];
-    // }
-
-    // MODS_SendWithCRC(g_tModS.TxBuf, g_tModS.TxCount);
-
 __exit:
 #if defined(USING_FREERTOS)
     CUSTOM_FREE(pBuf);
@@ -743,12 +727,15 @@ static mdVOID mdRTUHandleCode16(ModbusRTUSlaveHandler handler)
 #define MOD_WORD 1U
 #define MOD_DWORD 2U
 /*获取主机号*/
-#define Get_ModId(__obj) ((__obj)->Slave.pRbuf[0U])
+#define Get_ModId(__obj) ((__obj)->pRbuf[0U])
 /*获取Modbus功能号*/
-#define Get_ModFunCode(__obj) ((__obj)->Slave.pRbuf[1U])
+#define Get_ModFunCode(__obj) ((__obj)->pRbuf[1U])
 /*获取Modbus协议数据*/
-#define Get_Data(__ptr, __s, __size) \
-    ((__size) < 2U ? (((__ptr)->Slave.pRbuf[__s] << 8U) | ((__ptr)->Slave.pRbuf[__s + 1U])) : (((__ptr)->Slave.pRbuf[__s] << 24U) | ((__ptr)->Slave.pRbuf[__s + 1U] << 16U) | ((__ptr)->Slave.pRbuf[__s + 2U] << 8U) | ((__ptr)->Slave.pRbuf[__s + 3U])))
+#define Get_Data(__ptr, __s, __size)                                           \
+    ((__size) < 2U                                                             \
+         ? (((__ptr)->pRbuf[__s] << 8U) | ((__ptr)->pRbuf[__s + 1U]))          \
+         : (((__ptr)->pRbuf[__s] << 24U) | ((__ptr)->pRbuf[__s + 1U] << 16U) | \
+            ((__ptr)->pRbuf[__s + 2U] << 8U) | ((__ptr)->pRbuf[__s + 3U])))
 
 #define Get_MasterCrc(__buf, __count) \
     (ToU16((__buf)[(__count)-1U], (__buf)[(__count)-2U]))
@@ -765,8 +752,7 @@ static mdVOID portRtuMasterHandle(ModbusRTUSlaveHandler handler, uint8_t target_
     USER_TYPE *ptable = (USER_TYPE *)handler->puser;
     mdU16 startAddress = 0;
     mdU8 length = 0;
-    // typeof(ptable->pIRQ) p_target = Find_TargetSlave_AdoptId(ptable, target_slaveid);
-    typeof(ptable->pIRQ) p_target = Find_TargetSlave_AdoptId(ptable, p->pRbuf[0U]);
+    typeof(ptable->pIRQ) p_target = NULL;
 
     if (rx_count < 3U)
     {
@@ -779,23 +765,13 @@ static mdVOID portRtuMasterHandle(ModbusRTUSlaveHandler handler, uint8_t target_
         return;
     }
     /*首次识别板卡时核对id号，后面再次上电后不需要核对*/
-    if ((p->pRbuf[0U] != target_slaveid) && (ps->Param.Slave_IRQ_Table.IRQ_Table_SetFlag != SAVE_SURE_CODE))
+    if ((ps->Param.Slave_IRQ_Table.IRQ_Table_SetFlag != SAVE_SURE_CODE) && (Get_ModId(p) != target_slaveid))
     {
         handler->mdRTUError(handler, ERROR4);
         return;
     }
 
-    //     if (ptable->TableCount)
-    //     {
-    //         if (!p_target)
-    //         {
-    // #if defined(USING_DEBUG)
-    //             shellPrint(Shell_Object, "Error: The target board is not in the interrupt table." __INFORMATION());
-    // #endif
-    //             return;
-    //         }
-    //     }
-    switch (p->pRbuf[1U])
+    switch (Get_ModFunCode(p))
     {
         /*根据板卡信息编码中断表*/
     case MODBUS_CODE_17:
@@ -809,10 +785,10 @@ static mdVOID portRtuMasterHandle(ModbusRTUSlaveHandler handler, uint8_t target_
         // {
         // }
 
-#if defined(USING_DEBUG)
-        shellPrint(Shell_Object, "Note: The board is coded as 0x%02x.\r\n",
-                   p->pRbuf[3U]);
-#endif
+        // #if defined(USING_DEBUG)
+        //         shellPrint(Shell_Object, "@Note: The board is coded as 0x%02x.\r\n",
+        //                    p->pRbuf[3U]);
+        // #endif
     }
     break;
     /*读回的线圈状态写会主CPU寄存器组*/
@@ -830,6 +806,7 @@ static mdVOID portRtuMasterHandle(ModbusRTUSlaveHandler handler, uint8_t target_
         /*读回的输入线圈状态写回主CPU寄存器组*/
     case MODBUS_CODE_2:
     {
+        p_target = Find_TargetSlave_AdoptId(ptable, Get_ModId(p));
         if (!p_target)
         {
 #if defined(USING_DEBUG)
@@ -837,15 +814,14 @@ static mdVOID portRtuMasterHandle(ModbusRTUSlaveHandler handler, uint8_t target_
 #endif
             return;
         }
-        // startAddress = CARD_SIGNAL_MAX * target_slaveid;
-        startAddress = CARD_SIGNAL_MAX * p_target->Number;
         length = p->pRbuf[2];
-        // for (mdU8 i = 0; i < length; i++)
-        for (mdU8 i = 0; i < CARD_SIGNAL_MAX; i++)
+        startAddress = length * CARD_SIGNAL_MAX * p_target->Number;
+        mdU8 i = 0, j = 0;
+        for (i = 0; i < length; ++i)
         {
-            // handler->registerPool->mdWriteInputCoil(handler->registerPool, startAddress + i, ((p->pRbuf[3 + i / 8U] >> (i % 8U)) & 0x01));
-            // mdRTU_WriteInputCoil(handler, startAddress + i, ((p->pRbuf[3 + i / 8U] >> (i % 8U)) & 0x01));
-            mdRTU_WriteInputCoil(handler, startAddress + i, ((p->pRbuf[3U] >> (i % 8U)) & 0x01));
+            for (j = 0; j < CARD_SIGNAL_MAX; ++j)
+                mdRTU_WriteInputCoil(handler, startAddress + i * CARD_SIGNAL_MAX + j,
+                                     ((p->pRbuf[3U + i] >> (j % 8U)) & 0x01));
         }
     }
     break;
@@ -857,6 +833,7 @@ static mdVOID portRtuMasterHandle(ModbusRTUSlaveHandler handler, uint8_t target_
     /*读回的输入寄存器状态写回主CPU寄存器组*/
     case MODBUS_CODE_4:
     {
+        p_target = Find_TargetSlave_AdoptId(ptable, Get_ModId(p));
         if (!p_target)
         {
 #if defined(USING_DEBUG)
@@ -864,11 +841,9 @@ static mdVOID portRtuMasterHandle(ModbusRTUSlaveHandler handler, uint8_t target_
 #endif
             return;
         }
-        // startAddress = CARD_SIGNAL_MAX * 2U * target_slaveid;
         startAddress = CARD_SIGNAL_MAX * 2U * p_target->Number;
         length = p->pRbuf[2] / 2U;
         mdRTU_WriteInputRegisters(handler, startAddress, length, (mdU16 *)&p->pRbuf[3]);
-        // handler->registerPool->mdReadInputRegisters(handler->registerPool, startAddress, length, (mdU16 *)&p->pRbuf[3]);
     }
     break;
     default:
