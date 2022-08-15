@@ -48,7 +48,7 @@
 "communication1\cmsis_os.o"
 "communication1\heap_4.o"
 "communication1\port.o"
---strict --scatter "communication1\communication1.sct"
+--library_type=microlib --strict --scatter "communication1\communication1.sct"
 --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers
 --list ".\communication1\communication1.map" -o communication1\communication1.axf

@@ -239,12 +239,12 @@ float sidefilter(SideParm *side, float input)
 #endif
 
 #if defined(USING_DEBUG)
+uint8_t temp_buffer[256U];
 void Debug(const char *format, ...)
 {
     extern UART_HandleTypeDef huart1;
 #define DEBUG_UART huart1
     uint16_t len;
-    uint8_t temp_buffer[256U];
     va_list args;
 
     va_start(args, format);

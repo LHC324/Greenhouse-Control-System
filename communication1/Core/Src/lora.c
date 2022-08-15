@@ -402,6 +402,13 @@ void Lora_Recive_Poll(pLoraHandle pl)
                     !Find_ListItem(pl->Schedule.Ready, pl->Schedule.Event_Id) ? Add_ListItem(pl->Schedule.Ready,
                                                                                              pl->Schedule.Event_Id)
                                                                               : (void)false;
+                    /*此处极限容纳32个从机状态:取离散输入的后32字节空间作为状态存储*/
+                    if (pl->Schedule.Event_Id < sizeof(pd->Slave.pPools->InputCoils) / 2U)
+                    {
+                        if (pd->Slave.pPools->InputCoils[LORA_STATE_OFFSET + pl->Schedule.Event_Id] != 0xFF)
+                            *(bool *)pd->Slave.pHandle = false;
+                        pd->Slave.pPools->InputCoils[LORA_STATE_OFFSET + pl->Schedule.Event_Id] = 0xFF;
+                    }
                 }
                 Check_FirstFlag(pl);
                 /*对应从站正确响应*/
@@ -543,6 +550,7 @@ void Lora_Send(pLoraHandle pl, uint8_t *pdata, uint16_t size)
  */
 void Lora_Tansmit_Poll(pLoraHandle pl)
 {
+    pModbusHandle pd = (pModbusHandle)pl->pHandle;
     if (!pl || !pl->Schedule.Ready || !pl->Schedule.Block || !pl->Cs.pGPIOx)
         return;
 
@@ -634,6 +642,13 @@ void Lora_Tansmit_Poll(pLoraHandle pl)
         pl->Schedule.First_Flag &&listCURRENT_LIST_LENGTH(pl->Schedule.Ready)
             ? Remove_ListItem(pl->Schedule.Ready, pl->Schedule.Event_Id)
             : false;
+        /*目标从机离线*/
+        if (pd && (pl->Schedule.Event_Id < sizeof(pd->Slave.pPools->InputCoils) / 2U))
+        {
+            if (pd->Slave.pPools->InputCoils[LORA_STATE_OFFSET + pl->Schedule.Event_Id] != 0x00)
+                *(bool *)pd->Slave.pHandle = false;
+            pd->Slave.pPools->InputCoils[LORA_STATE_OFFSET + pl->Schedule.Event_Id] = 0x00;
+        }
 
         /*在此处递增事件，而不是在L_OK中*/
         Check_FirstFlag(pl);

@@ -28,6 +28,8 @@ extern "C"
 #define LORA_SCHEDULE_TIMES 50U
 /*Lora模块无效ID号*/
 #define LORA_NULL_ID 0xFF
+/*Lora从机离线/在线情况统计，存储时偏移量*/
+#define LORA_STATE_OFFSET 32U
 
 /*定义Master发送缓冲区字节数*/
 #define PF_TX_SIZE 64U

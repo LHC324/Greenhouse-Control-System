@@ -54,20 +54,6 @@ void Modbus_Handle(void)
  */
 static void Modbus_CallBack(pModbusHandle pd, Function_Code code)
 {
-    //    TYPEDEF_STRUCT *pflag = (TYPEDEF_STRUCT *)pd->Slave.pHandle;
-    //    if (pflag)
-    //    {
-    //        switch (code)
-    //        {
-    //        case ReportSeverId:
-    //        {
-    //            *pflag = true;
-    //        }
-    //        break;
-    //        default:
-    //            break;
-    //        }
-    //    }
     TYPEDEF_STRUCT *pflag = (TYPEDEF_STRUCT *)pd->Slave.pHandle;
     static bool check_flag = false;
     if (pd->Slave.pHandle)

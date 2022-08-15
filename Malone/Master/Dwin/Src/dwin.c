@@ -145,6 +145,7 @@ static void Create_DwinObject(pDwinHandle *pd, pDwinHandle ps)
 	(*pd)->Dw_Page = Dwin_PageChange;
 	(*pd)->Dw_Poll = Dwin_Poll;
 	(*pd)->Dw_Error = Dwin_ErrorHandle;
+	(*pd)->Dw_Delay = (void (*)(uint32_t))osDelay;
 	(*pd)->Master.pTbuf = pTxbuf;
 	(*pd)->Master.TxCount = 0U;
 	(*pd)->Master.TxSize = ps->Master.TxSize;
@@ -484,7 +485,9 @@ static void Dwin_EventHandle(pDwinHandle pd, uint8_t *pSite)
  */
 static void Dwin_ErrorHandle(pDwinHandle pd, uint8_t error_code, uint8_t site)
 {
+#define ERROR_NOTE_PAGE 30U
 	TYPEDEF_STRUCT tdata = (error_code == BELOW_LOWER_LIMIT) ? pd->Slave.pMap[site].lower : pd->Slave.pMap[site].upper;
+	uint16_t tarry[] = {0, 0, 0};
 #if defined(USING_DEBUG)
 	if (error_code == BELOW_LOWER_LIMIT)
 	{
@@ -492,12 +495,19 @@ static void Dwin_ErrorHandle(pDwinHandle pd, uint8_t error_code, uint8_t site)
 	}
 	else
 	{
+		tarry[0] = 0x0100;
 		shellPrint(Shell_Object, "Error: Above upper limit %.3f.\r\n", tdata);
 	}
 #endif
 	Endian_Swap((uint8_t *)&tdata, 0U, sizeof(TYPEDEF_STRUCT));
 	/*设置错误时将显示上下限*/
 	pd->Dw_Write(pd, pd->Slave.pMap[site].addr, (uint8_t *)&tdata, sizeof(TYPEDEF_STRUCT));
+	pd->Dw_Delay(NEXT_DELAT_TIMES);
+	/*切换到提示页面*/
+	pd->Dw_Page(pd, ERROR_NOTE_PAGE);
+	pd->Dw_Delay(NEXT_DELAT_TIMES);
+	memcpy(&tarry[1], (void *)&tdata, sizeof(tdata));
+	pd->Dw_Write(pd, NOTE_PAGE_ADDR, (uint8_t *)&tarry, sizeof(tarry));
 }
 
 /**
@@ -618,7 +628,6 @@ static void Password_Handle(pDwinHandle pd, uint8_t *pSite)
  */
 static void Card_Handle(pDwinHandle pd, uint8_t *pSite)
 {
-#define NEXT_DELAT_TIMES 50U
 #define Get_Change_Page(__type)                             \
 	((__type) == Card_AnalogInput	  ? ANALOG_INPUT_PAGE   \
 	 : (__type) == Card_AnalogOutput  ? ANALOG_OUTPUT_PAGE  \
@@ -640,9 +649,9 @@ static void Card_Handle(pDwinHandle pd, uint8_t *pSite)
 	mdSTATUS ret = mdFALSE;
 	// float analog_data[CARD_SIGNAL_MAX];
 	// mdBit digital_data[CARD_SIGNAL_MAX * 4U];
-	mdBit temp_data[(CARD_SIGNAL_MAX * 4U * 2U) * 2U];
+	mdBit temp_data[(CARD_COMM_OFFSET_MAX + 0x20) * 2U];
 	// mdU16 digital = 0x0000;
-	mdU16 digital[] = {0, 0, 0, 0};
+	mdU16 digital[] = {0, 0, 0, 0, 0, 0, 0, 0};
 	IRQ_Code *p_target = NULL;
 
 	memset(temp_data, 0x00, sizeof(temp_data));
@@ -663,7 +672,8 @@ static void Card_Handle(pDwinHandle pd, uint8_t *pSite)
 		uint16_t count = (uint16_t)(p_target->Number >> 8U) | (p_target->Number << 8U);
 		pd->Dw_Write(pd, CARD_SAMETYPE_DIFF_ADDR, (uint8_t *)&count, sizeof(p_target->Number));
 		// HAL_Delay(50);
-		osDelay(NEXT_DELAT_TIMES);
+		// osDelay(NEXT_DELAT_TIMES);
+		pd->Dw_Delay(NEXT_DELAT_TIMES);
 	}
 
 	if (sp_irq && (sp_irq->TableCount) && (card_site < CARD_NUM_MAX))
@@ -720,10 +730,10 @@ static void Card_Handle(pDwinHandle pd, uint8_t *pSite)
 		case Card_Lora1:
 		case Card_Lora2:
 		{
-			/*需要同时组合32路数字输入和数字输出*/
-			read_addr = (CARD_SIGNAL_MAX * 4U) * p_target->Number; //数字输入和输出的读取地址
-			ret = mdRTU_ReadInputCoils(pSlave, read_addr, (CARD_SIGNAL_MAX * 4U), temp_data);
-			ret = mdRTU_ReadCoils(pSlave, read_addr, (CARD_SIGNAL_MAX * 4U), &temp_data[CARD_SIGNAL_MAX * 4U]);
+			/*需要同时组合32路数字输入和数字输出，以及32bit在线码*/
+			read_addr = CARD_COMM_OFFSET_MAX * p_target->Number; //数字输入和输出的读取地址
+			ret = mdRTU_ReadInputCoils(pSlave, read_addr, CARD_COMM_OFFSET_MAX, temp_data);
+			ret = mdRTU_ReadCoils(pSlave, (read_addr / 2U), (CARD_COMM_OFFSET_MAX / 2U), &temp_data[CARD_COMM_OFFSET_MAX]);
 			/*上报地址：以第一张数字输入板卡基地址开始，后续扩展需要重新分配更多迪文屏幕地址*/
 			report_addr = CARD_COMM_REPORT_ADDR;
 		}
@@ -735,7 +745,8 @@ static void Card_Handle(pDwinHandle pd, uint8_t *pSite)
 		if (card_type != Card_None)
 		{ /*切换至指定板卡页面*/
 			pd->Dw_Page(pd, Get_Change_Page(card_type));
-			osDelay(NEXT_DELAT_TIMES);
+			// osDelay(NEXT_DELAT_TIMES);
+			pd->Dw_Delay(NEXT_DELAT_TIMES);
 #if defined(USING_DEBUG)
 			shellPrint(Shell_Object, "page = %d, card_code = 0x%x.\r\n", Get_Change_Page(card_type), card_type);
 #endif
@@ -772,7 +783,7 @@ static void Card_Handle(pDwinHandle pd, uint8_t *pSite)
 			break;
 			case Card_Lora1:
 			case Card_Lora2:
-			{ /*组合32bit的DI、DO*/
+			{ /*组合32bit的DI、DO, 在线状态*/
 				for (uint8_t count = 0; count < sizeof(digital) / sizeof(digital[0]); count++)
 				{
 					for (uint8_t i = 0; i < CARD_SIGNAL_MAX * 2U; i++)

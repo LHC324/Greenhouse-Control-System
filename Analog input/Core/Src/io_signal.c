@@ -90,6 +90,16 @@ void Write_Digital_IO(void)
 }
 #endif
 
+float Adc_Param[ADC_DMA_CHANNEL][2] = {
+    {0.008941086F, 0.54000809F},
+    {0.009064281F, 0.549737849F},
+    {0.00907234F, 0.550323292F},
+    {0.009069635F, 0.562189562F},
+    {0.009066967F, 0.532366555F},
+    {0.009035415F, 0.550182F},
+    {0.009066897F, 0.552336103F},
+    {0.009069586F, 0.554958248F},
+};
 /**
  * @brief	外部模拟量输入处理
  * @details	STM32F030F4共在io口扩展了8路模拟输入
@@ -99,11 +109,12 @@ void Write_Digital_IO(void)
 #if defined(USING_INPUT_REGISTER)
 void Read_Analog_Io(void)
 {
-#define MAX_RANGE 0.1F
+#define MAX_RANGE 0.025F
 #define CP 0.00911038F
 #define CQ 0.641778298F
     static bool first_flag = false;
     pModbusHandle pd = Modbus_Object;
+    uint16_t tdata = 0;
 /*滤波结构需要不断迭代，否则滤波器无法正常工作*/
 #if defined(KALMAN)
     KFP hkfp = {
@@ -146,9 +157,11 @@ void Read_Analog_Io(void)
 
     for (uint16_t ch = 0; ch < ADC_DMA_CHANNEL; ch++)
     { /*获取DAC值*/
-        pdata[ch] = CP * Get_AdcValue(ch) + CQ;
+        tdata = Get_AdcValue(ch);
+        pdata[ch] = Adc_Param[ch][0] * tdata + Adc_Param[ch][1];
+        // pdata[ch] = CP * tdata + CQ;
 #if defined(USING_DEBUG)
-        Debug("ch[%d]= %d.\r\n", ch, Get_AdcValue(ch));
+        Debug("ch[%d]= %d.\r\n", ch, tdata);
 #endif
         pdata[ch] = (pdata[ch] <= CQ) ? 0 : pdata[ch];
         /*滤波处理*/

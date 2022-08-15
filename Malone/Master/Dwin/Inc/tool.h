@@ -80,6 +80,8 @@ extern float sidefilter(SideParm *side, float input);
 #define CARD_TYPE_MAX 0x08
 /*每块板卡的信号数*/
 #define CARD_SIGNAL_MAX 0x08
+/*通信类板卡地址偏移量:32bit数据+32bit从机状态*/
+#define CARD_COMM_OFFSET_MAX 0x40
 /*板卡类型的优先级上限*/
 #define PRIORITY_MIN 0x00
 /*板卡类型的优先级上限*/

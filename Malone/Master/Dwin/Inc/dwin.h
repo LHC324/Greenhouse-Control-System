@@ -31,6 +31,7 @@
 #define COMMUNICATION_PAGE 0x0F
 #define ERROR_PAGE 0x10
 #define RESET_POEWR_NOTE_PAGE 28U
+#define NEXT_DELAT_TIMES 50U
 
 #define USER_NAME_ADDR 0x1000	  //用户名地址
 #define USER_PASSWORD_ADDR 0x1001 //用户密码
@@ -127,7 +128,7 @@
 /*通信板卡数据地址*/
 #define CARD_COMM_REPORT_ADDR 0x10D0
 /*提示页面地址*/
-#define NOTE_PAGE_ADDR 0x10D4
+#define NOTE_PAGE_ADDR 0x10D6
 
 typedef struct Dwin_HandleTypeDef *pDwinHandle;
 typedef struct Dwin_HandleTypeDef DwinHandle;
@@ -151,6 +152,7 @@ struct Dwin_HandleTypeDef
 	void (*Dw_Page)(pDwinHandle, uint16_t);
 	void (*Dw_Poll)(pDwinHandle);
 	void (*Dw_Error)(pDwinHandle, uint8_t, uint8_t);
+	void (*Dw_Delay)(uint32_t);
 	struct
 	{
 		uint8_t *pTbuf;

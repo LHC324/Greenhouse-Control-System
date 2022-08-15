@@ -360,14 +360,15 @@ static void shellWritePrompt(Shell *shell, unsigned char newline)
  * @param fmt 格式化字符串
  * @param ... 参数
  */
+char buffer[256U];
 void shellPrint(Shell *shell, char *fmt, ...)
 {
 #if defined(USING_RTOS)
-    char *buffer = (char *)SHELL_MALLOC(SHELL_PRINT_BUFFER);
+    // char *buffer = (char *)SHELL_MALLOC(SHELL_PRINT_BUFFER);
 #else
     char buffer[SHELL_PRINT_BUFFER];
 #endif
-
+    shell->lock(shell);
     va_list vargs;
 
     SHELL_ASSERT(shell, return );
@@ -378,8 +379,9 @@ void shellPrint(Shell *shell, char *fmt, ...)
 
     shellWriteString(shell, buffer);
 #if defined(USING_RTOS)
-    SHELL_FREE(buffer);
+    // SHELL_FREE(buffer);
 #endif
+    shell->unlock(shell);
 }
 #endif
 

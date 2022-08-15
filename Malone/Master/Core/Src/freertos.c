@@ -1016,6 +1016,8 @@ void Control_Task(void const *argument)
       {
 #if defined(USING_DEBUG)
         shellPrint(Shell_Object, "Error: Failed to send user parameters!\r\n");
+        shellPrint(Shell_Object, "OS remaining heap = %dByte, Mini heap = %dByte\r\n\r\n",
+                   xPortGetFreeHeapSize(), xPortGetMinimumEverFreeHeapSize());
 #endif
       }
     }
@@ -1325,7 +1327,7 @@ static void DataTransmit_Handle(Slave_IRQTableTypeDef *sp_irq, IRQ_Request *rp_i
           case Card_Lora1:
           case Card_Lora2:
           {
-            mdRTU_Master_Codex(MASTER_OBJECT, MODBUS_CODE_2, pt_irq->SlaveId, NULL, CARD_SIGNAL_MAX * 4U);
+            mdRTU_Master_Codex(MASTER_OBJECT, MODBUS_CODE_2, pt_irq->SlaveId, NULL, CARD_COMM_OFFSET_MAX);
           }
           break;
           /*Invalid board, remove interrupt record table*/
