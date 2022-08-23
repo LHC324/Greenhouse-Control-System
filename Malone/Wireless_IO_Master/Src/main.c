@@ -34,6 +34,7 @@
 #include "mdrtuslave.h"
 #include "L101.h"
 #include "io_uart.h"
+#include "io_signal.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -211,6 +212,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   if (htim->Instance == TIM1)
   {
     HAL_IncTick();
+    DDIx_TimerOut_Check(&DDIx);
   }
   /* USER CODE BEGIN Callback 1 */
   else if (htim->Instance == TIM3)

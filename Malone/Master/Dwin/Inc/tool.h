@@ -92,10 +92,11 @@ extern float sidefilter(SideParm *side, float input);
 /*是否使用用户定时器*/
 #define USING_USERTIMER0 0
 #define USING_USERTIMER1 0
-#define START_SIGNAL_MAX 10U
+#define START_SIGNAL_MAX 12U
 #define USER_COIL_OFFSET 4U
 #define BX_SIZE 7U
-#define VX_SIZE 32U // 5U
+#define VX_SIZE 32U             // 5U
+#define DIGITAL_OUTPUTOFFSET 4U //有线阀门偏移量
 #define DWIN_ADDR_SIZE 16U
 #define DELAY_TIMES 5U
 #define ACTION_TIMES 800U

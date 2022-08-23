@@ -405,9 +405,9 @@ void Lora_Recive_Poll(pLoraHandle pl)
                     /*此处极限容纳32个从机状态:取离散输入的后32字节空间作为状态存储*/
                     if (pl->Schedule.Event_Id < sizeof(pd->Slave.pPools->InputCoils) / 2U)
                     {
-                        if (pd->Slave.pPools->InputCoils[LORA_STATE_OFFSET + pl->Schedule.Event_Id] != 0xFF)
+                        if (pd->Slave.pPools->InputCoils[LORA_STATE_OFFSET + pl->Schedule.Event_Id] != 0x01)
                             *(bool *)pd->Slave.pHandle = false;
-                        pd->Slave.pPools->InputCoils[LORA_STATE_OFFSET + pl->Schedule.Event_Id] = 0xFF;
+                        pd->Slave.pPools->InputCoils[LORA_STATE_OFFSET + pl->Schedule.Event_Id] = 0x01;
                     }
                 }
                 Check_FirstFlag(pl);

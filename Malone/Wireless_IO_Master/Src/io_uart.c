@@ -203,18 +203,15 @@ HAL_StatusTypeDef HAL_SUART_Receive(IoUart_HandleTypeDef *huart, uint8_t *pData,
         return HAL_BUSY;
     }
 }
-
 /**
  * @brief	模拟串口RX接收中断处理
  * @details
  * @param	GPIO_Pin 触发中断引脚
  * @retval	None
  */
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+void HAL_Suart_EXTI_Callback(IoUart_HandleTypeDef *huart, uint16_t GPIO_Pin)
 {
-    IoUart_HandleTypeDef *huart = &S_Uart1;
-
-    if (GPIO_Pin == IO_UART_RX_Pin)
+    if (huart && (GPIO_Pin == IO_UART_RX_Pin))
     {
         if (huart->Rx.Status == COM_NONE_BIT)
         {
@@ -232,3 +229,32 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 #endif
     }
 }
+
+/**
+ * @brief	模拟串口RX接收中断处理
+ * @details
+ * @param	GPIO_Pin 触发中断引脚
+ * @retval	None
+ */
+// void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+// {
+//     IoUart_HandleTypeDef *huart = &S_Uart1;
+
+//     if (GPIO_Pin == IO_UART_RX_Pin)
+//     {
+//         if (huart->Rx.Status == COM_NONE_BIT)
+//         {
+//             huart->Rx.En = true;
+//             // huart->Tx.En = false; /////
+//             huart->Rx.Status = COM_START_BIT;
+//             /*Close falling edge interrupt*/
+//             HAL_NVIC_DisableIRQ(huart->Rx.IRQn);
+//             __HAL_TIM_SET_COUNTER(huart->Rx.Timer_Handle, 0U);
+//             __HAL_TIM_SET_AUTORELOAD(huart->Rx.Timer_Handle, huart->Rx.Sam_Times[Start_Recv]);
+//             HAL_TIM_Base_Start_IT(huart->Rx.Timer_Handle);
+//         }
+// #if defined(USING_DEBUG)
+//         // shellPrint(&shell, "Received a falling edge!\r\n");
+// #endif
+//     }
+// }

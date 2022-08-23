@@ -62,6 +62,7 @@ osThreadId shellHandle;
 osThreadId mdbusHandle;
 osThreadId read_ioHandle;
 osThreadId IWDGHandle;
+osMessageQId DDIx_QueueHandle;
 osTimerId Timer1Handle;
 osMutexId shellMutexHandle;
 osSemaphoreId ReciveHandle;
@@ -161,6 +162,11 @@ void MX_FREERTOS_Init(void)
   /* start timers, add new ones, ... */
   /* USER CODE END RTOS_TIMERS */
 
+  /* Create the queue(s) */
+  /* definition and creation of DDIx_Queue */
+  osMessageQDef(DDIx_Queue, 16, uint16_t);
+  DDIx_QueueHandle = osMessageCreate(osMessageQ(DDIx_Queue), NULL);
+
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
   /* USER CODE END RTOS_QUEUES */
@@ -176,7 +182,7 @@ void MX_FREERTOS_Init(void)
 
   /* definition and creation of read_io */
   osThreadDef(read_io, Read_Io_Task, osPriorityAboveNormal, 0, 256);
-  read_ioHandle = osThreadCreate(osThread(read_io), NULL);
+  read_ioHandle = osThreadCreate(osThread(read_io), &DDIx);
 
   /* definition and creation of IWDG */
   osThreadDef(IWDG, IWDG_Task, osPriorityRealtime, 0, 64);
@@ -202,16 +208,20 @@ void MX_FREERTOS_Init(void)
 void Shell_Task(void const *argument)
 {
   /* USER CODE BEGIN Shell_Task */
+  // HAL_NVIC_DisableIRQ(TIM1_UP_IRQn);
   HAL_NVIC_DisableIRQ(TIM3_IRQn);
   HAL_NVIC_DisableIRQ(TIM4_IRQn);
   HAL_NVIC_DisableIRQ(EXTI9_5_IRQn);
+  // HAL_NVIC_SetPriority(TIM1_UP_IRQn, 8, 0);
   HAL_NVIC_SetPriority(TIM3_IRQn, 6, 0);
   HAL_NVIC_SetPriority(TIM4_IRQn, 7, 0);
   HAL_NVIC_SetPriority(EXTI9_5_IRQn, 7, 0);
+  // HAL_NVIC_EnableIRQ(TIM1_UP_IRQn);
   HAL_NVIC_EnableIRQ(TIM3_IRQn);
   HAL_NVIC_EnableIRQ(TIM4_IRQn);
   HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
   At_GetSlaveId();
+  DDIx.pQueue = DDIx_QueueHandle;
   /* Infinite loop */
   for (;;)
   {
@@ -250,7 +260,7 @@ void Mdbus_Task(void const *argument)
 #endif
 #if defined(USING_DEBUG)
       shellWriteEndLine(&shell, "Received a data!\r\n", 19U);
-		  #endif
+#endif
     }
   }
 
@@ -275,10 +285,25 @@ void Mdbus_Task(void const *argument)
 void Read_Io_Task(void const *argument)
 {
   /* USER CODE BEGIN Read_Io_Task */
+  DDIx_HandleTypeDef *pDDIx = (DDIx_HandleTypeDef *)argument;
+  // uint16_t data = 0;
   /* Infinite loop */
   for (;;)
   {
-    Io_Digital_Handle();
+    // Io_Digital_Handle();
+    // Io_Analog_Handle();
+    // osDelay(50);
+
+    // if (xQueueReceive(DDIx_QueueHandle, &data, osWaitForever) == pdPASS)
+    // {
+    //   /* xRxedStructure now contains a copy of xMessage. */
+    //   Io_Digital_Handle(pDDIx->site, (uint8_t *)&data);
+    //   pDDIx->site = 0;
+    //   pDDIx->bits = 0;
+    // }
+
+    Io_Digital_Handle((uint8_t *)&pDDIx->bits);
+    pDDIx->bits = 0;
     Io_Analog_Handle();
     osDelay(50);
   }

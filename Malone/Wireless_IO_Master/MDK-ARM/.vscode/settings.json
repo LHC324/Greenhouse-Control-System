@@ -29,6 +29,7 @@
         "io_uart.h": "c",
         "shell_cfg.h": "c",
         "stdarg.h": "c",
-        "comdef.h": "c"
+        "comdef.h": "c",
+        "limits": "c"
     }
 }

@@ -980,9 +980,14 @@ void Control_Task(void const *argument)
 #define ERROR_CHECK
         {
           /*Filter sub sensor error detection*/
-          if (!error_code && (!site || (site % 2)))
+          if (!error_code && (site != 5U) && (!site || (site % 2)))
           {
-            error_code = *p <= 0.0F ? (3U * site + ERROR_BASE_CODE) : (*p < CURRENT_LOWER ? (3U * site + ERROR_BASE_CODE + 1U) : (*p > (CURRENT_LOWER + CURRENT_UPPER + 1.0F) ? (3U * site + ERROR_BASE_CODE + 2U) : 0));
+            error_code = *p <= 0.0F
+                             ? (3U * site + ERROR_BASE_CODE)
+                             : (*p < CURRENT_LOWER ? (3U * site + ERROR_BASE_CODE + 1U)
+                                                   : (*p > (CURRENT_LOWER + CURRENT_UPPER + 1.0F)
+                                                          ? (3U * site + ERROR_BASE_CODE + 2U)
+                                                          : 0));
           }
         }
         if (p < &ps->User.Ltank)
@@ -1419,10 +1424,11 @@ static void Digital_Output(Report_TypeDef *pdr)
           // pdest = &target_value[4U];
           // memcpy(target_value, &target_value[4U], pdr->pr->id_size - 4U);
           /*前移4bit:去掉气站部分有线阀数据,最后8bit数据重复*/
-          memcpy(pdr->pwbit, &pdr->pwbit[4U], VX_SIZE - 4U);
+          // memcpy(pdr->pwbit, &pdr->pwbit[4U], VX_SIZE - 4U);
         }
         break;
         default:
+          counts = base_offset = len = 0x00;
           break;
         }
         if (counts && num < pdr->pr->count)
@@ -1458,7 +1464,7 @@ void Transimt_Task(void const *argument)
   Save_HandleTypeDef *ps = &Save_Flash;
   IRQ_Request requset_irq = {0};
   mdSTATUS ret = mdFALSE;
-  mdBit wbit[VX_SIZE], copy_wbit[VX_SIZE];
+  mdBit digital_wbit[VX_SIZE], Lora_wbit[VX_SIZE], copy_wbit[VX_SIZE];
   uint8_t target_type[__Get_TargetBoardNum(CARD_SIGNAL_MAX)];
   R_TargetTypeDef record_type = {
       .count = 0,
@@ -1471,14 +1477,14 @@ void Transimt_Task(void const *argument)
           .pr = &record_type,
           .sp = sp_irq,
           .nums = __Get_TargetBoardNum(CARD_SIGNAL_MAX),
-          .pwbit = wbit,
+          .pwbit = digital_wbit,
       },
       {
           .ctype = Card_Lora1,
           .pr = &record_type,
           .sp = sp_irq,
           .nums = __Get_TargetBoardNum((CARD_SIGNAL_MAX * 4U)),
-          .pwbit = wbit,
+          .pwbit = Lora_wbit,
       },
   };
   /* Infinite loop */
@@ -1498,7 +1504,8 @@ void Transimt_Task(void const *argument)
     /*One cycle processing completed*/
     else
     {
-      ret = mdRTU_ReadCoils(Slave1_Object, OUT_DIGITAL_START_ADDR, VX_SIZE, wbit);
+      ret = mdRTU_ReadCoils(Slave1_Object, OUT_DIGITAL_START_ADDR, VX_SIZE, digital_wbit);
+      memcpy(Lora_wbit, &digital_wbit[DIGITAL_OUTPUTOFFSET], VX_SIZE - DIGITAL_OUTPUTOFFSET);
       if (ret == mdFALSE)
       {
 #if defined(USING_DEBUG)
@@ -1508,7 +1515,7 @@ void Transimt_Task(void const *argument)
       else
       {
 #define Board_DigitalOutput_______________________________________________________________________Start
-        if (Check_Qx_State(wbit, copy_wbit, VX_SIZE) && sp_irq->TableCount && record_type.p_id)
+        if (Check_Qx_State(digital_wbit, copy_wbit, VX_SIZE) && sp_irq->TableCount && record_type.p_id)
         {
           /*Set data transmission target channel*/
           MASTER_OBJECT->uartId = 0x01;

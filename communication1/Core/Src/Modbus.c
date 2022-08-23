@@ -202,7 +202,20 @@ void MX_ModbusInit(void)
     // memset(&Spool, 0x00, sizeof(ModbusPools));
     /*寄存器池*/
     Modbus.Slave.pPools = &Spool;
+    /*初始化寄存器池*/
 
+#if defined(USING_COIL)
+    memset(Spool.Coils, 0x00, sizeof(Spool.Coils));
+#endif
+#if defined(USING_INPUT_COIL)
+    memset(Spool.InputCoils, 0x00, sizeof(Spool.InputCoils));
+#endif
+#if defined(USING_INPUT_REGISTER)
+    memset(Spool.InputRegister, 0x00, sizeof(Spool.InputRegister));
+#endif
+#if defined(USING_HOLD_REGISTER)
+    memset(Spool.HoldRegister, 0x00, sizeof(Spool.HoldRegister));
+#endif
     Create_ModObject(&Modbus_Object, &Modbus);
 }
 
@@ -254,66 +267,68 @@ static void Modbus_Poll(pModbusHandle pd)
     {
         pd->Slave.Recive_FinishFlag = false;
 #endif /*首次调度时RXcount值被清零，导致计算crc时地址越界*/
-        if (pd->Slave.RxCount > 2U)
+        if ((pd->Slave.RxCount > 2U) && (pd->Slave.RxCount < pd->Slave.RxSize))
+        {
             crc16 = Get_Crc16(pd->Slave.pRbuf, pd->Slave.RxCount - 2U, 0xffff);
 #if defined(USING_DEBUG)
-        shellPrint(Shell_Object, "md_rxcount = %d,crc16 = 0x%X.\r\n", pd->Slave.RxCount,
-                   (uint16_t)((crc16 >> 8U) | (crc16 << 8U)));
+            shellPrint(Shell_Object, "md_rxcount = %d,crc16 = 0x%X.\r\n", pd->Slave.RxCount,
+                       (uint16_t)((crc16 >> 8U) | (crc16 << 8U)));
 #endif
-        /*检查是否是目标从站*/
-        if ((Get_ModId(pd) == pd->Slave_Id) && (Get_Data(pd, pd->Slave.RxCount - 2U, MOD_WORD) ==
-                                                ((uint16_t)((crc16 >> 8U) | (crc16 << 8U)))))
-        {
+            /*检查是否是目标从站*/
+            if ((Get_ModId(pd) == pd->Slave_Id) && (Get_Data(pd, pd->Slave.RxCount - 2U, MOD_WORD) ==
+                                                    ((uint16_t)((crc16 >> 8U) | (crc16 << 8U)))))
+            {
 #if defined(USING_DEBUG)
-            shellPrint(Shell_Object, "\r\nModbus_Buf[%d]:", pd->Slave.RxCount);
-            for (uint8_t i = 0; i < pd->Slave.RxCount; i++)
-            {
-                shellPrint(Shell_Object, "%02X ", pd->Slave.pRbuf[i]);
-            }
-            shellPrint(Shell_Object, "\r\n\r\n");
+                shellPrint(Shell_Object, "\r\nModbus_Buf[%d]:", pd->Slave.RxCount);
+                for (uint8_t i = 0; i < pd->Slave.RxCount; i++)
+                {
+                    shellPrint(Shell_Object, "%02X ", pd->Slave.pRbuf[i]);
+                }
+                shellPrint(Shell_Object, "\r\n\r\n");
 #endif
-            switch (Get_ModFunCode(pd))
-            {
+                switch (Get_ModFunCode(pd))
+                {
 #if defined(USING_COIL) || defined(USING_INPUT_COIL)
-            case ReadCoil:
-            case ReadInputCoil:
-            {
-                pd->Mod_ReadXCoil(pd);
-                pd->Mod_CallBack(pd, (Function_Code)Get_ModFunCode(pd));
-            }
-            break;
-            case WriteCoil:
-            case WriteCoils:
-            {
-                pd->Mod_WriteCoil(pd);
-            }
-            break;
+                case ReadCoil:
+                case ReadInputCoil:
+                {
+                    pd->Mod_ReadXCoil(pd);
+                    pd->Mod_CallBack(pd, (Function_Code)Get_ModFunCode(pd));
+                }
+                break;
+                case WriteCoil:
+                case WriteCoils:
+                {
+                    pd->Mod_WriteCoil(pd);
+                }
+                break;
 #endif
 #if defined(USING_INPUT_REGISTER) || defined(USING_HOLD_REGISTER)
-            case ReadHoldReg:
-            case ReadInputReg:
-            {
-                pd->Mod_ReadXRegister(pd);
-            }
-            break;
-            case WriteHoldReg:
-            case WriteHoldRegs:
-            {
-                pd->Mod_WriteHoldRegister(pd);
-            }
-            break;
-#endif
-            case ReportSeverId:
-            {
-                pd->Mod_ReportSeverId(pd);
-                pd->Mod_CallBack(pd, ReportSeverId);
-            }
-            break;
-            default:
+                case ReadHoldReg:
+                case ReadInputReg:
+                {
+                    pd->Mod_ReadXRegister(pd);
+                }
                 break;
+                case WriteHoldReg:
+                case WriteHoldRegs:
+                {
+                    pd->Mod_WriteHoldRegister(pd);
+                }
+                break;
+#endif
+                case ReportSeverId:
+                {
+                    pd->Mod_ReportSeverId(pd);
+                    pd->Mod_CallBack(pd, ReportSeverId);
+                }
+                break;
+                default:
+                    break;
+                }
             }
         }
-        memset(pd->Slave.pRbuf, 0x00, pd->Slave.RxCount);
+        memset(pd->Slave.pRbuf, 0x00, pd->Slave.RxSize);
         pd->Slave.RxCount = 0U;
         // MODIFY_REG(huart1.Instance->CR2, USART_CR2_ABREN, huart1.AdvancedInit.AutoBaudRateEnable);
         // MODIFY_REG(huart1.Instance->CR2, USART_CR2_ABRMODE, huart1.AdvancedInit.AutoBaudRateMode);
@@ -354,6 +369,35 @@ static bool Modbus_Operatex(pModbusHandle pd, uint16_t addr, uint8_t *pdata, uin
     uint8_t *pDest, *pSou;
     bool ret = false;
 
+    switch (pd->Slave.Reg_Type)
+    {
+#if defined(USING_COIL)
+    case Coil:
+        max = sizeof(pd->Slave.pPools->Coils);
+        break;
+#endif
+#if defined(USING_INPUT_COIL)
+    case InputCoil:
+        max = sizeof(pd->Slave.pPools->InputCoils);
+        break;
+#endif
+#if defined(USING_INPUT_REGISTER)
+    case InputRegister:
+        max = sizeof(pd->Slave.pPools->InputRegister);
+        break;
+#endif
+#if defined(USING_HOLD_REGISTER)
+    case HoldRegister:
+        max = sizeof(pd->Slave.pPools->HoldRegister);
+        break;
+#endif
+    default:
+        max = 0;
+        break;
+    }
+#if defined(USING_FREERTOS)
+    taskENTER_CRITICAL();
+#endif
     if ((addr < max) && (len <= max))
     {
 #if defined(USING_COIL) || defined(USING_INPUT_COIL) || defined(USING_INPUT_REGISTER) || defined(USING_HOLD_REGISTER)
@@ -366,12 +410,19 @@ static bool Modbus_Operatex(pModbusHandle pd, uint16_t addr, uint8_t *pdata, uin
             pDest = Get_RegAddr(pd, pd->Slave.Reg_Type, addr), pSou = pdata;
         }
 #endif
-#if defined(USING_DEBUG)
-        // shellPrint(Shell_Object,"pdest[%p] = 0x%X, psou[%p]= 0x%X, len= %d.\r\n", pDest, *pDest, pSou, *pSou, len);
-#endif
         if (memcpy(pDest, pSou, len))
+            // for (uint8_t *p = pDest; p < pDest + len;)
+            // {
+            //     *p++ = *pSou++;
+            // }
             ret = true;
     }
+#if defined(USING_FREERTOS)
+    taskEXIT_CRITICAL();
+#endif
+#if defined(USING_DEBUG)
+    shellPrint(Shell_Object, "pdest[%p] = 0x%X, psou[%p]= 0x%X, len= %d.\r\n", pDest, *pDest, pSou, *pSou, len);
+#endif
     return ret;
 }
 

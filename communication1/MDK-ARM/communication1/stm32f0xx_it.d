@@ -57,3 +57,6 @@ communication1\stm32f0xx_it.o: ../Middlewares/Third_Party/FreeRTOS/Source/includ
 communication1\stm32f0xx_it.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/queue.h
 communication1\stm32f0xx_it.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/semphr.h
 communication1\stm32f0xx_it.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/event_groups.h
+communication1\stm32f0xx_it.o: ../Letter_Shell/Inc/shell_port.h
+communication1\stm32f0xx_it.o: ../Letter_Shell/Inc/shell.h
+communication1\stm32f0xx_it.o: ../Letter_Shell/Inc/shell_cfg.h

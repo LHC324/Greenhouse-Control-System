@@ -11,6 +11,8 @@
         "l101.h": "c",
         "stm32f0xx_it.h": "c",
         "lora.h": "c",
-        "io_uart.h": "c"
+        "io_uart.h": "c",
+        "tool.h": "c",
+        "freertos.h": "c"
     }
 }

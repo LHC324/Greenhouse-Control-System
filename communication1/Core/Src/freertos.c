@@ -113,11 +113,14 @@ static void TIRQ_Handle(void)
   /*Interrupt signal generation*/
   static IRQ_Type irq = DisEnable;
   pModbusHandle pd = Modbus_Object;
+  GPIO_PinState PinState = GPIO_PIN_RESET;
 
   if (pd->Slave.pHandle)
   { /*The board model is read or the corresponding interrupt processing request is responded*/
     irq = *(bool *)pd->Slave.pHandle ? DisEnable : (IRQ_Type)(irq ^ DisEnable);
-    IRQ_Handle(irq);
+    PinState = (irq == DisEnable) ? GPIO_PIN_SET : GPIO_PIN_RESET;
+    HAL_GPIO_WritePin(M_IRQ_GPIO_Port, M_IRQ_Pin, PinState);
+    // IRQ_Handle(irq);
   }
 }
 /* USER CODE END 5 */
@@ -202,7 +205,7 @@ void MX_FREERTOS_Init(void)
   CpuHandle = osThreadCreate(osThread(Cpu), (void *)Modbus_Object);
 
   /* definition and creation of Lora */
-  osThreadDef(Lora, Lora_Task, osPriorityHigh, 0, 256);
+  osThreadDef(Lora, Lora_Task, osPriorityNormal, 0, 256);
   LoraHandle = osThreadCreate(osThread(Lora), (void *)Lora_Object);
 
   /* definition and creation of IWDG */

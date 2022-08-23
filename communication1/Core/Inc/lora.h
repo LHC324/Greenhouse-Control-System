@@ -13,7 +13,7 @@ extern "C"
 #endif
 
 /*支持的最大从机*/
-#define SLAVE_MAX_NUMBER 15U
+#define SLAVE_MAX_NUMBER 16U
 #define LORA_TX_BUF_SIZE 64U
 #define LORA_RX_BUF_SIZE 64U
 /*A型从机地址*/

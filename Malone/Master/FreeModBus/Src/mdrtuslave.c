@@ -410,7 +410,7 @@ mdVOID mdRTU_MasterCodex(ModbusRTUSlaveHandler handler, mdU8 fun_code, mdU8 slav
 {
     mdU8 data_size = 0, *pdest = NULL, *pBuf = NULL;
     // mdU8 read_data[] = {slave_id, fun_code, 0x00, 0x00, 0x00, 0x08};
-    mdU8 read_data[] = {slave_id, fun_code, 0x00, 0x00, 0x00, (len < CARD_SIGNAL_MAX ? 8U : len)};
+    mdU8 read_data[] = {slave_id, fun_code, 0x00, 0x00, len / 0xFF, (len < CARD_SIGNAL_MAX ? 8U : len % 0xFF)};
     mdU8 write_data[] = {slave_id, fun_code, 0x00, 0x00, 0x00, 0x08, 0x01, 0x00, 0x00, 0x00, 0x00};
     mdU16 crc16;
 

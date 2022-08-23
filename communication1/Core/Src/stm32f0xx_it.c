@@ -24,6 +24,7 @@
 /* USER CODE BEGIN Includes */
 #include "Modbus.h"
 #include "lora.h"
+#include "shell_port.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -68,15 +69,47 @@ extern UART_HandleTypeDef huart2;
 extern TIM_HandleTypeDef htim1;
 
 /* USER CODE BEGIN EV */
-
+// Hard Fault handler in C, with stack frame location and LR value
+// extracted from the assembly wrapper as input parameters
+void hard_fault_handler_c(unsigned int *hardfault_args, unsigned lr_value)
+{
+  unsigned int stacked_r0;
+  unsigned int stacked_r1;
+  unsigned int stacked_r2;
+  unsigned int stacked_r3;
+  unsigned int stacked_r12;
+  unsigned int stacked_lr;
+  unsigned int stacked_pc;
+  unsigned int stacked_psr;
+  stacked_r0 = ((unsigned long)hardfault_args[0]);
+  stacked_r1 = ((unsigned long)hardfault_args[1]);
+  stacked_r2 = ((unsigned long)hardfault_args[2]);
+  stacked_r3 = ((unsigned long)hardfault_args[3]);
+  stacked_r12 = ((unsigned long)hardfault_args[4]);
+  stacked_lr = ((unsigned long)hardfault_args[5]);
+  stacked_pc = ((unsigned long)hardfault_args[6]);
+  stacked_psr = ((unsigned long)hardfault_args[7]);
+  shellPrint(Shell_Object, "[Hard fault handler]\n");
+  shellPrint(Shell_Object, "R0 = %x\n", stacked_r0);
+  shellPrint(Shell_Object, "R1 = %x\n", stacked_r1);
+  shellPrint(Shell_Object, "R2 = %x\n", stacked_r2);
+  shellPrint(Shell_Object, "R3 = %x\n", stacked_r3);
+  shellPrint(Shell_Object, "R12 = %x\n", stacked_r12);
+  shellPrint(Shell_Object, "Stacked LR = %x\n", stacked_lr);
+  shellPrint(Shell_Object, "Stacked PC = %x\n", stacked_pc);
+  shellPrint(Shell_Object, "Stacked PSR = %x\n", stacked_psr);
+  shellPrint(Shell_Object, "Current LR = %x\n", lr_value);
+  while (1)
+    ; // endless loop
+}
 /* USER CODE END EV */
 
 /******************************************************************************/
 /*           Cortex-M0 Processor Interruption and Exception Handlers          */
 /******************************************************************************/
 /**
-  * @brief This function handles Non maskable interrupt.
-  */
+ * @brief This function handles Non maskable interrupt.
+ */
 void NMI_Handler(void)
 {
   /* USER CODE BEGIN NonMaskableInt_IRQn 0 */
@@ -90,18 +123,33 @@ void NMI_Handler(void)
 }
 
 /**
-  * @brief This function handles Hard fault interrupt.
-  */
-void HardFault_Handler(void)
+ * @brief This function handles Hard fault interrupt.
+ */
+__asm void HardFault_Handler(void)
 {
   /* USER CODE BEGIN HardFault_IRQn 0 */
-
+  /* Hard Fault handler wrapper in assembly
+    It extracts the location of stack frame and passes it to handler
+    in C as a pointer. We also extract the LR value as second
+    parameter. */
   /* USER CODE END HardFault_IRQn 0 */
-  while (1)
-  {
+  // while (1)
+  // {
     /* USER CODE BEGIN W1_HardFault_IRQn 0 */
+    MOVS r0, #4 
+    MOV r1, LR 
+    TST r0, r1 
+    BEQ stacking_used_MSP 
+    MRS R0, PSP ;first parameter - stacking was using PSP
+    B get_LR_and_branch
+stacking_used_MSP
+    MRS R0,MSP ;first parameter - stacking was using MSP
+get_LR_and_branch
+    MOV R1,LR ;second parameter is LR current value
+    LDR R2,=__cpp(hard_fault_handler_c)
+    BX R2
     /* USER CODE END W1_HardFault_IRQn 0 */
-  }
+  // }
 }
 
 /******************************************************************************/
@@ -112,8 +160,8 @@ void HardFault_Handler(void)
 /******************************************************************************/
 
 /**
-  * @brief This function handles EXTI line 4 to 15 interrupts.
-  */
+ * @brief This function handles EXTI line 4 to 15 interrupts.
+ */
 void EXTI4_15_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI4_15_IRQn 0 */
@@ -126,8 +174,8 @@ void EXTI4_15_IRQHandler(void)
 }
 
 /**
-  * @brief This function handles DMA1 channel 2 and 3 interrupts.
-  */
+ * @brief This function handles DMA1 channel 2 and 3 interrupts.
+ */
 void DMA1_Channel2_3_IRQHandler(void)
 {
   /* USER CODE BEGIN DMA1_Channel2_3_IRQn 0 */
@@ -141,8 +189,8 @@ void DMA1_Channel2_3_IRQHandler(void)
 }
 
 /**
-  * @brief This function handles DMA1 channel 4 and 5 interrupts.
-  */
+ * @brief This function handles DMA1 channel 4 and 5 interrupts.
+ */
 void DMA1_Channel4_5_IRQHandler(void)
 {
   /* USER CODE BEGIN DMA1_Channel4_5_IRQn 0 */
@@ -156,8 +204,8 @@ void DMA1_Channel4_5_IRQHandler(void)
 }
 
 /**
-  * @brief This function handles TIM1 break, update, trigger and commutation interrupts.
-  */
+ * @brief This function handles TIM1 break, update, trigger and commutation interrupts.
+ */
 void TIM1_BRK_UP_TRG_COM_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM1_BRK_UP_TRG_COM_IRQn 0 */
@@ -170,8 +218,8 @@ void TIM1_BRK_UP_TRG_COM_IRQHandler(void)
 }
 
 /**
-  * @brief This function handles TIM6 global interrupt.
-  */
+ * @brief This function handles TIM6 global interrupt.
+ */
 void TIM6_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM6_IRQn 0 */
@@ -184,8 +232,8 @@ void TIM6_IRQHandler(void)
 }
 
 /**
-  * @brief This function handles TIM14 global interrupt.
-  */
+ * @brief This function handles TIM14 global interrupt.
+ */
 void TIM14_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM14_IRQn 0 */
@@ -198,8 +246,8 @@ void TIM14_IRQHandler(void)
 }
 
 /**
-  * @brief This function handles USART1 global interrupt.
-  */
+ * @brief This function handles USART1 global interrupt.
+ */
 void USART1_IRQHandler(void)
 {
   /* USER CODE BEGIN USART1_IRQn 0 */
@@ -217,8 +265,8 @@ void USART1_IRQHandler(void)
 }
 
 /**
-  * @brief This function handles USART2 global interrupt.
-  */
+ * @brief This function handles USART2 global interrupt.
+ */
 void USART2_IRQHandler(void)
 {
   /* USER CODE BEGIN USART2_IRQn 0 */

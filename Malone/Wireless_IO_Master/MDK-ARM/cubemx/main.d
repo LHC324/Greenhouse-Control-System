@@ -68,3 +68,4 @@ cubemx\main.o: ../FreeModBus/Inc/mdregpool.h
 cubemx\main.o: ../FreeModBus/Inc/mdrecbuffer.h
 cubemx\main.o: ../Inc/L101.h
 cubemx\main.o: ../Inc/io_uart.h
+cubemx\main.o: ../Inc/io_signal.h

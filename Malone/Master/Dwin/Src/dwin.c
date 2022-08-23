@@ -733,7 +733,8 @@ static void Card_Handle(pDwinHandle pd, uint8_t *pSite)
 			/*需要同时组合32路数字输入和数字输出，以及32bit在线码*/
 			read_addr = CARD_COMM_OFFSET_MAX * p_target->Number; //数字输入和输出的读取地址
 			ret = mdRTU_ReadInputCoils(pSlave, read_addr, CARD_COMM_OFFSET_MAX, temp_data);
-			ret = mdRTU_ReadCoils(pSlave, (read_addr / 2U), (CARD_COMM_OFFSET_MAX / 2U), &temp_data[CARD_COMM_OFFSET_MAX]);
+			/*去掉气站部分的4个有线阀门*/
+			ret = mdRTU_ReadCoils(pSlave, DIGITAL_OUTPUTOFFSET + (read_addr / 2U), (CARD_COMM_OFFSET_MAX / 2U), &temp_data[CARD_COMM_OFFSET_MAX]);
 			/*上报地址：以第一张数字输入板卡基地址开始，后续扩展需要重新分配更多迪文屏幕地址*/
 			report_addr = CARD_COMM_REPORT_ADDR;
 		}

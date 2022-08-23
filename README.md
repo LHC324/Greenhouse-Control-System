@@ -197,3 +197,4 @@
 - **USB** 目前为USB虚拟串口功能。
 - **QSPI_FLASH 和 SDRAM** 暂时没有启用。
 - **通信板卡** 暂未接入使用。
+- **Stm32芯片烧机贴** https://www.amobbs.com/thread-5001725-1-1.html。
