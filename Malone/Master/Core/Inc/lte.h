@@ -23,7 +23,7 @@ extern "C"
 #define WIFI_RELOAD
 
 /*定义设备ID*/
-#define LTE_DRIVERS_ID "81"
+#define LTE_DRIVERS_ID "87"
 #define WIFI_DRIVERS_ID "77"
 /*定义串口参数*/
 #define UART_PARAM "115200,8,1,NONE,NFC"
@@ -40,7 +40,7 @@ extern "C"
 /*当前设备热点名称*/
 #define AP_NAME STR_MCRO() //"AT+WAP=PLC7_AP,NONE\r\n"
 /*当前设备云平台设备号*/
-#define LTE_CLOUD_ID "AT+REGCLOUD=000196390000000000" LTE_DRIVERS_ID ",SkdGAzyl\r\n"
+#define LTE_CLOUD_ID "AT+CLOUD=000196390000000000" LTE_DRIVERS_ID ",SkdGAzyl\r\n"
 /*WIFI设备云平台设备号*/
 #define WIFI_CLOUD_ID "AT+REGCLOUD=000196390000000000" WIFI_DRIVERS_ID ",SkdGAzyl\r\n"
 /*当前WIFI模块工作方式*/

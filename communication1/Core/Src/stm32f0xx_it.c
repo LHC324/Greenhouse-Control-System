@@ -125,6 +125,7 @@ void NMI_Handler(void)
 /**
  * @brief This function handles Hard fault interrupt.
  */
+#if !defined(USING_CMBACKTRACE)
 __asm void HardFault_Handler(void)
 {
   /* USER CODE BEGIN HardFault_IRQn 0 */
@@ -151,6 +152,7 @@ get_LR_and_branch
     /* USER CODE END W1_HardFault_IRQn 0 */
   // }
 }
+#endif
 
 /******************************************************************************/
 /* STM32F0xx Peripheral Interrupt Handlers                                    */

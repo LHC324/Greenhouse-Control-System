@@ -55,14 +55,14 @@ uint8_t Read_74HC165(Read_InfoTypeDef *pr)
     if (pr && (pr->p74HC138))
     {
         pr->p74HC138->pGpio[0].PinState = GPIO_PIN_RESET;
-        // pr->p74HC138->pGpio[1].PinState = GPIO_PIN_RESET;
+        pr->p74HC138->pGpio[1].PinState = GPIO_PIN_RESET;
         /*通过138译码获得PL信号*/
         Write_74HC138(pr->p74HC138);
         // __NOP();
         // __NOP();
         // __NOP();
         pr->p74HC138->pGpio[0].PinState = GPIO_PIN_SET;
-        // pr->p74HC138->pGpio[1].PinState = GPIO_PIN_SET;
+        pr->p74HC138->pGpio[1].PinState = GPIO_PIN_SET;
         /*PL来一个下降沿锁住数据*/
         Write_74HC138(pr->p74HC138);
         // HAL_Delay(1);

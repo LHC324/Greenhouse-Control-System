@@ -408,10 +408,13 @@ mdVOID mdRTUHandleCode11(ModbusRTUSlaveHandler handler, mdU8 slave_id)
 
 mdVOID mdRTU_MasterCodex(ModbusRTUSlaveHandler handler, mdU8 fun_code, mdU8 slave_id, mdU8 *pdata, mdU8 len)
 {
+#define DATA_MAX_SIZE ((CARD_SIGNAL_MAX * 4U) + 9U) //始终以最大所需数据定义内存空间
     mdU8 data_size = 0, *pdest = NULL, *pBuf = NULL;
     // mdU8 read_data[] = {slave_id, fun_code, 0x00, 0x00, 0x00, 0x08};
     mdU8 read_data[] = {slave_id, fun_code, 0x00, 0x00, len / 0xFF, (len < CARD_SIGNAL_MAX ? 8U : len % 0xFF)};
-    mdU8 write_data[] = {slave_id, fun_code, 0x00, 0x00, 0x00, 0x08, 0x01, 0x00, 0x00, 0x00, 0x00};
+    mdU8 write_data[DATA_MAX_SIZE] = {slave_id, fun_code, 0x00, 0x00, 0x00, 0x08, 0x01, 0x00, 0x00, 0x00, 0x00};
+    // mdU8 write_analog[(CARD_SIGNAL_MAX * 4U) + 9U] = {slave_id, fun_code, 0x00, 0x00, (len / 2U) / 0xFF,
+    //                                                   (len / 2U) % 0xFF, len};
     mdU16 crc16;
 
     switch (fun_code)
@@ -441,11 +444,22 @@ mdVOID mdRTU_MasterCodex(ModbusRTUSlaveHandler handler, mdU8 fun_code, mdU8 slav
     /*写多个线圈*/
     case MODBUS_CODE_15:
     {
-        data_size = (len == 0x01) ? (sizeof(write_data) - 3U) : sizeof(write_data);
+        data_size = (len == 0x01) ? 8U : 11U;
 
-        if (pdata)
+        if (pdata && (len < data_size))
         {
-            // write_data[7U] = *pdata;
+            memcpy(&write_data[7U], pdata, len);
+        }
+        pdest = write_data;
+    }
+    break;
+    /*写多个保持寄存器*/
+    case MODBUS_CODE_16:
+    {
+        data_size = sizeof(write_data);
+        if (pdata && (len < data_size))
+        {
+            write_data[4U] = (len / 2U) / 0xFF, write_data[5U] = (len / 2U) % 0xFF, write_data[6U] = len;
             memcpy(&write_data[7U], pdata, len);
         }
         pdest = write_data;

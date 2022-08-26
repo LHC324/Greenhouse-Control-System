@@ -19,34 +19,34 @@ static bool At_ExeAppointCmd(pAtHandle pa, AT_Command *pat);
 /*4G模块AT指令列表*/
 AT_Command Lte_list[] = {
 
-	{"+++", "a", Get_Ms(0.2F)},
-	{"a", "+ok", Get_Ms(0.2F)},
-	// {"AT+E=OFF\r\n", "OK", Get_Ms(0.2F)},
+	{"+++", "a", Get_Ms(2U)},
+	{"a", "+ok", Get_Ms(2U)},
+	{"AT+E=OFF\r\n", "OK", Get_Ms(0.2F)},
 
-	{"AT+HEARTDT=7777772E796E7061782E636F6D\r\n", "OK", Get_Ms(0.02F)},
+	{"AT+HEARTDT=7777772E796E7061782E636F6D\r\n", "OK", Get_Ms(0.2F)},
 
-	{"AT+WKMOD=NET\r\n", "OK", Get_Ms(0.02F)},
-	{"AT+SOCKAEN=ON\r\n", "OK", Get_Ms(0.02F)},
-	{"AT+SOCKASL=LONG\r\n", "OK", Get_Ms(0.02F)},
-	{"AT+SOCKA=TCP,clouddata.usr.cn,15000\r\n", "OK", Get_Ms(0.02F)},
+	{"AT+WKMOD=NET\r\n", "OK", Get_Ms(0.2F)},
+	{"AT+SOCKAEN=ON\r\n", "OK", Get_Ms(0.2F)},
+	{"AT+SOCKASL=LONG\r\n", "OK", Get_Ms(0.2F)},
+	{"AT+SOCKA=TCP,clouddata.usr.cn,15000\r\n", "OK", Get_Ms(0.2F)},
 
-	{"AT+REGEN=ON\r\n", "OK", Get_Ms(0.02F)},
-	{"AT+REGTP=CLOUD\r\n", "OK", Get_Ms(0.02F)},
-	{LTE_CLOUD_ID, "OK", Get_Ms(0.02F)},
-	{"AT+UART=" UART_PARAM "\r\n", "OK", Get_Ms(0.02F)},
-	{"AT+UARTFL=" PACKAGE_SIZE "\r\n", "OK", Get_Ms(0.02F)},
-	{"AT+Z\r\n", "OK", Get_Ms(0.02F)},
+	{"AT+REGEN=ON\r\n", "OK", Get_Ms(0.2F)},
+	{"AT+REGTP=CLOUD\r\n", "OK", Get_Ms(0.2F)},
+	{LTE_CLOUD_ID, "OK", Get_Ms(0.2F)},
+	{"AT+UART=" UART_PARAM "\r\n", "OK", Get_Ms(0.2F)},
+	{"AT+UARTFL=" PACKAGE_SIZE "\r\n", "OK", Get_Ms(0.2F)},
+	{"AT+Z\r\n", "OK", Get_Ms(0.2F)},
 };
 #define LTE_CMD_SIZE (sizeof(Lte_list) / sizeof(AT_Command))
 
 /*USR-C210模块AT指令列表*/
 AT_Command Wifi_list[] = {
 	/*WIFI模块推出透传模式进入AT指令模式*/
-	{"+++", "a", Get_Ms(0.2F)},
+	{"+++", "a", Get_Ms(2U)},
 	/*WIFI模块响应后，主动发送”a“*/
-	{"a", "+Ok", Get_Ms(0.2F)},
+	{"a", "+Ok", Get_Ms(2U)},
 	/*关闭回显*/
-	//{"AT+E=OFF\r\n", "+OK", 500},
+	{"AT+E=OFF\r\n", "+OK", Get_Ms(0.02F)},
 	/*显示SSID*/
 	//{"AT+HSSID = OFF\r\n", "+OK", 500},
 	/*WIFI工作模式：AP + STA*/

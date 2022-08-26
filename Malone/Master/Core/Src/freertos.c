@@ -446,10 +446,10 @@ void MX_FREERTOS_Init(void)
   }
   if (Slave2_Object)
   {
-    __HAL_UART_ENABLE_IT(&huart3, UART_IT_IDLE);
-    /*DMA buffer must point to an entity address!!!*/
-    HAL_UART_Receive_DMA(&huart3, mdRTU_Recive_Buf(Slave2_Object), MODBUS_PDU_SIZE_MAX);
-    Slave2_Object->receiveBuffer->count = 0U;
+    // __HAL_UART_ENABLE_IT(&huart3, UART_IT_IDLE);
+    // /*DMA buffer must point to an entity address!!!*/
+    // HAL_UART_Receive_DMA(&huart3, mdRTU_Recive_Buf(Slave2_Object), MODBUS_PDU_SIZE_MAX);
+    // Slave2_Object->receiveBuffer->count = 0U;
   }
   MX_DwinInit();
   if (Dwin_Object)
@@ -896,7 +896,7 @@ void IRQ_Task(void const *argument)
  * @param  size  Detection length
  * @retval true/false
  */
-bool Check_Qx_State(mdBit *p_current, mdBit *p_last, uint8_t size)
+bool Check_Bytes_State(mdBit *p_current, mdBit *p_last, uint8_t size)
 {
   bool ret = false;
   if (p_current && p_last && size)
@@ -1452,10 +1452,70 @@ static void Digital_Output(Report_TypeDef *pdr)
 }
 
 /**
+ * @brief Analog output scheduler.
+ * @param sp: Slave Interrupt Table Pointer
+ * @param pr: Reporting object pointer
+ * @param ctype: Target board type with lookup
+ * @retval None
+ */
+static void Analog_Output(Report_TypeDef *pdr)
+{
+  uint16_t num, count;
+
+  if (pdr && pdr->pr && pdr->sp && pdr->pwbit && (pdr->ctype != Card_None))
+  {
+    pdr->pr->count = 0;
+    if (Save_TargetSlave_Id(pdr->sp, pdr->ctype, pdr->pr, pdr->nums))
+    {
+      uint8_t target_value[pdr->wbit_size], len = 0, counts = 0, base_offset = 0;
+
+      for (num = 0; num < pdr->pr->count; ++num)
+      {
+        /*Integrated signal source*/
+        memset(target_value, 0x00, pdr->wbit_size);
+
+        switch (pdr->ctype)
+        {
+        case Card_AnalogOutput:
+        {
+          counts = CARD_SIGNAL_MAX, base_offset = (CARD_SIGNAL_MAX * 4U), len = (CARD_SIGNAL_MAX * 4U);
+          if (pdr->wbit_size)
+            /*Copy data to temporary buffer*/
+            memcpy(target_value, pdr->pwbit, pdr->wbit_size);
+          else
+            return;
+        }
+        break;
+        case Card_Lora1:
+        {
+          // counts = 0x04, base_offset = num * (CARD_SIGNAL_MAX * 4U), len = 0x04;
+        }
+        break;
+        default:
+          counts = base_offset = len = 0x00;
+          break;
+        }
+
+        /*Swap float type 4byte*/
+        // for (count = 0; count < counts; ++count)
+        // {
+        //   Endian_Swap(&target_value[count * sizeof(float)], base_offset * num + count * sizeof(float),
+        //               sizeof(float));
+        // }
+        mdRTU_Master_Codex(MASTER_OBJECT, MODBUS_CODE_16, pdr->pr->p_id[num], (mdU8 *)target_value, len);
+        xTaskNotify(MasterHandle, pdr->pr->p_id[num], eSetValueWithOverwrite);
+        osDelay(50);
+      }
+    }
+  }
+}
+
+/**
  * @brief Function implementing the Transimt thread.
  * @param argument: Not used
  * @retval None
  */
+mdBit digital_wbit[VX_SIZE], lora_wbit[VX_SIZE], analog_wbit[AO_SIZE], copy_wbit[VX_SIZE], copy1_wbit[AO_SIZE];
 /* USER CODE END Header_Transimt_Task */
 void Transimt_Task(void const *argument)
 {
@@ -1464,8 +1524,8 @@ void Transimt_Task(void const *argument)
   Save_HandleTypeDef *ps = &Save_Flash;
   IRQ_Request requset_irq = {0};
   mdSTATUS ret = mdFALSE;
-  mdBit digital_wbit[VX_SIZE], Lora_wbit[VX_SIZE], copy_wbit[VX_SIZE];
-  uint8_t target_type[__Get_TargetBoardNum(CARD_SIGNAL_MAX)];
+  // mdBit digital_wbit[VX_SIZE], lora_wbit[VX_SIZE], analog_wbit[AO_SIZE], copy_wbit[VX_SIZE];
+  uint8_t target_type[__Get_TargetBoardNum(VX_SIZE, CARD_SIGNAL_MAX)];
   R_TargetTypeDef record_type = {
       .count = 0,
       .p_id = target_type,
@@ -1476,15 +1536,27 @@ void Transimt_Task(void const *argument)
           .ctype = Card_DigitalOutput,
           .pr = &record_type,
           .sp = sp_irq,
-          .nums = __Get_TargetBoardNum(CARD_SIGNAL_MAX),
+          .nums = __Get_TargetBoardNum(VX_SIZE, CARD_SIGNAL_MAX),
           .pwbit = digital_wbit,
+          .wbit_size = sizeof(digital_wbit),
       },
       {
           .ctype = Card_Lora1,
           .pr = &record_type,
           .sp = sp_irq,
-          .nums = __Get_TargetBoardNum((CARD_SIGNAL_MAX * 4U)),
-          .pwbit = Lora_wbit,
+          .nums = __Get_TargetBoardNum(VX_SIZE, (CARD_SIGNAL_MAX * 4U)),
+          .pwbit = lora_wbit,
+          .wbit_size = sizeof(lora_wbit),
+      },
+  };
+  Report_TypeDef ao_report[1] = {
+      {
+          .ctype = Card_AnalogOutput,
+          .pr = &record_type,
+          .sp = sp_irq,
+          .nums = __Get_TargetBoardNum(AO_SIZE, (CARD_SIGNAL_MAX * 4U)),
+          .pwbit = analog_wbit,
+          .wbit_size = sizeof(analog_wbit),
       },
   };
   /* Infinite loop */
@@ -1505,7 +1577,8 @@ void Transimt_Task(void const *argument)
     else
     {
       ret = mdRTU_ReadCoils(Slave1_Object, OUT_DIGITAL_START_ADDR, VX_SIZE, digital_wbit);
-      memcpy(Lora_wbit, &digital_wbit[DIGITAL_OUTPUTOFFSET], VX_SIZE - DIGITAL_OUTPUTOFFSET);
+      ret = mdRTU_ReadHoldRegisters(Slave1_Object, OUT_ANALOG_START_ADDR, AO_SIZE / 2U, (mdU16 *)analog_wbit);
+      memcpy(lora_wbit, &digital_wbit[DIGITAL_OUTPUTOFFSET], VX_SIZE - DIGITAL_OUTPUTOFFSET);
       if (ret == mdFALSE)
       {
 #if defined(USING_DEBUG)
@@ -1515,15 +1588,27 @@ void Transimt_Task(void const *argument)
       else
       {
 #define Board_DigitalOutput_______________________________________________________________________Start
-        if (Check_Qx_State(digital_wbit, copy_wbit, VX_SIZE) && sp_irq->TableCount && record_type.p_id)
+        if (Check_Bytes_State(digital_wbit, copy_wbit, VX_SIZE) && sp_irq->TableCount && record_type.p_id)
         {
-          /*Set data transmission target channel*/
-          MASTER_OBJECT->uartId = 0x01;
-
           for (uint8_t i = 0; i < sizeof(di_report) / sizeof(Report_TypeDef); ++i)
+          {
+            /*Set data transmission target channel*/
+            MASTER_OBJECT->uartId = 0x01;
             Digital_Output(&di_report[i]);
+          }
         }
 #define Board_DigitalOutput_______________________________________________________________________End
+#define Board_AnalogOutput_______________________________________________________________________Start
+        if (Check_Bytes_State(analog_wbit, copy1_wbit, AO_SIZE) && sp_irq->TableCount && record_type.p_id)
+        {
+          for (uint8_t i = 0; i < sizeof(ao_report) / sizeof(Report_TypeDef); ++i)
+          {
+            /*Set data transmission target channel*/
+            MASTER_OBJECT->uartId = 0x01;
+            Analog_Output(&ao_report[i]);
+          }
+        }
+#define Board_AnalogOutput_______________________________________________________________________End
       }
     }
     // /*Resume interrupt processing task*/

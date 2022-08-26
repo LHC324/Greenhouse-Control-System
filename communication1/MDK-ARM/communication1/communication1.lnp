@@ -20,6 +20,7 @@
 "communication1\shell_companion.o"
 "communication1\shell_ext.o"
 "communication1\shell_port.o"
+"communication1\cm_backtrace.o"
 "communication1\stm32f0xx_hal_rcc.o"
 "communication1\stm32f0xx_hal_rcc_ex.o"
 "communication1\stm32f0xx_hal.o"

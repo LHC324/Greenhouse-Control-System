@@ -96,6 +96,7 @@ extern float sidefilter(SideParm *side, float input);
 #define USER_COIL_OFFSET 4U
 #define BX_SIZE 7U
 #define VX_SIZE 32U             // 5U
+#define AO_SIZE (8U * 4U)       /*模拟量输出占用的字节数*/
 #define DIGITAL_OUTPUTOFFSET 4U //有线阀门偏移量
 #define DWIN_ADDR_SIZE 16U
 #define DELAY_TIMES 5U
@@ -133,14 +134,14 @@ extern float sidefilter(SideParm *side, float input);
 #define Open_Qx(__x) ((__x) < VX_SIZE ? wbit[__x] = true : false)
 #define Close_Qx(__x) ((__x) < VX_SIZE ? wbit[__x] = false : false)
 #define TARGET_BOARD_NUM ((VX_SIZE + (CARD_SIGNAL_MAX - 1U)) / CARD_SIGNAL_MAX)
-#define __Get_TargetBoardNum(card_size) \
-    ((VX_SIZE + (card_size - 1U)) / card_size)
+#define __Get_TargetBoardNum(bytes, card_size) \
+    (card_size ? (bytes + (card_size - 1U)) / card_size : 0U)
     typedef struct
     {
         // IRQ_Code *pTIRQ;
-        uint8_t *p_id;
-        uint8_t id_size;
-        uint8_t count;
+        uint8_t *p_id;   /*指向目标板卡id存储对象*/
+        uint8_t id_size; /*id存储的数量*/
+        uint8_t count;   /*实际找到到的目标id数*/
     } R_TargetTypeDef;
 
     typedef struct
@@ -148,7 +149,8 @@ extern float sidefilter(SideParm *side, float input);
         Slave_IRQTableTypeDef *sp;
         R_TargetTypeDef *pr;
         Card_Tyte ctype;
-        uint8_t nums, *pwbit;
+        uint8_t nums, *pwbit; /*用户程序实际使用目标id板卡的数目；用户数据源*/
+        uint16_t wbit_size;   /*用户数据源大小*/
     } Report_TypeDef;
 
     extern IRQ_Code IRQ[CARD_NUM_MAX];

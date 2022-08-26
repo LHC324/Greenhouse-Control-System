@@ -55,19 +55,19 @@ void Modbus_Handle(void)
 static void Modbus_CallBack(pModbusHandle pd, Function_Code code)
 {
     TYPEDEF_STRUCT *pflag = (TYPEDEF_STRUCT *)pd->Slave.pHandle;
-    static bool check_flag = false;
+    // static bool check_flag = false;
     if (pd->Slave.pHandle)
     {
         switch (code)
         {
         case ReportSeverId:
         {
-            check_flag = true;
+            // check_flag = true;
         }
         break;
         case ReadInputCoil:
         {
-            if (check_flag)
+            // if (check_flag)
             {
                 *pflag = true;
             }
@@ -396,7 +396,7 @@ static bool Modbus_Operatex(pModbusHandle pd, uint16_t addr, uint8_t *pdata, uin
         break;
     }
 #if defined(USING_FREERTOS)
-    taskENTER_CRITICAL();
+    // taskENTER_CRITICAL();
 #endif
     if ((addr < max) && (len <= max))
     {
@@ -416,12 +416,14 @@ static bool Modbus_Operatex(pModbusHandle pd, uint16_t addr, uint8_t *pdata, uin
             //     *p++ = *pSou++;
             // }
             ret = true;
+        // __DSB();
+        // __DMB();
     }
 #if defined(USING_FREERTOS)
-    taskEXIT_CRITICAL();
+    // taskEXIT_CRITICAL();
 #endif
 #if defined(USING_DEBUG)
-    shellPrint(Shell_Object, "pdest[%p] = 0x%X, psou[%p]= 0x%X, len= %d.\r\n", pDest, *pDest, pSou, *pSou, len);
+    shellPrint(Shell_Object, "pdest[%#x] = %#X, psou[%#x]= %#X, len= %d.\r\n", pDest, *pDest, pSou, *pSou, len);
 #endif
     return ret;
 }

@@ -60,7 +60,7 @@ void Mcp48xx_Write(Dac_HandleTypeDef *p_ch, uint16_t data)
  */
 void Output_Current(Dac_HandleTypeDef *p_ch, float data)
 {
-#define CURRENT_MAX 20.0F
+#define CURRENT_MAX 21.0F
 	/*浮点数电流值转换为uint16_t*/
 	uint16_t value = (uint16_t)(gDac_OutPrarm[p_ch->Channel][0] * data + gDac_OutPrarm[p_ch->Channel][1]);
 

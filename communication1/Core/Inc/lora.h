@@ -38,6 +38,8 @@ extern "C"
 #define SUSPEND_TIMES 3U
 /*30s增加一个离线设备扫描*/
 #define TOTAL_SUM 5U
+/*三轮调度均离线：则认为从机掉线，主动清除状态*/
+#define SCHEDULING_COUNTS 3U
     /*Enter键值*/
     // #define ENTER_CODE 0x2F
     typedef enum
@@ -65,6 +67,7 @@ extern "C"
             uint8_t Channel;
         } Frame_Head;
         uint8_t Slave_Id;
+        uint8_t schedule_counts; /*调度次数*/
         // bool (*func)(void *);
     } Lora_Map;
 

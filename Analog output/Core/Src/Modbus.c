@@ -143,11 +143,12 @@ void MX_ModbusInit(void)
     static bool Read_Flag = false;
     // extern Save_HandleTypeDef Save_Flash;
     MdbusHandle Modbus;
-    uint8_t slave_id = Get_CardId() & 0x0F;
-
+    // uint8_t slave_id = Get_CardId() & 0x0F;
+    uint16_t card_code = Get_CardId();
+    uint8_t slave_id = card_code & 0x0F, type_id = card_code & 0xF0;
     // Modbus.Slave_Id = SLAVE_ADDRESS;
 #if defined(USING_DEBUG)
-    Debug("Board id is 0x%02x, slave id is 0x%02x.\r\n", Get_CardId(), slave_id);
+    Debug("Board id is 0x%02x, slave id is 0x%02x.\r\n", type_id, slave_id);
 #endif
 
     /*从站ID通过卡槽编码确定*/

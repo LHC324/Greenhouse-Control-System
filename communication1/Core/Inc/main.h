@@ -45,6 +45,7 @@ extern "C" {
 #define USING_FREERTOS
 #define USING_SHELL
 #define USING_IO_UART
+// #define USING_CMBACKTRACE 
 #define CUSTOM_MALLOC pvPortMalloc
 #define CUSTOM_FREE vPortFree
 /* USER CODE END ET */

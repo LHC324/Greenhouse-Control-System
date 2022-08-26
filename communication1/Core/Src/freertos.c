@@ -29,11 +29,14 @@
 #include "Modbus.h"
 #include "lora.h"
 #include "shell_port.h"
+/*https://www.cnblogs.com/ydmblog/p/15308372.html*/
+#include <cm_backtrace.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-
+#define HARDWARE_VERSION "V1.0.0"
+#define SOFTWARE_VERSION "V0.1.0"
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -193,6 +196,12 @@ void MX_FREERTOS_Init(void)
     HAL_UART_Receive_DMA(Lora_Object->huart, Lora_Object->Slave.pRbuf, Lora_Object->Slave.RxSize);
     Lora_Object->Slave.RxCount = 0U;
   }
+#if defined(USING_CMBACKTRACE)
+  SCB->CCR |= (1 << 3); /* bit3: UNALIGN_TRP. */
+  SCB->CCR |= (1 << 4); /* bit4: DIV_0_TRP. */
+  /* CmBacktrace initialize */
+  cm_backtrace_init("communication1", HARDWARE_VERSION, SOFTWARE_VERSION);
+#endif
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */

@@ -11,8 +11,8 @@
 #include "main.h"
 
 #define Slave_ADDRESS 0x02
-#define MOD_RX_BUF_SIZE 64U
-#define MOD_TX_BUF_SIZE 64U
+#define MOD_RX_BUF_SIZE 72U
+#define MOD_TX_BUF_SIZE 72U
 #define REG_POOL_SIZE 92U
 
 #define COIL_OFFSET (1)
@@ -49,7 +49,7 @@ typedef enum
 	InputCoil,
 	InputRegister,
 	HoldRegister,
-} Regsiter_Type __attribute__((aligned(1)));
+} Regsiter_Type __attribute__((aligned(4)));
 
 typedef enum
 {
@@ -63,13 +63,13 @@ typedef enum
 	WriteHoldRegs = 0x10,
 	ReportSeverId = 0x11,
 
-} Function_Code __attribute__((aligned(1)));
+} Function_Code __attribute__((aligned(4)));
 
 typedef enum
 {
 	Read = 0x00,
 	Write,
-} Regsiter_Operate __attribute__((aligned(1)));
+} Regsiter_Operate __attribute__((aligned(4)));
 
 enum Using_Crc
 {
@@ -86,7 +86,7 @@ typedef struct
 	float upper;
 	float lower;
 	pfunc event;
-} ModbusMap;
+} ModbusMap __attribute__((aligned(4)));
 
 typedef struct
 {
@@ -102,13 +102,13 @@ typedef struct
 #if defined(USING_HOLD_REGISTER)
 	uint16_t HoldRegister[REG_POOL_SIZE * 2U];
 #endif
-} ModbusPools;
+} ModbusPools __attribute__((aligned(4)));
 
 typedef struct
 {
 	Regsiter_Type type;
 	void *registers;
-} Pool;
+} Pool __attribute__((aligned(4)));
 
 struct Modbus_HandleTypeDef
 {

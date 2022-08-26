@@ -60,3 +60,6 @@ communication1\freertos.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS
 communication1\freertos.o: ../Letter_Shell/Inc/shell_port.h
 communication1\freertos.o: ../Letter_Shell/Inc/shell.h
 communication1\freertos.o: ../Letter_Shell/Inc/shell_cfg.h
+communication1\freertos.o: ..\cm_backtrace\cm_backtrace.h
+communication1\freertos.o: ..\cm_backtrace\cmb_def.h
+communication1\freertos.o: ..\cm_backtrace\cmb_cfg.h
