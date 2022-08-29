@@ -47,15 +47,16 @@ static void Create_ModObject(pLoraHandle *pl, pLoraHandle ps)
         (*pl)->Lora_Check_InputCoilState = Lora_Check_InputCoilState;
         (*pl)->Loara_CallBack = Lora_CallBack;
         (*pl)->Schedule.Ready = (List_t *)CUSTOM_MALLOC(sizeof(List_t));
-        (*pl)->Schedule.Ready ? vListInitialise((*pl)->Schedule.Ready) : CUSTOM_FREE((*pl)->Schedule.Ready);
+        (*pl)->Schedule.Ready ? vListInitialise((*pl)->Schedule.Ready)
+                              : CUSTOM_FREE((*pl)->Schedule.Ready);
         (*pl)->Schedule.Block = (List_t *)CUSTOM_MALLOC(sizeof(List_t));
-        (*pl)->Schedule.Block ? vListInitialise((*pl)->Schedule.Block) : CUSTOM_FREE((*pl)->Schedule.Block);
+        (*pl)->Schedule.Block ? vListInitialise((*pl)->Schedule.Block)
+                              : CUSTOM_FREE((*pl)->Schedule.Block);
         (*pl)->Schedule.First_Flag = false;
         (*pl)->Schedule.Period = 0;
         (*pl)->Schedule.Event_Id = 0;
-        // (*pl)->Schedule.Ready_Iter = (*pl)->Schedule.Block_Iter = NULL;
-        (*pl)->Schedule.Ready_Iter = (ListItem_t *)&(*pl)->Schedule.Ready->xListEnd;
-        (*pl)->Schedule.Block_Iter = (ListItem_t *)&(*pl)->Schedule.Block->xListEnd;
+        // (*pl)->Schedule.Ready.pIter = (ListItem_t *)&(*pl)->Schedule.Ready.pList->xListEnd;
+        // (*pl)->Schedule.Block.pIter = (ListItem_t *)&(*pl)->Schedule.Block.pList->xListEnd;
         (*pl)->Master.pTbuf = (uint8_t *)CUSTOM_MALLOC(ps->Master.TxSize);
         (*pl)->Master.pTbuf ? (void)memset((*pl)->Master.pTbuf, 0, ps->Master.TxSize) : CUSTOM_FREE((*pl)->Master.pTbuf);
         (*pl)->Slave.pRbuf = (uint8_t *)CUSTOM_MALLOC(ps->Slave.RxSize);
@@ -65,7 +66,7 @@ static void Create_ModObject(pLoraHandle *pl, pLoraHandle ps)
         (*pl)->Slave.RxSize = ps->Slave.RxSize;
         (*pl)->Slave.RxCount = 0;
         (*pl)->Slave.bSemaphore = ps->Slave.bSemaphore;
-        (*pl)->Check = ps->Check;
+        // (*pl)->Check = ps->Check;
         (*pl)->huart = ps->huart;
         (*pl)->Cs = ps->Cs;
         (*pl)->pHandle = ps->pHandle;
@@ -106,8 +107,16 @@ void MX_Lora_Init(void)
     {
         L_Map[i].Frame_Head.Device_Addr.Val = i + 1U;
         L_Map[i].Frame_Head.Channel = i + 1U;
-        L_Map[i].Slave_Id = i + 1U;
-        L_Map[i].schedule_counts = 0;
+        // L_Map[i].Slave_Id = i + 1U;
+
+#if (USING_INDEPENDENT_STRUCT)
+        L_Map[i].Check.State = L_None;
+        L_Map[i].Check.Counter = 0;
+        L_Map[i].Check.OverTimes = SUSPEND_TIMES;
+        L_Map[i].Check.Schedule_counts = 0;
+#else
+        L_Map[i].Schedule_counts = 0;
+#endif
     }
     Lora_Handle lora = {
         .MapSize = sizeof(L_Map) / sizeof(Lora_Map),
@@ -125,11 +134,13 @@ void MX_Lora_Init(void)
             .pRbuf = NULL,
             .RxSize = LORA_RX_BUF_SIZE,
         },
+#if (!USING_INDEPENDENT_STRUCT)
         .Check = {
             .State = L_None,
             .Counter = 0,
             .OverTimes = SUSPEND_TIMES,
         },
+#endif
         .huart = &huart2,
         .Cs = {
             .pGPIOx = CS0_LORA1_GPIO_Port,
@@ -261,6 +272,9 @@ void Add_ListItem(List_t *list, TickType_t data)
 UBaseType_t Remove_ListItem(List_t *list, TickType_t data)
 {
     UBaseType_t items;
+
+    if (!listCURRENT_LIST_LENGTH(list))
+        return 0;
     /*先从对应列表中查找到列表项，在移除*/
     ListItem_t *p = Find_ListItem(list, data);
     if (p && (p->xItemValue != portMAX_DELAY))
@@ -274,77 +288,39 @@ UBaseType_t Remove_ListItem(List_t *list, TickType_t data)
 }
 
 /**
- * @brief	获取一个列表项
- * @details
- * @param	None
- * @retval	目标列表项
- */
-ListItem_t *Get_OneListItem(List_t *list, ListItem_t **p)
-{
-    if (list == NULL)
-    {
-        return NULL;
-    }
-    // *p = *p ? (*p) : ((ListItem_t *)&list->xListEnd);
-    // *p = ((*p)->pxNext->xItemValue == portMAX_DELAY) ? ((ListItem_t *)list->xListEnd.pxNext) : ((*p)->pxNext);
-    // if ((*p)->pxNext != (ListItem_t *)&list->xListEnd)
-    // {
-    //     // if ((*p)->pxNext->xItemValue != portMAX_DELAY)
-    //     // *p = list->pxIndex->pxNext;
-    //     *p = (*p)->pxNext;
-    // }
-    // else
-    // {
-    //     *p = ((ListItem_t *)&list->xListEnd);
-    // }
-
-    List_t *const pxConstList = (list);
-    /* Increment the index to the next item and return the item, ensuring */
-    /* we don't return the marker used at the end of the list.  */
-    (pxConstList)->pxIndex = (pxConstList)->pxIndex->pxNext;
-    if ((void *)(pxConstList)->pxIndex == (void *)&((pxConstList)->xListEnd))
-    {
-        (pxConstList)->pxIndex = (pxConstList)->pxIndex->pxNext;
-    }
-    *p = (pxConstList)->pxIndex;
-
-#if defined(USING_DEBUG)
-    shellPrint(Shell_Object, "\r\n@note:list[%#x]:*p = %#x.\r\n", list, *p);
-#endif
-
-    return *p;
-}
-
-/**
  * @brief	查找目标设备（在线/离线）设备
  * @details
  * @param	None
  * @retval	None
  */
-TickType_t Get_OnlineDevice(pLoraHandle pl, List_t *list)
+ListItem_t *Get_OneDevice(pLoraHandle pl, List_t *plist)
 {
-    TickType_t data;
-    if (pl && list)
+    List_t *const pxConstList = (plist);
+
+    if (pl && plist)
     {
-        if (!list->uxNumberOfItems)
-            return LORA_NULL_ID;
-        ListItem_t *p = Get_OneListItem(list, &pl->Schedule.Ready_Iter);
+        if (!listCURRENT_LIST_LENGTH(plist))
+            return NULL;
+
+        /* Increment the index to the next item and return the item, ensuring */
+        /* we don't return the marker used at the end of the list.  */
+        (pxConstList)->pxIndex = (pxConstList)->pxIndex->pxNext;
+        if ((void *)(pxConstList)->pxIndex == (void *)&((pxConstList)->xListEnd))
+        {
+            (pxConstList)->pxIndex = (pxConstList)->pxIndex->pxNext;
+        }
+        /*记录本次调度位置*/
+        // listx->pIter = (pxConstList)->pxIndex;
 #if defined(USING_DEBUG)
         shellPrint(Shell_Object, "@note:uxNumberOfItems = %d,data = %d.\r\n",
                    list->uxNumberOfItems, p->xItemValue);
 #endif
-        if (p)
-        {
-            data = listGET_LIST_ITEM_VALUE(p);
-            if (data == portMAX_DELAY)
-            {
-                return LORA_NULL_ID;
-            }
-            return data;
-        }
+
+        return (pxConstList)->pxIndex;
     }
-    return LORA_NULL_ID;
+    return NULL;
 }
+
 /**
  * @brief  Check whether the status of each switch changes
  * @param  p_current current state
@@ -429,28 +405,37 @@ void Lora_Recive_Poll(pLoraHandle pl)
         // uint8_t slave_id = pl->Schedule.Event_Id + 1U;
         // if ((Get_LoraId(pl) == slave_id) && (Get_Data(pl, pl->Slave.RxCount - 2U, MOD_WORD) ==
         //                                      ((uint16_t)((crc16 >> 8U) | (crc16 << 8U)))))
-        uint8_t slave_id = Get_LoraId(pl);
+        uint8_t slave_id = Get_LoraId(pl), event_id = (slave_id - 1U);
+#if defined(USING_DEBUG)
+        shellPrint(Shell_Object, "\r\n@note:current response event_id[%d].\r\n", event_id);
+#endif
         if (Get_Data(pl, pl->Slave.RxCount - 2U, MOD_WORD) == ((uint16_t)((crc16 >> 8U) | (crc16 << 8U))))
         {
-            if (pl->Schedule.Event_Id < pl->MapSize)
+            if (event_id < pl->MapSize)
             {
-                Add_ListItem(pl->Schedule.Ready, pl->Schedule.Event_Id);
+                Add_ListItem(pl->Schedule.Ready, event_id);
                 /*从阻塞列表中移除*/
-                listCURRENT_LIST_LENGTH(pl->Schedule.Block)
-                    ? Remove_ListItem(pl->Schedule.Block, pl->Schedule.Event_Id)
-                    : false;
+                Remove_ListItem(pl->Schedule.Block, event_id);
                 /*此处极限容纳32个从机状态:取离散输入的后32字节空间作为状态存储*/
-                if (pd->Slave.pPools->InputCoils[LORA_STATE_OFFSET + pl->Schedule.Event_Id] != 0x01)
+                if (pd->Slave.pPools->InputCoils[LORA_STATE_OFFSET + event_id] != 0x01)
                 {
                     *(bool *)pd->Slave.pHandle = false;
-                    pd->Slave.pPools->InputCoils[LORA_STATE_OFFSET + pl->Schedule.Event_Id] = 0x01;
-                    if (pl->Schedule.Event_Id < pl->MapSize)
-                        pl->pMap[pl->Schedule.Event_Id].schedule_counts = 0;
+                    pd->Slave.pPools->InputCoils[LORA_STATE_OFFSET + event_id] = 0x01;
                 }
+
+#if (USING_INDEPENDENT_STRUCT)
+                pl->pMap[event_id].Check.Schedule_counts = 0;
+#else
+                pl->pMap[event_id].Schedule_counts = 0;
+#endif
             }
             Check_FirstFlag(pl);
-            /*对应从站正确响应*/
+/*对应从站正确响应*/
+#if (USING_INDEPENDENT_STRUCT)
+            pl->pMap[event_id].Check.State = L_OK;
+#else
             pl->Check.State = L_OK;
+#endif
             /*按分区写数据到目标寄存器：数字输入响应帧*/
             if ((slave_id < B_TYPE_SLAVE_START_ADDR))
             {
@@ -476,7 +461,7 @@ void Lora_Recive_Poll(pLoraHandle pl)
                     // if (!pd->Mod_Operatex(pd, (p->Slave_Id - 1U) * DIGITAL_INPUT_NUMBERS, wbits,
                     //                       DIGITAL_INPUT_NUMBERS))
                     /*pl->Schedule.Event_Id在Check_FirstFlag(pl)后++*/
-                    uint16_t target_addr = (slave_id - 1U) * DIGITAL_INPUT_NUMBERS;
+                    uint16_t target_addr = event_id * DIGITAL_INPUT_NUMBERS;
                     if (target_addr > (DIGITAL_INPUT_NUMBERS * A_TYPE_SLAVE_MAX_ADDR))
                     {
 #if defined(USING_DEBUG)
@@ -502,7 +487,11 @@ void Lora_Recive_Poll(pLoraHandle pl)
             // break;
         }
         else
+#if (USING_INDEPENDENT_STRUCT)
+            pl->pMap[event_id].Check.State = L_Error;
+#else
             pl->Check.State = L_Error;
+#endif
     }
     // __exit:
     Clear_LoraBuffer(pl, Slave, R);
@@ -519,15 +508,16 @@ void Lora_Recive_Poll(pLoraHandle pl)
 bool Lora_MakeFrame(pLoraHandle pl, Lora_Map *pm)
 {
     pModbusHandle pd = (pModbusHandle)pl->pHandle;
+    uint8_t slave_id = pl->Schedule.Event_Id + 1U;
     uint8_t buf[] = {pm->Frame_Head.Device_Addr.V.H, pm->Frame_Head.Device_Addr.V.L,
-                     pm->Frame_Head.Channel, pm->Slave_Id, 0x05, 0x00, 0x00,
+                     pm->Frame_Head.Channel, slave_id, 0x05, 0x00, 0x00,
                      0x00, 0x00, 0x00, 0x00};
 #if defined(USING_DEBUG)
     shellPrint(Shell_Object, "@Warning:Slave_Id = %d.\r\n", pm->Slave_Id);
 #endif
     if (pd && pm)
     {
-        if (pm->Slave_Id < B_TYPE_SLAVE_START_ADDR)
+        if (slave_id < B_TYPE_SLAVE_START_ADDR)
         {
             // buf[4] = 0x02, buf[6] = (pm->Slave_Id - DIGITAL_INPUT_OFFSET), buf[8] = 0x08;
             buf[4] = 0x02, buf[8] = 0x08;
@@ -539,7 +529,7 @@ bool Lora_MakeFrame(pLoraHandle pl, Lora_Map *pm)
             pd->Slave.Operate = Read;
 #if !defined(USING_TEST)
             /*读取对应寄存器*/
-            if (!pd->Mod_Operatex(pd, (pm->Slave_Id - DIGITAL_OUTPUT_OFFSET), &data, sizeof(data)))
+            if (!pd->Mod_Operatex(pd, (slave_id - DIGITAL_OUTPUT_OFFSET), &data, sizeof(data)))
             {
 #if defined(USING_DEBUG)
                 shellPrint(Shell_Object, "Coil reading failed!\r\n");
@@ -597,7 +587,11 @@ void Lora_Tansmit_Poll(pLoraHandle pl)
     if (!pl || !pl->Schedule.Ready || !pl->Schedule.Block || !pl->Cs.pGPIOx)
         return;
 
+#if (USING_INDEPENDENT_STRUCT)
+    switch (pl->pMap[pl->Schedule.Event_Id].Check.State)
+#else
     switch (pl->Check.State)
+#endif
     { /*首次发出事件或者从机响应成功*/
     case L_None:
     case L_OK:
@@ -612,12 +606,18 @@ void Lora_Tansmit_Poll(pLoraHandle pl)
         //     osDelay(1);
         // }
         /*清除超时计数器*/
+
+#if (USING_INDEPENDENT_STRUCT)
+        pl->pMap[pl->Schedule.Event_Id].Check.Counter = 0;
+#else
         pl->Check.Counter = 0;
+#endif
         // pl->Schedule.Event_Id = pl->Schedule.First_Flag ? (uint8_t)Get_OnlineDevice(pl, pl->Schedule.Ready)
         //                                                 : pl->Schedule.Event_Id;
         if (pl->Schedule.First_Flag)
         {
-            pl->Schedule.Event_Id = (uint8_t)Get_OnlineDevice(pl, pl->Schedule.Ready);
+            ListItem_t *p = Get_OneDevice(pl, pl->Schedule.Ready);
+            pl->Schedule.Event_Id = p ? (uint8_t)listGET_LIST_ITEM_VALUE(p) : LORA_NULL_ID;
             pl->Schedule.Period++;
 #if defined(USING_DEBUG)
             shellPrint(Shell_Object, "@Warning:Schedule_Event_Id = %d.\r\n", pl->Schedule.Event_Id);
@@ -626,59 +626,69 @@ void Lora_Tansmit_Poll(pLoraHandle pl)
         /*禁止接收引脚*/
         HAL_GPIO_WritePin(pl->Cs.pGPIOx, pl->Cs.Gpio_Pin, GPIO_PIN_SET);
         /*去掉首次扫描完毕的第一个静默周期*/
-        pl->Schedule.Event_Id < pl->MapSize ? pl->Lora_MakeFrame(pl, &pl->pMap[pl->Schedule.Event_Id]),
-            pl->Check.State = L_Wait        : false;
+        pl->Schedule.Event_Id < pl->MapSize
+#if (USING_INDEPENDENT_STRUCT)
+            ? pl->Lora_MakeFrame(pl, &pl->pMap[pl->Schedule.Event_Id]),
+            pl->pMap[pl->Schedule.Event_Id].Check.State = L_Wait : false;
+#else
+            ? pl->Lora_MakeFrame(pl, &pl->pMap[pl->Schedule.Event_Id]),
+            pl->Check.State = L_Wait : false;
+#endif
         /*使能接收引脚*/
         HAL_GPIO_WritePin(pl->Cs.pGPIOx, pl->Cs.Gpio_Pin, GPIO_PIN_RESET);
 
         /*每调度一个周期就绪列表，就检测阻塞列表中一个从机*/
-        if ((pl->Schedule.Period > pl->Schedule.Ready->uxNumberOfItems) ||
-            (!pl->Schedule.Ready->uxNumberOfItems && pl->Schedule.First_Flag))
+        if ((pl->Schedule.Period > listCURRENT_LIST_LENGTH(pl->Schedule.Ready)) ||
+            (!listCURRENT_LIST_LENGTH(pl->Schedule.Ready) && pl->Schedule.First_Flag))
         {
             pl->Schedule.Period = 0;
-            /*判断是否有离线设备*/
-            if (listCURRENT_LIST_LENGTH(pl->Schedule.Block))
-            {
-                /*循环的从阻塞列表中移除一个列表项*/
-                ListItem_t *p = Get_OneListItem(pl->Schedule.Block, &pl->Schedule.Block_Iter);
-                if (p && (p->xItemValue != portMAX_DELAY))
-                {
-                    /*加入就绪列表*/
-                    Add_ListItem(pl->Schedule.Ready, listGET_LIST_ITEM_VALUE(p));
-                    /*从阻塞列表中移除*/
-                    Remove_ListItem(pl->Schedule.Block, listGET_LIST_ITEM_VALUE(p));
-                }
+            /*循环的从阻塞列表中移除一个列表项*/
+            ListItem_t *p = Get_OneDevice(pl, pl->Schedule.Block);
+            /*加入就绪列表*/
+            Add_ListItem(pl->Schedule.Ready, listGET_LIST_ITEM_VALUE(p));
+            /*从阻塞列表中移除*/
+            Remove_ListItem(pl->Schedule.Block, listGET_LIST_ITEM_VALUE(p));
 #if defined(USING_DEBUG)
-                shellPrint(Shell_Object, "p = 0x%p,\r\n", p);
-                // shellPrint(Shell_Object, "\r\nschdule !\r\n");
-                shellPrint(Shell_Object, "\r\nBlocK_List[%d]:", pl->Schedule.Block->uxNumberOfItems);
-                for (p = (ListItem_t *)pl->Schedule.Block->xListEnd.pxNext; p->xItemValue != portMAX_DELAY;
-                     p = p->pxNext)
-                {
-                    shellPrint(Shell_Object, "%d ", listGET_LIST_ITEM_VALUE(p));
-                }
-                // shellPrint(Shell_Object, "p->xItemValue = 0X%0X\r\n", p->xItemValue);
-                shellPrint(Shell_Object, "\r\n\r\nReady_List[%d]:", pl->Schedule.Ready->uxNumberOfItems);
-                for (p = (ListItem_t *)pl->Schedule.Ready->xListEnd.pxNext; p->xItemValue != portMAX_DELAY;
-                     p = p->pxNext)
-                {
-                    shellPrint(Shell_Object, "%d ", listGET_LIST_ITEM_VALUE(p));
-                }
-                shellPrint(Shell_Object, "\r\n\r\nOS remaining heap = %dByte, Mini heap = %dByte\r\n",
-                           xPortGetFreeHeapSize(), xPortGetMinimumEverFreeHeapSize());
-#endif
+            // shellPrint(Shell_Object, "p = 0x%p,\r\n", p);
+            // shellPrint(Shell_Object, "\r\nschdule !\r\n");
+            shellPrint(Shell_Object, "\r\n\r\n@note:BlocK_List[%d],current_idex[%d]:_________Start\r\n",
+                       listCURRENT_LIST_LENGTH(pl->Schedule.Block), listGET_LIST_ITEM_VALUE(pl->Schedule.Block->pxIndex));
+            for (p = (ListItem_t *)pl->Schedule.Block->xListEnd.pxNext; p->xItemValue != portMAX_DELAY;
+                 p = p->pxNext)
+            {
+                shellPrint(Shell_Object, "%d ", listGET_LIST_ITEM_VALUE(p));
             }
+            shellPrint(Shell_Object, "\r\n@note:Ready_List[%d],current_idex[%d]:\r\n",
+                       listCURRENT_LIST_LENGTH(pl->Schedule.Ready), listGET_LIST_ITEM_VALUE(pl->Schedule.Ready->pxIndex));
+            for (p = (ListItem_t *)pl->Schedule.Ready->xListEnd.pxNext; p->xItemValue != portMAX_DELAY;
+                 p = p->pxNext)
+            {
+                shellPrint(Shell_Object, "%d ", listGET_LIST_ITEM_VALUE(p));
+            }
+            shellPrint(Shell_Object, "\r\nOS remaining heap = %dByte, Mini heap = %dByte_________End\r\n\r\n",
+                       xPortGetFreeHeapSize(), xPortGetMinimumEverFreeHeapSize());
+#endif
         }
     }
     break;
     case L_Wait:
     {
+#if (USING_INDEPENDENT_STRUCT)
+        /*接收超时，不是接收错误导致的超时*/
+        if (++pl->pMap[pl->Schedule.Event_Id].Check.Counter >=
+            pl->pMap[pl->Schedule.Event_Id].Check.OverTimes)
+        {
+            pl->pMap[pl->Schedule.Event_Id].Check.Counter = 0;
+            pl->pMap[pl->Schedule.Event_Id].Check.State = L_TimeOut;
+        }
+#else
         /*接收超时，不是接收错误导致的超时*/
         if (++pl->Check.Counter >= pl->Check.OverTimes)
         {
             pl->Check.Counter = 0;
             pl->Check.State = L_TimeOut;
         }
+#endif
     }
     break;
     case L_Error:
@@ -688,37 +698,53 @@ void Lora_Tansmit_Poll(pLoraHandle pl)
         /*目标从机离线*/
         if (pd && (pl->Schedule.Event_Id > pl->MapSize))
             goto __start_next;
-        /*当前设备不在阻塞列表中*/
+        /*添加到当前设备到塞列表中*/
         Add_ListItem(pl->Schedule.Block, pl->Schedule.Event_Id);
         /*从就绪列表中移除:非首次扫描状态(就绪列表非空)*/
-        pl->Schedule.First_Flag &&listCURRENT_LIST_LENGTH(pl->Schedule.Ready)
+        pl->Schedule.First_Flag
             ? Remove_ListItem(pl->Schedule.Ready, pl->Schedule.Event_Id)
             : false;
-
 #if defined(USING_DEBUG)
         shellPrint(Shell_Object, "@Warning:Timeout_Event_Id = %d.\r\n", pl->Schedule.Event_Id);
 #endif
         if (pd->Slave.pPools->InputCoils[actual_site] != 0x00)
         {
-            /*连续三轮调度均检测不到目标从机响应：则认为直接离线*/
-            if (pl->pMap[pl->Schedule.Event_Id].schedule_counts++ > SCHEDULING_COUNTS)
+            *(bool *)pd->Slave.pHandle = false;
+            pd->Slave.pPools->InputCoils[actual_site] = 0x00;
+            // pl->pMap[pl->Schedule.Event_Id].schedule_counts++;
+            // pl->pMap[pl->Schedule.Event_Id].Check.Schedule_counts++;
+        }
+        /*连续三轮调度均检测不到目标从机响应：则认为直接离线*/
+#if (USING_INDEPENDENT_STRUCT)
+        if (++pl->pMap[pl->Schedule.Event_Id].Check.Schedule_counts > SCHEDULING_COUNTS)
+#else
+        if (++pl->pMap[pl->Schedule.Event_Id].Schedule_counts > SCHEDULING_COUNTS)
+#endif
+        {
+
+#if (USING_INDEPENDENT_STRUCT)
+            pl->pMap[pl->Schedule.Event_Id].Check.Schedule_counts = 0;
+#else
+            pl->pMap[pl->Schedule.Event_Id].Schedule_counts = 0;
+#endif
+            *(bool *)pd->Slave.pHandle = false;
+            /*对于输入型从机：离线时清除输入寄存器*/
+            if (pl->Schedule.Event_Id < A_TYPE_SLAVE_MAX_ADDR)
             {
-                pl->pMap[pl->Schedule.Event_Id].schedule_counts = 0;
-                *(bool *)pd->Slave.pHandle = false;
-                pd->Slave.pPools->InputCoils[actual_site] = 0x00;
-                /*对于输入型从机：离线时清除输入寄存器*/
-                if (pl->Schedule.Event_Id < A_TYPE_SLAVE_MAX_ADDR)
-                {
-                    memset(&pd->Slave.pPools->InputCoils[pl->Schedule.Event_Id * DIGITAL_INPUT_NUMBERS],
-                           0x00, DIGITAL_INPUT_NUMBERS);
-                }
+                memset(&pd->Slave.pPools->InputCoils[pl->Schedule.Event_Id * DIGITAL_INPUT_NUMBERS],
+                       0x00, DIGITAL_INPUT_NUMBERS);
             }
         }
 
     __start_next:
         /*在此处递增事件，而不是在L_OK中*/
         Check_FirstFlag(pl);
+
+#if (USING_INDEPENDENT_STRUCT)
+        pl->pMap[pl->Schedule.Event_Id].Check.State = L_None;
+#else
         pl->Check.State = L_None;
+#endif
     }
     break;
     default:

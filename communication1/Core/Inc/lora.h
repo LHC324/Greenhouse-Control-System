@@ -12,6 +12,7 @@ extern "C"
 #include "cmsis_os.h"
 #endif
 
+#define USING_INDEPENDENT_STRUCT 1
 /*支持的最大从机*/
 #define SLAVE_MAX_NUMBER 16U
 #define LORA_TX_BUF_SIZE 64U
@@ -25,7 +26,7 @@ extern "C"
 #define DIGITAL_INPUT_OFFSET 1U
 #define DIGITAL_OUTPUT_OFFSET 5U
 /*Lora模块调度时间*/
-#define LORA_SCHEDULE_TIMES 50U
+#define LORA_SCHEDULE_TIMES 60U
 /*Lora模块无效ID号*/
 #define LORA_NULL_ID 0xFF
 /*Lora从机离线/在线情况统计，存储时偏移量*/
@@ -66,10 +67,29 @@ extern "C"
             } Device_Addr;
             uint8_t Channel;
         } Frame_Head;
-        uint8_t Slave_Id;
-        uint8_t schedule_counts; /*调度次数*/
+        // uint8_t Slave_Id;
+
+#if (USING_INDEPENDENT_STRUCT)
+        struct
+        { /*当前状态*/
+            Lora_State State;
+            /*超时时间*/
+            uint8_t OverTimes;
+            /*错误计数器*/
+            uint8_t Counter;
+            uint8_t Schedule_counts; /*调度次数*/
+        } Check;
+#else
+    uint8_t Schedule_counts; /*调度次数*/
+#endif
         // bool (*func)(void *);
     } Lora_Map;
+
+    typedef struct
+    {
+        List_t *pList;
+        ListItem_t *pIter;
+    } Listx_t;
 
     typedef struct Lora_HandleTypeDef *pLoraHandle;
     typedef struct Lora_HandleTypeDef Lora_Handle;
@@ -80,9 +100,9 @@ extern "C"
         /*建立lora模块各节点间调度数据结构*/
         struct
         {
-            List_t *Ready;
-            List_t *Block;
-            ListItem_t *Ready_Iter, *Block_Iter;
+            List_t *Ready, *Block;
+            // ListItem_t *Ready_Iter, *Block_Iter;
+            // Listx_t Ready, Block;
             uint8_t Event_Id;
             uint8_t Period; /*阻塞设备调度周期*/
             bool First_Flag;
@@ -104,6 +124,7 @@ extern "C"
             void *bSemaphore;
 #endif
         } Slave;
+#if (!USING_INDEPENDENT_STRUCT)
         struct
         { /*当前状态*/
             Lora_State State;
@@ -112,6 +133,7 @@ extern "C"
             /*错误计数器*/
             uint32_t Counter;
         } Check;
+#endif
         void (*Set_Lora_Factory)(void);
         bool (*Get_Lora_Status)(pLoraHandle);
         // bool (*Lora_Handle)(pLoraHandle);
