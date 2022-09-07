@@ -46,6 +46,9 @@ extern "C" {
 #define USING_SHELL
 #define USING_IO_UART
 // #define USING_CMBACKTRACE 
+//#define USING_ASHINING
+//#define USING_TRANSPARENT_MODE
+#define USING_REPEATER_MODE
 #define CUSTOM_MALLOC pvPortMalloc
 #define CUSTOM_FREE vPortFree
 /* USER CODE END ET */

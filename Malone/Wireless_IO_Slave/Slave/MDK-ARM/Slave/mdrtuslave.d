@@ -48,3 +48,17 @@ slave\mdrtuslave.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdarg.h
 slave\mdrtuslave.o: ../Letter_Shell/Inc/shell_port.h
 slave\mdrtuslave.o: ../Letter_Shell/Inc/shell.h
 slave\mdrtuslave.o: ../Letter_Shell/Inc/shell_cfg.h
+slave\mdrtuslave.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.h
+slave\mdrtuslave.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
+slave\mdrtuslave.o: ../Core/Inc/FreeRTOSConfig.h
+slave\mdrtuslave.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h
+slave\mdrtuslave.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h
+slave\mdrtuslave.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/deprecated_definitions.h
+slave\mdrtuslave.o: ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3/portmacro.h
+slave\mdrtuslave.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/mpu_wrappers.h
+slave\mdrtuslave.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h
+slave\mdrtuslave.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h
+slave\mdrtuslave.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/timers.h
+slave\mdrtuslave.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/queue.h
+slave\mdrtuslave.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/semphr.h
+slave\mdrtuslave.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/event_groups.h

@@ -1,21 +1,21 @@
 /* USER CODE BEGIN Header */
 /**
-  ******************************************************************************
-  * @file    gpio.c
-  * @brief   This file provides code for the configuration
-  *          of all used GPIO pins.
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2022 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-  */
+ ******************************************************************************
+ * @file    gpio.c
+ * @brief   This file provides code for the configuration
+ *          of all used GPIO pins.
+ ******************************************************************************
+ * @attention
+ *
+ * Copyright (c) 2022 STMicroelectronics.
+ * All rights reserved.
+ *
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ *
+ ******************************************************************************
+ */
 /* USER CODE END Header */
 
 /* Includes ------------------------------------------------------------------*/
@@ -33,12 +33,12 @@
 /* USER CODE END 1 */
 
 /** Configure pins as
-        * Analog
-        * Input
-        * Output
-        * EVENT_OUT
-        * EXTI
-*/
+ * Analog
+ * Input
+ * Output
+ * EVENT_OUT
+ * EXTI
+ */
 void MX_GPIO_Init(void)
 {
 
@@ -54,13 +54,19 @@ void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(M_IRQ_GPIO_Port, M_IRQ_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, CS3_OPT_Pin|CS0_LORA1_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOA, CS3_OPT_Pin | CS0_LORA1_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
+#if !defined(USING_ASHINING)
   HAL_GPIO_WritePin(GPIOB, CS1_485_Pin|CS2_232_Pin|IO_UART_TX_Pin|LORA_RELOAD_Pin, GPIO_PIN_SET);
+#else
+  HAL_GPIO_WritePin(GPIOB, CS1_485_Pin | CS2_232_Pin | IO_UART_TX_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOB, LORA_RELOAD_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_RESET);
+#endif
 
   /*Configure GPIO pins : PCPin PCPin */
-  GPIO_InitStruct.Pin = CODE2_Pin|CODE3_Pin;
+  GPIO_InitStruct.Pin = CODE2_Pin | CODE3_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
@@ -73,7 +79,7 @@ void MX_GPIO_Init(void)
   HAL_GPIO_Init(M_IRQ_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PAPin PAPin */
-  GPIO_InitStruct.Pin = CS3_OPT_Pin|CS0_LORA1_Pin;
+  GPIO_InitStruct.Pin = CS3_OPT_Pin | CS0_LORA1_Pin | GPIO_PIN_15;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -81,14 +87,13 @@ void MX_GPIO_Init(void)
 
   /*Configure GPIO pins : PBPin PBPin PBPin PBPin
                            PBPin PBPin */
-  GPIO_InitStruct.Pin = TYPE0_Pin|TYPE1_Pin|TYPE2_Pin|TYPE3_Pin
-                          |CODE0_Pin|CODE1_Pin;
+  GPIO_InitStruct.Pin = TYPE0_Pin | TYPE1_Pin | TYPE2_Pin | TYPE3_Pin | CODE0_Pin | CODE1_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PBPin PBPin PBPin */
-  GPIO_InitStruct.Pin = CS1_485_Pin|CS2_232_Pin|LORA_RELOAD_Pin;
+  GPIO_InitStruct.Pin = CS1_485_Pin | CS2_232_Pin | LORA_RELOAD_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -116,7 +121,6 @@ void MX_GPIO_Init(void)
   /* EXTI interrupt init*/
   HAL_NVIC_SetPriority(EXTI4_15_IRQn, 3, 0);
   HAL_NVIC_EnableIRQ(EXTI4_15_IRQn);
-
 }
 
 /* USER CODE BEGIN 2 */

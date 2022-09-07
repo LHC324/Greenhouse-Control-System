@@ -40,7 +40,7 @@ char shell_buffer[SHELL_BUFFER_SIZE];
 unsigned short User_Shell_Read(char *data, unsigned short len)
 {
 #if defined(USING_IO_UART)
-	if (HAL_SUART_Receive(&SHELL_TARGET_UART, (uint8_t *)data, len, 0xFFFF) != HAL_OK)
+	if (HAL_SUART_Receive(&SHELL_TARGET_UART, (uint8_t *)data, len, 0x100) != HAL_OK)
 #elif defined(USING_USB)
 	if (!Usb.counts)
 #else
@@ -83,14 +83,14 @@ unsigned short User_Shell_Write(char *data, unsigned short len)
 	{
 		goto __exit;
 	}
-	if (HAL_UART_Transmit(&SHELL_TARGET_UART, (uint8_t *)pData, len + 3U, 0xFFFF) != HAL_OK)
+	if (HAL_UART_Transmit(&SHELL_TARGET_UART, (uint8_t *)pData, len + 3U, 0x100) != HAL_OK)
 #else
 #if defined(USING_IO_UART)
-	if (HAL_SUART_Transmit(&SHELL_TARGET_UART, (uint8_t *)data, len, 0xFFFF) != HAL_OK)
+	if (HAL_SUART_Transmit(&SHELL_TARGET_UART, (uint8_t *)data, len, 0x100) != HAL_OK)
 #elif defined(USING_USB)
 	if (CDC_Transmit_FS((uint8_t *)data, len) != USBD_OK)
 #else
-	if (HAL_UART_Transmit(&SHELL_TARGET_UART, (uint8_t *)data, len, 0xFFFF) != HAL_OK)
+	if (HAL_UART_Transmit(&SHELL_TARGET_UART, (uint8_t *)data, len, 0x100) != HAL_OK)
 #endif
 #endif
 	{ /*串口发送数据失败*/

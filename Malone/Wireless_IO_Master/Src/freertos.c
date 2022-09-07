@@ -220,7 +220,11 @@ void Shell_Task(void const *argument)
   HAL_NVIC_EnableIRQ(TIM3_IRQn);
   HAL_NVIC_EnableIRQ(TIM4_IRQn);
   HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
+#if !defined(USING_ASHINING)
+#if !defined(USING_TRANSPARENT_MODE)
   At_GetSlaveId();
+#endif
+#endif
   DDIx.pQueue = DDIx_QueueHandle;
   /* Infinite loop */
   for (;;)

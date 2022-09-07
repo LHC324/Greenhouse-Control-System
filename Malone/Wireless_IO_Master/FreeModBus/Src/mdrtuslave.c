@@ -170,8 +170,12 @@ static mdVOID mdRTUHandleCode2(ModbusRTUSlaveHandler handler)
     mdmalloc(data, mdBit, length);
     regPool->mdReadInputCoils(regPool, startAddress, length, data);
     length2 = length % 8 > 0 ? length / 8 + 1 : length / 8;
+#if !defined(USING_TRANSPARENT_MODE)
     /*3个字节的lora前导码*/
     mdmalloc(data2, mdU8, 3 + 5 + length2);
+#if defined(USING_REPEATER_MODE)
+    data2[1] = data2[2] = 0x01;
+#endif
     data2[3] = recbuf[0];
     data2[4] = recbuf[1];
     data2[5] = length2;
@@ -186,6 +190,23 @@ static mdVOID mdRTUHandleCode2(ModbusRTUSlaveHandler handler)
     data2[6 + length2] = LOW(crc);
     data2[7 + length2] = HIGH(crc);
     handler->mdRTUSendString(handler, data2, 3 + 5 + length2);
+#else
+    mdmalloc(data2, mdU8, 5 + length2);
+    data2[0] = recbuf[0];
+    data2[1] = recbuf[1];
+    data2[2] = length2;
+    for (mdU32 i = 0; i < length2; i++)
+    {
+        for (mdU32 j = 0; j < 8 && (i * 8 + j) < length; j++)
+        {
+            data2[3 + i] |= ((data[i * 8 + j] & 0x01) << j);
+        }
+    }
+    crc = mdCrc16(data2, 3 + length2);
+    data2[3 + length2] = LOW(crc);
+    data2[4 + length2] = HIGH(crc);
+    handler->mdRTUSendString(handler, data2, 5 + length2);
+#endif
     mdfree(data);
     mdfree(data2);
 }
@@ -401,7 +422,11 @@ static mdVOID mdRTUCenterProcessor(ModbusRTUSlaveHandler handler)
         handler->mdRTUError(handler, ERROR3);
         return;
     }
+#if defined(USING_REPEATER_MODE)
+    if (mdGetSlaveId() != (handler->slaveId - 1U))
+#else
     if (mdGetSlaveId() != handler->slaveId)
+#endif
     {
         handler->mdRTUError(handler, ERROR4);
         return;

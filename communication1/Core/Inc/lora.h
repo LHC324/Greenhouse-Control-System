@@ -26,7 +26,7 @@ extern "C"
 #define DIGITAL_INPUT_OFFSET 1U
 #define DIGITAL_OUTPUT_OFFSET 5U
 /*Lora模块调度时间*/
-#define LORA_SCHEDULE_TIMES 60U
+#define LORA_SCHEDULE_TIMES 100U
 /*Lora模块无效ID号*/
 #define LORA_NULL_ID 0xFF
 /*Lora从机离线/在线情况统计，存储时偏移量*/
@@ -35,12 +35,12 @@ extern "C"
 /*定义Master发送缓冲区字节数*/
 #define PF_TX_SIZE 64U
 #define LEVENTS (sizeof(L101_Map) / sizeof(L101_HandleTypeDef))
-/*累计三次超时或者错误后，改变上报的时间*/
+/*累计3次超时或者错误后，改变上报的时间*/
 #define SUSPEND_TIMES 3U
 /*30s增加一个离线设备扫描*/
 #define TOTAL_SUM 5U
-/*三轮调度均离线：则认为从机掉线，主动清除状态*/
-#define SCHEDULING_COUNTS 3U
+/*2轮调度均离线：则认为从机掉线，主动清除状态*/
+#define SCHEDULING_COUNTS 2U
     /*Enter键值*/
     // #define ENTER_CODE 0x2F
     typedef enum

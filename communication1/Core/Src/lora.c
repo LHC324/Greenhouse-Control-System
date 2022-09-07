@@ -105,8 +105,13 @@ void MX_Lora_Init(void)
 
     for (uint8_t i = 0; i < SLAVE_MAX_NUMBER; i++)
     {
+#if defined(USING_REPEATER_MODE)
+        L_Map[i].Frame_Head.Device_Addr.Val = 1U;
+        L_Map[i].Frame_Head.Channel = 1U;
+#else
         L_Map[i].Frame_Head.Device_Addr.Val = i + 1U;
         L_Map[i].Frame_Head.Channel = i + 1U;
+#endif
         // L_Map[i].Slave_Id = i + 1U;
 
 #if (USING_INDEPENDENT_STRUCT)
@@ -406,6 +411,9 @@ void Lora_Recive_Poll(pLoraHandle pl)
         // if ((Get_LoraId(pl) == slave_id) && (Get_Data(pl, pl->Slave.RxCount - 2U, MOD_WORD) ==
         //                                      ((uint16_t)((crc16 >> 8U) | (crc16 << 8U)))))
         uint8_t slave_id = Get_LoraId(pl), event_id = (slave_id - 1U);
+        /*过滤离散输入自己请求数据*/
+        // if (!pl->Slave.pRbuf[2] && (slave_id < B_TYPE_SLAVE_START_ADDR))
+        //     return;
 #if defined(USING_DEBUG)
         shellPrint(Shell_Object, "\r\n@note:current response event_id[%d].\r\n", event_id);
 #endif
@@ -509,9 +517,19 @@ bool Lora_MakeFrame(pLoraHandle pl, Lora_Map *pm)
 {
     pModbusHandle pd = (pModbusHandle)pl->pHandle;
     uint8_t slave_id = pl->Schedule.Event_Id + 1U;
-    uint8_t buf[] = {pm->Frame_Head.Device_Addr.V.H, pm->Frame_Head.Device_Addr.V.L,
+#if !defined(USING_TRANSPARENT_MODE)
+//#if defined(USING_REPEATER_MODE)
+//    uint8_t buf[] = {pm->Frame_Head.Device_Addr.V.H, pm->Frame_Head.Device_Addr.V.L,
+//                     pm->Frame_Head.Channel, slave_id | 0x80, 0x05, 0x00, 0x00,
+//                     0x00, 0x00, 0x00, 0x00};
+//#else
+	uint8_t buf[] = {pm->Frame_Head.Device_Addr.V.H, pm->Frame_Head.Device_Addr.V.L,
                      pm->Frame_Head.Channel, slave_id, 0x05, 0x00, 0x00,
-                     0x00, 0x00, 0x00, 0x00};
+                     0x00, 0x00, 0x00, 0x00};				 
+//#endif
+#else
+    uint8_t buf[] = {slave_id, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+#endif
 #if defined(USING_DEBUG)
     shellPrint(Shell_Object, "@Warning:Slave_Id = %d.\r\n", pm->Slave_Id);
 #endif
@@ -519,8 +537,11 @@ bool Lora_MakeFrame(pLoraHandle pl, Lora_Map *pm)
     {
         if (slave_id < B_TYPE_SLAVE_START_ADDR)
         {
-            // buf[4] = 0x02, buf[6] = (pm->Slave_Id - DIGITAL_INPUT_OFFSET), buf[8] = 0x08;
+#if !defined(USING_TRANSPARENT_MODE)
             buf[4] = 0x02, buf[8] = 0x08;
+#else
+            buf[1] = 0x02, buf[5] = 0x08;
+#endif
         }
         else
         {
@@ -545,10 +566,21 @@ bool Lora_MakeFrame(pLoraHandle pl, Lora_Map *pm)
                 data ^= 1;
             }
 #endif
+#if !defined(USING_TRANSPARENT_MODE)
             buf[4] = 0x05, buf[7] = data;
+#else
+            buf[1] = 0x05, buf[3] = data;
+#endif
         }
         pl->Master.TxCount = sizeof(buf);
+#if !defined(USING_TRANSPARENT_MODE)
         uint16_t crc = Get_Crc16(&buf[sizeof(pm->Frame_Head) - 1U], sizeof(buf) - 5U, 0xffff);
+#else
+        uint16_t crc = Get_Crc16(buf, sizeof(buf) - 2U, 0xffff);
+#endif
+#if defined(USING_REPEATER_MODE)
+	 buf[3]	|= 0x80;
+#endif
         /*拷贝两个字节CRC到临时缓冲区*/
         memcpy(&buf[sizeof(buf) - sizeof(uint16_t)], &crc, sizeof(uint16_t));
         memcpy(pl->Master.pTbuf, buf, pl->Master.TxCount);
@@ -596,15 +628,20 @@ void Lora_Tansmit_Poll(pLoraHandle pl)
     case L_None:
     case L_OK:
     {
+#if !defined(USING_ASHINING)
         /*确保L101模块当前处于空闲状态*/
         if (!pl->Get_Lora_Status(pl))
         {
-            return;
+            //            return;
+            osDelay(1);
         }
-        // while (!pl->Get_Lora_Status(pl))
-        // {
-        //     osDelay(1);
-        // }
+#else
+        while (!pl->Get_Lora_Status(pl))
+        {
+            osDelay(1);
+        }
+        osDelay(2);
+#endif
         /*清除超时计数器*/
 
 #if (USING_INDEPENDENT_STRUCT)

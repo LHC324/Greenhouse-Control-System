@@ -4,6 +4,7 @@
 #include "mdcrc16.h"
 #include "usart.h"
 #include "shell_port.h"
+#include "cmsis_os.h"
 
 #if defined(USING_FREERTOS)
 extern void *pvPortMalloc(size_t xWantedSize);
@@ -117,6 +118,7 @@ static mdVOID mdRTUError(ModbusRTUSlaveHandler handler, mdU8 error)
 
 // }
 
+#if !defined(AS_REPEATER)
 /*
     mdRTUHandleCode1
         @handler 句柄
@@ -326,6 +328,7 @@ static mdVOID mdRTUHandleCode16(ModbusRTUSlaveHandler handler)
     handler->mdRTUSendString(handler, data, 8);
     mdfree(data);
 }
+#endif
 
 /*
     mdRtuBaseTimerTick
@@ -380,6 +383,16 @@ static mdVOID portRtuTimerTick(ModbusRTUSlaveHandler handler, mdU32 ustime)
     mdClearReceiveBuffer(handler->receiveBuffer);
 }
 
+#if defined(USING_REPEATER_MODE)
+/**
+ * @brief	获取Lora模块当前是否空闲
+ * @details	无线发送数据时拉低，用于指示发送繁忙状态
+ * @param	None
+ * @retval	ture/fale
+ */
+extern bool inline Get_L101_Status(void);
+#endif
+
 /*
     mdModbusRTUCenterProcessor
         @handler 句柄
@@ -395,15 +408,45 @@ static mdVOID mdRTUCenterProcessor(ModbusRTUSlaveHandler handler)
         handler->mdRTUError(handler, ERROR2);
         return;
     }
+#if defined(USING_DEBUG)
+    shellPrint(&shell, "gcrc = 0x%04x, crc = 0x%04x\r\n", mdCrc16(recbuf, reclen - 2), mdGetCrc16());
+#endif
+#if defined(AS_REPEATER)
+    uint8_t direction = mdGetSlaveId() & 0x80;
+
+    uint8_t tx_size = reclen + 3U, *pdata = CUSTOM_MALLOC(tx_size);
+
+    if (!pdata)
+        goto __exit;
+    memset(pdata, 0x00, tx_size);
+    /*A->B*/
+    if (direction)
+    { /*去掉方向*/
+        recbuf[0] &= 0x7F;
+        /*地址和信道相同:与从机id号不同，偏移1位，中继器占用*/
+        pdata[1] = pdata[2] = recbuf[0] + 1U;
+    }
+    memcpy(&pdata[3U], recbuf, reclen);
+    /*B->A:全部为0*/
+    while (!Get_L101_Status())
+    {
+        osDelay(1);
+    }
+    handler->mdRTUSendString(handler, pdata, tx_size);
+	HAL_GPIO_TogglePin(RELAY_GPIO_Port, RELAY_Pin);
+__exit:
+    CUSTOM_FREE(pdata);
+#else
     if (mdCrc16(recbuf, reclen - 2U) != mdGetCrc16() && (CRC_CHECK != 0))
     {
         handler->mdRTUError(handler, ERROR3);
         return;
     }
-#if defined(USING_DEBUG)
-    shellPrint(&shell, "gcrc = 0x%04x, crc = 0x%04x\r\n", mdCrc16(recbuf, reclen - 2), mdGetCrc16());
-#endif
+#if defined(USING_REPEATER_MODE)
+    if (mdGetSlaveId() != (handler->slaveId - 1U))
+#else
     if (mdGetSlaveId() != handler->slaveId)
+#endif
     {
         handler->mdRTUError(handler, ERROR4);
         return;
@@ -438,6 +481,7 @@ static mdVOID mdRTUCenterProcessor(ModbusRTUSlaveHandler handler)
         handler->mdRTUError(handler, ERROR5);
         break;
     }
+#endif
 }
 
 /* ================================================================== */
@@ -472,6 +516,7 @@ mdSTATUS mdCreateModbusRTUSlave(ModbusRTUSlaveHandler *handler, struct ModbusRTU
         (*handler)->portRTUTimerTick = portRtuTimerTick;
         (*handler)->portRTUPushString = portRtuPushString;
         (*handler)->mdRTUSendString = mdRTUSendString;
+#if !defined(AS_REPEATER)
         (*handler)->mdRTUHandleCode1 = mdRTUHandleCode1;
         (*handler)->mdRTUHandleCode2 = mdRTUHandleCode2;
         (*handler)->mdRTUHandleCode3 = mdRTUHandleCode3;
@@ -480,6 +525,7 @@ mdSTATUS mdCreateModbusRTUSlave(ModbusRTUSlaveHandler *handler, struct ModbusRTU
         (*handler)->mdRTUHandleCode6 = mdRTUHandleCode6;
         (*handler)->mdRTUHandleCode15 = mdRTUHandleCode15;
         (*handler)->mdRTUHandleCode16 = mdRTUHandleCode16;
+#endif
 
         if (mdCreateRegisterPool(&((*handler)->registerPool)) &&
             mdCreateReceiveBuffer(&((*handler)->receiveBuffer)))

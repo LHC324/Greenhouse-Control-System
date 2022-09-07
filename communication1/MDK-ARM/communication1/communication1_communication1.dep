@@ -1,8 +1,8 @@
 Dependencies for Project 'communication1', Target 'communication1': (DO NOT MODIFY !)
 F (startup_stm32f030x8.s)(0x62DF5CBF)(--cpu Cortex-M0 -g --apcs=interwork --pd "__MICROLIB SETA 1" -I ..\Core\Inc-I.\RTE\_communication1-IC:\Users\Administrator\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include-IC:\Users\Administrator\AppData\Local\Arm\Packs\Keil\STM32F0xx_DFP\2.1.0\Drivers\CMSIS\Device\ST\STM32F0xx\Include--pd "__UVISION_VERSION SETA 527" --pd "_RTE_ SETA 1" --pd "STM32F030x8 SETA 1"--list .\communication1\startup_stm32f030x8.lst --xref -o communication1\startup_stm32f030x8.o --depend communication1\startup_stm32f030x8.d)
-F (..\Core\Src\Modbus.c)(0x63083580)(--c99 -c --cpu Cortex-M0 -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F0xx_HAL_Driver/Inc -I ../Drivers/STM32F0xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F0xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM0 -I ../Letter_Shell/Inc -I ../AT/Inc -I ..\cm_backtrace -I ..\cm_backtrace\fault_handler\keil -I ..\cm_backtrace\Languages\zh-CN-I.\RTE\_communication1-IC:\Users\Administrator\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include-IC:\Users\Administrator\AppData\Local\Arm\Packs\Keil\STM32F0xx_DFP\2.1.0\Drivers\CMSIS\Device\ST\STM32F0xx\Include-D__UVISION_VERSION="527" -D_RTE_ -DSTM32F030x8 -DUSE_HAL_DRIVER -DSTM32F030x8-o communication1\modbus.o --omf_browse communication1\modbus.crf --depend communication1\modbus.d)
+F (..\Core\Src\Modbus.c)(0x631441A2)(--c99 -c --cpu Cortex-M0 -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F0xx_HAL_Driver/Inc -I ../Drivers/STM32F0xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F0xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM0 -I ../Letter_Shell/Inc -I ../AT/Inc -I ..\cm_backtrace -I ..\cm_backtrace\fault_handler\keil -I ..\cm_backtrace\Languages\zh-CN-I.\RTE\_communication1-IC:\Users\Administrator\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include-IC:\Users\Administrator\AppData\Local\Arm\Packs\Keil\STM32F0xx_DFP\2.1.0\Drivers\CMSIS\Device\ST\STM32F0xx\Include-D__UVISION_VERSION="527" -D_RTE_ -DSTM32F030x8 -DUSE_HAL_DRIVER -DSTM32F030x8-o communication1\modbus.o --omf_browse communication1\modbus.crf --depend communication1\modbus.d)
 I (../Core/Inc/Modbus.h)(0x630C3163)
-I (../Core/Inc/main.h)(0x63087C71)
+I (../Core/Inc/main.h)(0x6314AE08)
 I (../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal.h)(0x61EFA0E0)
 I (../Core/Inc/stm32f0xx_hal_conf.h)(0x62DF5CBC)
 I (../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_rcc.h)(0x61EFA0E0)
@@ -62,7 +62,7 @@ I (../Middlewares/Third_Party/FreeRTOS/Source/include/semphr.h)(0x61EFA0CE)
 I (../Middlewares/Third_Party/FreeRTOS/Source/include/event_groups.h)(0x61EFA0CE)
 F (..\Core\Src\tool.c)(0x62D6AAB7)(--c99 -c --cpu Cortex-M0 -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F0xx_HAL_Driver/Inc -I ../Drivers/STM32F0xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F0xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM0 -I ../Letter_Shell/Inc -I ../AT/Inc -I ..\cm_backtrace -I ..\cm_backtrace\fault_handler\keil -I ..\cm_backtrace\Languages\zh-CN-I.\RTE\_communication1-IC:\Users\Administrator\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include-IC:\Users\Administrator\AppData\Local\Arm\Packs\Keil\STM32F0xx_DFP\2.1.0\Drivers\CMSIS\Device\ST\STM32F0xx\Include-D__UVISION_VERSION="527" -D_RTE_ -DSTM32F030x8 -DUSE_HAL_DRIVER -DSTM32F030x8-o communication1\tool.o --omf_browse communication1\tool.crf --depend communication1\tool.d)
 I (../Core/Inc/tool.h)(0x62579FA9)
-I (../Core/Inc/main.h)(0x63087C71)
+I (../Core/Inc/main.h)(0x6314AE08)
 I (../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal.h)(0x61EFA0E0)
 I (../Core/Inc/stm32f0xx_hal_conf.h)(0x62DF5CBC)
 I (../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_rcc.h)(0x61EFA0E0)
@@ -104,10 +104,10 @@ I (C:\Keil_v5\ARM\ARMCC\include\stdlib.h)(0x599ECD2C)
 I (../Letter_Shell/Inc/shell_port.h)(0x62DF4C3A)
 I (../Letter_Shell/Inc/shell.h)(0x6274BC69)
 I (../Letter_Shell/Inc/shell_cfg.h)(0x62DF4E55)
-F (..\Core\Src\lora.c)(0x630C50B8)(--c99 -c --cpu Cortex-M0 -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F0xx_HAL_Driver/Inc -I ../Drivers/STM32F0xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F0xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM0 -I ../Letter_Shell/Inc -I ../AT/Inc -I ..\cm_backtrace -I ..\cm_backtrace\fault_handler\keil -I ..\cm_backtrace\Languages\zh-CN-I.\RTE\_communication1-IC:\Users\Administrator\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include-IC:\Users\Administrator\AppData\Local\Arm\Packs\Keil\STM32F0xx_DFP\2.1.0\Drivers\CMSIS\Device\ST\STM32F0xx\Include-D__UVISION_VERSION="527" -D_RTE_ -DSTM32F030x8 -DUSE_HAL_DRIVER -DSTM32F030x8-o communication1\lora.o --omf_browse communication1\lora.crf --depend communication1\lora.d)
-I (../Core/Inc/lora.h)(0x630C3F5D)
+F (..\Core\Src\lora.c)(0x63188DB2)(--c99 -c --cpu Cortex-M0 -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F0xx_HAL_Driver/Inc -I ../Drivers/STM32F0xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F0xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM0 -I ../Letter_Shell/Inc -I ../AT/Inc -I ..\cm_backtrace -I ..\cm_backtrace\fault_handler\keil -I ..\cm_backtrace\Languages\zh-CN-I.\RTE\_communication1-IC:\Users\Administrator\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include-IC:\Users\Administrator\AppData\Local\Arm\Packs\Keil\STM32F0xx_DFP\2.1.0\Drivers\CMSIS\Device\ST\STM32F0xx\Include-D__UVISION_VERSION="527" -D_RTE_ -DSTM32F030x8 -DUSE_HAL_DRIVER -DSTM32F030x8-o communication1\lora.o --omf_browse communication1\lora.crf --depend communication1\lora.d)
+I (../Core/Inc/lora.h)(0x63189433)
 I (../Core/Inc/tool.h)(0x62579FA9)
-I (../Core/Inc/main.h)(0x63087C71)
+I (../Core/Inc/main.h)(0x6314AE08)
 I (../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal.h)(0x61EFA0E0)
 I (../Core/Inc/stm32f0xx_hal_conf.h)(0x62DF5CBC)
 I (../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_rcc.h)(0x61EFA0E0)
@@ -167,7 +167,7 @@ I (../Letter_Shell/Inc/shell_cfg.h)(0x62DF4E55)
 I (../Core/Inc/Modbus.h)(0x630C3163)
 F (..\Core\Src\io_uart.c)(0x62DE55CD)(--c99 -c --cpu Cortex-M0 -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F0xx_HAL_Driver/Inc -I ../Drivers/STM32F0xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F0xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM0 -I ../Letter_Shell/Inc -I ../AT/Inc -I ..\cm_backtrace -I ..\cm_backtrace\fault_handler\keil -I ..\cm_backtrace\Languages\zh-CN-I.\RTE\_communication1-IC:\Users\Administrator\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include-IC:\Users\Administrator\AppData\Local\Arm\Packs\Keil\STM32F0xx_DFP\2.1.0\Drivers\CMSIS\Device\ST\STM32F0xx\Include-D__UVISION_VERSION="527" -D_RTE_ -DSTM32F030x8 -DUSE_HAL_DRIVER -DSTM32F030x8-o communication1\io_uart.o --omf_browse communication1\io_uart.crf --depend communication1\io_uart.d)
 I (../Core/Inc/io_uart.h)(0x623543C3)
-I (../Core/Inc/main.h)(0x63087C71)
+I (../Core/Inc/main.h)(0x6314AE08)
 I (../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal.h)(0x61EFA0E0)
 I (../Core/Inc/stm32f0xx_hal_conf.h)(0x62DF5CBC)
 I (../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_rcc.h)(0x61EFA0E0)
@@ -225,7 +225,7 @@ I (../Middlewares/Third_Party/FreeRTOS/Source/include/queue.h)(0x61EFA0CE)
 I (../Middlewares/Third_Party/FreeRTOS/Source/include/semphr.h)(0x61EFA0CE)
 I (../Middlewares/Third_Party/FreeRTOS/Source/include/event_groups.h)(0x61EFA0CE)
 F (../Core/Src/main.c)(0x63087E5A)(--c99 -c --cpu Cortex-M0 -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F0xx_HAL_Driver/Inc -I ../Drivers/STM32F0xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F0xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM0 -I ../Letter_Shell/Inc -I ../AT/Inc -I ..\cm_backtrace -I ..\cm_backtrace\fault_handler\keil -I ..\cm_backtrace\Languages\zh-CN-I.\RTE\_communication1-IC:\Users\Administrator\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include-IC:\Users\Administrator\AppData\Local\Arm\Packs\Keil\STM32F0xx_DFP\2.1.0\Drivers\CMSIS\Device\ST\STM32F0xx\Include-D__UVISION_VERSION="527" -D_RTE_ -DSTM32F030x8 -DUSE_HAL_DRIVER -DSTM32F030x8-o communication1\main.o --omf_browse communication1\main.crf --depend communication1\main.d)
-I (../Core/Inc/main.h)(0x63087C71)
+I (../Core/Inc/main.h)(0x6314AE08)
 I (../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal.h)(0x61EFA0E0)
 I (../Core/Inc/stm32f0xx_hal_conf.h)(0x62DF5CBC)
 I (../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_rcc.h)(0x61EFA0E0)
@@ -284,9 +284,9 @@ I (../Core/Inc/tim.h)(0x62DA9692)
 I (../Core/Inc/usart.h)(0x62A830BF)
 I (../Core/Inc/gpio.h)(0x62A70679)
 I (../Core/Inc/io_uart.h)(0x623543C3)
-F (../Core/Src/gpio.c)(0x62DB8AE4)(--c99 -c --cpu Cortex-M0 -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F0xx_HAL_Driver/Inc -I ../Drivers/STM32F0xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F0xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM0 -I ../Letter_Shell/Inc -I ../AT/Inc -I ..\cm_backtrace -I ..\cm_backtrace\fault_handler\keil -I ..\cm_backtrace\Languages\zh-CN-I.\RTE\_communication1-IC:\Users\Administrator\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include-IC:\Users\Administrator\AppData\Local\Arm\Packs\Keil\STM32F0xx_DFP\2.1.0\Drivers\CMSIS\Device\ST\STM32F0xx\Include-D__UVISION_VERSION="527" -D_RTE_ -DSTM32F030x8 -DUSE_HAL_DRIVER -DSTM32F030x8-o communication1\gpio.o --omf_browse communication1\gpio.crf --depend communication1\gpio.d)
+F (../Core/Src/gpio.c)(0x6311B72A)(--c99 -c --cpu Cortex-M0 -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F0xx_HAL_Driver/Inc -I ../Drivers/STM32F0xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F0xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM0 -I ../Letter_Shell/Inc -I ../AT/Inc -I ..\cm_backtrace -I ..\cm_backtrace\fault_handler\keil -I ..\cm_backtrace\Languages\zh-CN-I.\RTE\_communication1-IC:\Users\Administrator\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include-IC:\Users\Administrator\AppData\Local\Arm\Packs\Keil\STM32F0xx_DFP\2.1.0\Drivers\CMSIS\Device\ST\STM32F0xx\Include-D__UVISION_VERSION="527" -D_RTE_ -DSTM32F030x8 -DUSE_HAL_DRIVER -DSTM32F030x8-o communication1\gpio.o --omf_browse communication1\gpio.crf --depend communication1\gpio.d)
 I (../Core/Inc/gpio.h)(0x62A70679)
-I (../Core/Inc/main.h)(0x63087C71)
+I (../Core/Inc/main.h)(0x6314AE08)
 I (../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal.h)(0x61EFA0E0)
 I (../Core/Inc/stm32f0xx_hal_conf.h)(0x62DF5CBC)
 I (../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_rcc.h)(0x61EFA0E0)
@@ -325,7 +325,7 @@ I (C:\Keil_v5\ARM\ARMCC\include\math.h)(0x599ECD2E)
 I (C:\Keil_v5\ARM\ARMCC\include\stdio.h)(0x599ECD2C)
 I (C:\Keil_v5\ARM\ARMCC\include\stdarg.h)(0x599ECD2A)
 I (C:\Keil_v5\ARM\ARMCC\include\stdlib.h)(0x599ECD2C)
-F (../Core/Src/freertos.c)(0x63087E64)(--c99 -c --cpu Cortex-M0 -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F0xx_HAL_Driver/Inc -I ../Drivers/STM32F0xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F0xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM0 -I ../Letter_Shell/Inc -I ../AT/Inc -I ..\cm_backtrace -I ..\cm_backtrace\fault_handler\keil -I ..\cm_backtrace\Languages\zh-CN-I.\RTE\_communication1-IC:\Users\Administrator\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include-IC:\Users\Administrator\AppData\Local\Arm\Packs\Keil\STM32F0xx_DFP\2.1.0\Drivers\CMSIS\Device\ST\STM32F0xx\Include-D__UVISION_VERSION="527" -D_RTE_ -DSTM32F030x8 -DUSE_HAL_DRIVER -DSTM32F030x8-o communication1\freertos.o --omf_browse communication1\freertos.crf --depend communication1\freertos.d)
+F (../Core/Src/freertos.c)(0x631899AD)(--c99 -c --cpu Cortex-M0 -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F0xx_HAL_Driver/Inc -I ../Drivers/STM32F0xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F0xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM0 -I ../Letter_Shell/Inc -I ../AT/Inc -I ..\cm_backtrace -I ..\cm_backtrace\fault_handler\keil -I ..\cm_backtrace\Languages\zh-CN-I.\RTE\_communication1-IC:\Users\Administrator\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include-IC:\Users\Administrator\AppData\Local\Arm\Packs\Keil\STM32F0xx_DFP\2.1.0\Drivers\CMSIS\Device\ST\STM32F0xx\Include-D__UVISION_VERSION="527" -D_RTE_ -DSTM32F030x8 -DUSE_HAL_DRIVER -DSTM32F030x8-o communication1\freertos.o --omf_browse communication1\freertos.crf --depend communication1\freertos.d)
 I (../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h)(0x630834E6)
 I (C:\Keil_v5\ARM\ARMCC\include\stddef.h)(0x599ECD2C)
 I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x599ECD2E)
@@ -337,7 +337,7 @@ I (../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM0/portmacro.h)
 I (../Middlewares/Third_Party/FreeRTOS/Source/include/mpu_wrappers.h)(0x61EFA0CE)
 I (../Middlewares/Third_Party/FreeRTOS/Source/include/task.h)(0x61EFA0CE)
 I (../Middlewares/Third_Party/FreeRTOS/Source/include/list.h)(0x61EFA0CE)
-I (../Core/Inc/main.h)(0x63087C71)
+I (../Core/Inc/main.h)(0x6314AE08)
 I (../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal.h)(0x61EFA0E0)
 I (../Core/Inc/stm32f0xx_hal_conf.h)(0x62DF5CBC)
 I (../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_rcc.h)(0x61EFA0E0)
@@ -381,7 +381,7 @@ I (../Middlewares/Third_Party/FreeRTOS/Source/include/semphr.h)(0x61EFA0CE)
 I (../Middlewares/Third_Party/FreeRTOS/Source/include/event_groups.h)(0x61EFA0CE)
 I (../Core/Inc/tool.h)(0x62579FA9)
 I (../Core/Inc/Modbus.h)(0x630C3163)
-I (../Core/Inc/lora.h)(0x630C3F5D)
+I (../Core/Inc/lora.h)(0x63189433)
 I (../Letter_Shell/Inc/shell_port.h)(0x62DF4C3A)
 I (../Letter_Shell/Inc/shell.h)(0x6274BC69)
 I (../Letter_Shell/Inc/shell_cfg.h)(0x62DF4E55)
@@ -390,7 +390,7 @@ I (..\cm_backtrace\cmb_def.h)(0x63082831)
 I (..\cm_backtrace\cmb_cfg.h)(0x63082B85)
 F (../Core/Src/dma.c)(0x62A95CE2)(--c99 -c --cpu Cortex-M0 -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F0xx_HAL_Driver/Inc -I ../Drivers/STM32F0xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F0xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM0 -I ../Letter_Shell/Inc -I ../AT/Inc -I ..\cm_backtrace -I ..\cm_backtrace\fault_handler\keil -I ..\cm_backtrace\Languages\zh-CN-I.\RTE\_communication1-IC:\Users\Administrator\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include-IC:\Users\Administrator\AppData\Local\Arm\Packs\Keil\STM32F0xx_DFP\2.1.0\Drivers\CMSIS\Device\ST\STM32F0xx\Include-D__UVISION_VERSION="527" -D_RTE_ -DSTM32F030x8 -DUSE_HAL_DRIVER -DSTM32F030x8-o communication1\dma.o --omf_browse communication1\dma.crf --depend communication1\dma.d)
 I (../Core/Inc/dma.h)(0x62A830BF)
-I (../Core/Inc/main.h)(0x63087C71)
+I (../Core/Inc/main.h)(0x6314AE08)
 I (../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal.h)(0x61EFA0E0)
 I (../Core/Inc/stm32f0xx_hal_conf.h)(0x62DF5CBC)
 I (../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_rcc.h)(0x61EFA0E0)
@@ -431,7 +431,7 @@ I (C:\Keil_v5\ARM\ARMCC\include\stdarg.h)(0x599ECD2A)
 I (C:\Keil_v5\ARM\ARMCC\include\stdlib.h)(0x599ECD2C)
 F (../Core/Src/iwdg.c)(0x62DF47D7)(--c99 -c --cpu Cortex-M0 -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F0xx_HAL_Driver/Inc -I ../Drivers/STM32F0xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F0xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM0 -I ../Letter_Shell/Inc -I ../AT/Inc -I ..\cm_backtrace -I ..\cm_backtrace\fault_handler\keil -I ..\cm_backtrace\Languages\zh-CN-I.\RTE\_communication1-IC:\Users\Administrator\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include-IC:\Users\Administrator\AppData\Local\Arm\Packs\Keil\STM32F0xx_DFP\2.1.0\Drivers\CMSIS\Device\ST\STM32F0xx\Include-D__UVISION_VERSION="527" -D_RTE_ -DSTM32F030x8 -DUSE_HAL_DRIVER -DSTM32F030x8-o communication1\iwdg.o --omf_browse communication1\iwdg.crf --depend communication1\iwdg.d)
 I (../Core/Inc/iwdg.h)(0x62DF47D7)
-I (../Core/Inc/main.h)(0x63087C71)
+I (../Core/Inc/main.h)(0x6314AE08)
 I (../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal.h)(0x61EFA0E0)
 I (../Core/Inc/stm32f0xx_hal_conf.h)(0x62DF5CBC)
 I (../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_rcc.h)(0x61EFA0E0)
@@ -472,7 +472,7 @@ I (C:\Keil_v5\ARM\ARMCC\include\stdarg.h)(0x599ECD2A)
 I (C:\Keil_v5\ARM\ARMCC\include\stdlib.h)(0x599ECD2C)
 F (../Core/Src/tim.c)(0x62DA982F)(--c99 -c --cpu Cortex-M0 -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F0xx_HAL_Driver/Inc -I ../Drivers/STM32F0xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F0xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM0 -I ../Letter_Shell/Inc -I ../AT/Inc -I ..\cm_backtrace -I ..\cm_backtrace\fault_handler\keil -I ..\cm_backtrace\Languages\zh-CN-I.\RTE\_communication1-IC:\Users\Administrator\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include-IC:\Users\Administrator\AppData\Local\Arm\Packs\Keil\STM32F0xx_DFP\2.1.0\Drivers\CMSIS\Device\ST\STM32F0xx\Include-D__UVISION_VERSION="527" -D_RTE_ -DSTM32F030x8 -DUSE_HAL_DRIVER -DSTM32F030x8-o communication1\tim.o --omf_browse communication1\tim.crf --depend communication1\tim.d)
 I (../Core/Inc/tim.h)(0x62DA9692)
-I (../Core/Inc/main.h)(0x63087C71)
+I (../Core/Inc/main.h)(0x6314AE08)
 I (../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal.h)(0x61EFA0E0)
 I (../Core/Inc/stm32f0xx_hal_conf.h)(0x62DF5CBC)
 I (../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_rcc.h)(0x61EFA0E0)
@@ -513,7 +513,7 @@ I (C:\Keil_v5\ARM\ARMCC\include\stdarg.h)(0x599ECD2A)
 I (C:\Keil_v5\ARM\ARMCC\include\stdlib.h)(0x599ECD2C)
 F (../Core/Src/usart.c)(0x6300E334)(--c99 -c --cpu Cortex-M0 -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F0xx_HAL_Driver/Inc -I ../Drivers/STM32F0xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F0xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM0 -I ../Letter_Shell/Inc -I ../AT/Inc -I ..\cm_backtrace -I ..\cm_backtrace\fault_handler\keil -I ..\cm_backtrace\Languages\zh-CN-I.\RTE\_communication1-IC:\Users\Administrator\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include-IC:\Users\Administrator\AppData\Local\Arm\Packs\Keil\STM32F0xx_DFP\2.1.0\Drivers\CMSIS\Device\ST\STM32F0xx\Include-D__UVISION_VERSION="527" -D_RTE_ -DSTM32F030x8 -DUSE_HAL_DRIVER -DSTM32F030x8-o communication1\usart.o --omf_browse communication1\usart.crf --depend communication1\usart.d)
 I (../Core/Inc/usart.h)(0x62A830BF)
-I (../Core/Inc/main.h)(0x63087C71)
+I (../Core/Inc/main.h)(0x6314AE08)
 I (../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal.h)(0x61EFA0E0)
 I (../Core/Inc/stm32f0xx_hal_conf.h)(0x62DF5CBC)
 I (../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_rcc.h)(0x61EFA0E0)
@@ -553,7 +553,7 @@ I (C:\Keil_v5\ARM\ARMCC\include\stdio.h)(0x599ECD2C)
 I (C:\Keil_v5\ARM\ARMCC\include\stdarg.h)(0x599ECD2A)
 I (C:\Keil_v5\ARM\ARMCC\include\stdlib.h)(0x599ECD2C)
 F (../Core/Src/stm32f0xx_it.c)(0x63087D75)(--c99 -c --cpu Cortex-M0 -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F0xx_HAL_Driver/Inc -I ../Drivers/STM32F0xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F0xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM0 -I ../Letter_Shell/Inc -I ../AT/Inc -I ..\cm_backtrace -I ..\cm_backtrace\fault_handler\keil -I ..\cm_backtrace\Languages\zh-CN-I.\RTE\_communication1-IC:\Users\Administrator\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include-IC:\Users\Administrator\AppData\Local\Arm\Packs\Keil\STM32F0xx_DFP\2.1.0\Drivers\CMSIS\Device\ST\STM32F0xx\Include-D__UVISION_VERSION="527" -D_RTE_ -DSTM32F030x8 -DUSE_HAL_DRIVER -DSTM32F030x8-o communication1\stm32f0xx_it.o --omf_browse communication1\stm32f0xx_it.crf --depend communication1\stm32f0xx_it.d)
-I (../Core/Inc/main.h)(0x63087C71)
+I (../Core/Inc/main.h)(0x6314AE08)
 I (../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal.h)(0x61EFA0E0)
 I (../Core/Inc/stm32f0xx_hal_conf.h)(0x62DF5CBC)
 I (../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_rcc.h)(0x61EFA0E0)
@@ -594,7 +594,7 @@ I (C:\Keil_v5\ARM\ARMCC\include\stdarg.h)(0x599ECD2A)
 I (C:\Keil_v5\ARM\ARMCC\include\stdlib.h)(0x599ECD2C)
 I (../Core/Inc/stm32f0xx_it.h)(0x62DB6481)
 I (../Core/Inc/Modbus.h)(0x630C3163)
-I (../Core/Inc/lora.h)(0x630C3F5D)
+I (../Core/Inc/lora.h)(0x63189433)
 I (../Core/Inc/tool.h)(0x62579FA9)
 I (../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.h)(0x61EFA0CE)
 I (../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h)(0x630834E6)
@@ -614,7 +614,7 @@ I (../Letter_Shell/Inc/shell_port.h)(0x62DF4C3A)
 I (../Letter_Shell/Inc/shell.h)(0x6274BC69)
 I (../Letter_Shell/Inc/shell_cfg.h)(0x62DF4E55)
 F (../Core/Src/stm32f0xx_hal_msp.c)(0x62DB5E93)(--c99 -c --cpu Cortex-M0 -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F0xx_HAL_Driver/Inc -I ../Drivers/STM32F0xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F0xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM0 -I ../Letter_Shell/Inc -I ../AT/Inc -I ..\cm_backtrace -I ..\cm_backtrace\fault_handler\keil -I ..\cm_backtrace\Languages\zh-CN-I.\RTE\_communication1-IC:\Users\Administrator\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include-IC:\Users\Administrator\AppData\Local\Arm\Packs\Keil\STM32F0xx_DFP\2.1.0\Drivers\CMSIS\Device\ST\STM32F0xx\Include-D__UVISION_VERSION="527" -D_RTE_ -DSTM32F030x8 -DUSE_HAL_DRIVER -DSTM32F030x8-o communication1\stm32f0xx_hal_msp.o --omf_browse communication1\stm32f0xx_hal_msp.crf --depend communication1\stm32f0xx_hal_msp.d)
-I (../Core/Inc/main.h)(0x63087C71)
+I (../Core/Inc/main.h)(0x6314AE08)
 I (../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal.h)(0x61EFA0E0)
 I (../Core/Inc/stm32f0xx_hal_conf.h)(0x62DF5CBC)
 I (../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_rcc.h)(0x61EFA0E0)
@@ -693,7 +693,7 @@ I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x599ECD2E)
 I (C:\Keil_v5\ARM\ARMCC\include\stdbool.h)(0x599ECD2E)
 I (C:\Keil_v5\ARM\ARMCC\include\stddef.h)(0x599ECD2C)
 I (../AT/Inc/comdef.h)(0x622B0B11)
-I (../Core/Inc/main.h)(0x63087C71)
+I (../Core/Inc/main.h)(0x6314AE08)
 I (../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal.h)(0x61EFA0E0)
 I (../Core/Inc/stm32f0xx_hal_conf.h)(0x62DF5CBC)
 I (../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_rcc.h)(0x61EFA0E0)
@@ -730,7 +730,7 @@ I (C:\Keil_v5\ARM\ARMCC\include\stdio.h)(0x599ECD2C)
 I (C:\Keil_v5\ARM\ARMCC\include\stdarg.h)(0x599ECD2A)
 I (C:\Keil_v5\ARM\ARMCC\include\stdlib.h)(0x599ECD2C)
 I (../Core/Inc/Modbus.h)(0x630C3163)
-I (../Core/Inc/lora.h)(0x630C3F5D)
+I (../Core/Inc/lora.h)(0x63189433)
 I (../Core/Inc/tool.h)(0x62579FA9)
 I (../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.h)(0x61EFA0CE)
 I (../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h)(0x630834E6)
@@ -763,7 +763,7 @@ I (C:\Keil_v5\ARM\ARMCC\include\string.h)(0x599ECD2C)
 I (C:\Keil_v5\ARM\ARMCC\include\stdio.h)(0x599ECD2C)
 I (C:\Keil_v5\ARM\ARMCC\include\stdarg.h)(0x599ECD2A)
 I (../Letter_Shell/Inc/shell_ext.h)(0x62159816)
-I (../Core/Inc/main.h)(0x63087C71)
+I (../Core/Inc/main.h)(0x6314AE08)
 I (../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal.h)(0x61EFA0E0)
 I (../Core/Inc/stm32f0xx_hal_conf.h)(0x62DF5CBC)
 I (../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_rcc.h)(0x61EFA0E0)
@@ -829,7 +829,7 @@ I (../Letter_Shell/Inc/shell_port.h)(0x62DF4C3A)
 I (../Letter_Shell/Inc/shell.h)(0x6274BC69)
 I (../Letter_Shell/Inc/shell_cfg.h)(0x62DF4E55)
 I (../Core/Inc/usart.h)(0x62A830BF)
-I (../Core/Inc/main.h)(0x63087C71)
+I (../Core/Inc/main.h)(0x6314AE08)
 I (../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal.h)(0x61EFA0E0)
 I (../Core/Inc/stm32f0xx_hal_conf.h)(0x62DF5CBC)
 I (../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_rcc.h)(0x61EFA0E0)

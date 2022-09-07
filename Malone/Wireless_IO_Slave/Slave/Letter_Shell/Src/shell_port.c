@@ -76,9 +76,9 @@ unsigned short User_Shell_Write(char *data, unsigned short len)
 	if (HAL_UART_Transmit(&SHELL_TARGET_UART, (uint8_t *)pData, len + 3U, 0xFFFF) != HAL_OK)
 #else
 #if defined(USING_IO_UART)
-	if (HAL_SUART_Transmit(&SHELL_TARGET_UART, (uint8_t *)data, len, 0xFFFF) != HAL_OK)
+	if (HAL_SUART_Transmit(&SHELL_TARGET_UART, (uint8_t *)data, len, 0x100) != HAL_OK)
 #else
-	if (HAL_UART_Transmit(&SHELL_TARGET_UART, (uint8_t *)data, len, 0xFFFF) != HAL_OK)
+	if (HAL_UART_Transmit(&SHELL_TARGET_UART, (uint8_t *)data, len, 0x100) != HAL_OK)
 #endif
 #endif
 	{ /*串口发送数据失败*/

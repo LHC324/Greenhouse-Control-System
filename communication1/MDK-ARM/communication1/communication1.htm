@@ -3,9 +3,9 @@
 <title>Static Call Graph - [communication1\communication1.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image communication1\communication1.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060750: Last Updated: Mon Aug 29 13:38:08 2022
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060750: Last Updated: Wed Sep 07 21:16:41 2022
 <BR><P>
-<H3>Maximum Stack Usage =        360 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
+<H3>Maximum Stack Usage =        368 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
 main &rArr; MX_FREERTOS_Init &rArr; MX_Lora_Init &rArr; Create_ModObject &rArr; pvPortMalloc &rArr; vApplicationMallocFailedHook &rArr; shellPrint &rArr; vsnprintf
 <P>
@@ -1056,7 +1056,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[d1]"></a>MX_FREERTOS_Init</STRONG> (Thumb, 232 bytes, Stack size 160 bytes, freertos.o(i.MX_FREERTOS_Init))
-<BR><BR>[Stack]<UL><LI>Max Depth = 360<LI>Call Chain = MX_FREERTOS_Init &rArr; MX_Lora_Init &rArr; Create_ModObject &rArr; pvPortMalloc &rArr; vApplicationMallocFailedHook &rArr; shellPrint &rArr; vsnprintf
+<BR><BR>[Stack]<UL><LI>Max Depth = 368<LI>Call Chain = MX_FREERTOS_Init &rArr; MX_Lora_Init &rArr; Create_ModObject &rArr; pvPortMalloc &rArr; vApplicationMallocFailedHook &rArr; shellPrint &rArr; vsnprintf
 </UL>
 <BR>[Calls]<UL><LI><a href="#[d8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osThreadCreate
 <LI><a href="#[d3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osSemaphoreCreate
@@ -1070,7 +1070,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[1f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[d9]"></a>MX_GPIO_Init</STRONG> (Thumb, 274 bytes, Stack size 48 bytes, gpio.o(i.MX_GPIO_Init))
+<P><STRONG><a name="[d9]"></a>MX_GPIO_Init</STRONG> (Thumb, 276 bytes, Stack size 48 bytes, gpio.o(i.MX_GPIO_Init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 72<LI>Call Chain = MX_GPIO_Init &rArr; HAL_GPIO_Init
 </UL>
 <BR>[Calls]<UL><LI><a href="#[99]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_NVIC_SetPriority
@@ -1091,8 +1091,8 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[1f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[d6]"></a>MX_Lora_Init</STRONG> (Thumb, 70 bytes, Stack size 104 bytes, lora.o(i.MX_Lora_Init))
-<BR><BR>[Stack]<UL><LI>Max Depth = 200<LI>Call Chain = MX_Lora_Init &rArr; Create_ModObject &rArr; pvPortMalloc &rArr; vApplicationMallocFailedHook &rArr; shellPrint &rArr; vsnprintf
+<P><STRONG><a name="[d6]"></a>MX_Lora_Init</STRONG> (Thumb, 72 bytes, Stack size 112 bytes, lora.o(i.MX_Lora_Init))
+<BR><BR>[Stack]<UL><LI>Max Depth = 208<LI>Call Chain = MX_Lora_Init &rArr; Create_ModObject &rArr; pvPortMalloc &rArr; vApplicationMallocFailedHook &rArr; shellPrint &rArr; vsnprintf
 </UL>
 <BR>[Calls]<UL><LI><a href="#[84]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Create_ModObject
 <LI><a href="#[d7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy4
@@ -1370,7 +1370,7 @@ Global Symbols
 <BR>[Address Reference Count : 1]<UL><LI> stm32f0xx_it.o(.emb_text)
 </UL>
 <P><STRONG><a name="[1f]"></a>main</STRONG> (Thumb, 50 bytes, Stack size 0 bytes, main.o(i.main))
-<BR><BR>[Stack]<UL><LI>Max Depth = 360<LI>Call Chain = main &rArr; MX_FREERTOS_Init &rArr; MX_Lora_Init &rArr; Create_ModObject &rArr; pvPortMalloc &rArr; vApplicationMallocFailedHook &rArr; shellPrint &rArr; vsnprintf
+<BR><BR>[Stack]<UL><LI>Max Depth = 368<LI>Call Chain = main &rArr; MX_FREERTOS_Init &rArr; MX_Lora_Init &rArr; Create_ModObject &rArr; pvPortMalloc &rArr; vApplicationMallocFailedHook &rArr; shellPrint &rArr; vsnprintf
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osKernelStart
 <LI><a href="#[e1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MX_USART2_UART_Init
@@ -1395,6 +1395,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[e4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;shellTask
 <LI><a href="#[45]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;IWDG_Task
 <LI><a href="#[2f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Set_Lora_FactoryMode
+<LI><a href="#[2d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Lora_Tansmit_Poll
 </UL>
 
 <P><STRONG><a name="[f4]"></a>osKernelStart</STRONG> (Thumb, 10 bytes, Stack size 8 bytes, cmsis_os.o(i.osKernelStart))
@@ -2374,7 +2375,7 @@ Local Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> modbus.o(i.Create_ModObject)
 </UL>
-<P><STRONG><a name="[23]"></a>Modbus_CallBack</STRONG> (Thumb, 16 bytes, Stack size 0 bytes, modbus.o(i.Modbus_CallBack))
+<P><STRONG><a name="[23]"></a>Modbus_CallBack</STRONG> (Thumb, 20 bytes, Stack size 0 bytes, modbus.o(i.Modbus_CallBack))
 <BR>[Address Reference Count : 1]<UL><LI> modbus.o(i.Create_ModObject)
 </UL>
 <P><STRONG><a name="[28]"></a>Modbus_Operatex</STRONG> (Thumb, 90 bytes, Stack size 24 bytes, modbus.o(i.Modbus_Operatex))
@@ -2462,7 +2463,7 @@ Local Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> lora.o(i.Create_ModObject)
 </UL>
-<P><STRONG><a name="[31]"></a>Lora_MakeFrame</STRONG> (Thumb, 158 bytes, Stack size 40 bytes, lora.o(i.Lora_MakeFrame))
+<P><STRONG><a name="[31]"></a>Lora_MakeFrame</STRONG> (Thumb, 168 bytes, Stack size 40 bytes, lora.o(i.Lora_MakeFrame))
 <BR><BR>[Stack]<UL><LI>Max Depth = 56<LI>Call Chain = Lora_MakeFrame &rArr; Get_Crc16
 </UL>
 <BR>[Calls]<UL><LI><a href="#[cb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Get_Crc16
@@ -2497,10 +2498,11 @@ Local Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> lora.o(i.Create_ModObject)
 </UL>
-<P><STRONG><a name="[2d]"></a>Lora_Tansmit_Poll</STRONG> (Thumb, 406 bytes, Stack size 24 bytes, lora.o(i.Lora_Tansmit_Poll))
+<P><STRONG><a name="[2d]"></a>Lora_Tansmit_Poll</STRONG> (Thumb, 412 bytes, Stack size 24 bytes, lora.o(i.Lora_Tansmit_Poll))
 <BR><BR>[Stack]<UL><LI>Max Depth = 112<LI>Call Chain = Lora_Tansmit_Poll &rArr; Add_ListItem &rArr; pvPortMalloc &rArr; vApplicationMallocFailedHook &rArr; shellPrint &rArr; vsnprintf
 </UL>
-<BR>[Calls]<UL><LI><a href="#[ce]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__ARM_common_switch8
+<BR>[Calls]<UL><LI><a href="#[ca]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
+<LI><a href="#[ce]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__ARM_common_switch8
 <LI><a href="#[cc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Remove_ListItem
 <LI><a href="#[cf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Get_OneDevice
 <LI><a href="#[72]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Add_ListItem

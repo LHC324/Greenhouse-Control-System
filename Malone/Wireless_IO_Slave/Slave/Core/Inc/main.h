@@ -46,6 +46,10 @@ extern "C" {
 #define RELAY_CLOSE_TIMES 1000U
 // #define USING_L101
 #define USING_IO_UART
+/*as a repeater*/
+//#define AS_REPEATER
+/*Use relay mode*/
+#define USING_REPEATER_MODE
 #if defined(USING_FREERTOS)
 /*Custom memory management*/
 #define CUSTOM_MALLOC pvPortMalloc

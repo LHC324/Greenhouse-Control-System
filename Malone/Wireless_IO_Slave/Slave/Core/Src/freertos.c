@@ -62,7 +62,7 @@ osSemaphoreId ReciveHandle;
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
-GPIO_PinState g_State = GPIO_PIN_SET;
+// GPIO_PinState g_State = GPIO_PIN_SET;
 bool g_Timerout_Flag = false;
 static uint32_t g_Counter = 0;
 /* USER CODE END FunctionPrototypes */
@@ -259,9 +259,12 @@ void Io_Output_Task(void const *argument)
   for (;;)
   {
     /*Dog feed signal*/
-    g_State ^= GPIO_PIN_SET;
-    HAL_GPIO_WritePin(GPIOA, WDI_Pin, g_State);
+    // g_State ^= GPIO_PIN_SET;
+    // HAL_GPIO_WritePin(GPIOA, WDI_Pin, g_State);
+    HAL_GPIO_TogglePin(GPIOA, WDI_Pin);
+#if !defined(AS_REPEATER)
     Io_Digital_Output(g_Timerout_Flag);
+#endif
     osDelay(50);
   }
   /* USER CODE END Io_Output_Task */

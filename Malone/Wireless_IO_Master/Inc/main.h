@@ -46,6 +46,9 @@ extern "C" {
 #define USING_RTOS
 #define MDTASK_SENDTIMES 50U
 // #define USING_L101
+//#define USING_ASHINING
+//#define USING_TRANSPARENT_MODE
+#define USING_REPEATER_MODE
 #define USING_IO_UART
 #if defined(USING_FREERTOS)
 /*Custom memory management*/

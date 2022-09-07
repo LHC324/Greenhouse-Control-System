@@ -63,6 +63,7 @@ static void Modbus_CallBack(pModbusHandle pd, Function_Code code)
         case ReportSeverId:
         {
             // check_flag = true;
+			*pflag = true;
         }
         break;
         case ReadInputCoil:

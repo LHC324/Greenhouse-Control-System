@@ -1,0 +1,9 @@
+cubemx\device.o: ../Middlewares/Third_Party/RealThread_RTOS/components/device/device.c
+cubemx\device.o: ../Middlewares/Third_Party/RealThread_RTOS/include/rtthread.h
+cubemx\device.o: ../Inc/rtconfig.h
+cubemx\device.o: ../Middlewares/Third_Party/RealThread_RTOS/finsh/finsh_config.h
+cubemx\device.o: ../Middlewares/Third_Party/RealThread_RTOS/include/rtdebug.h
+cubemx\device.o: ../Middlewares/Third_Party/RealThread_RTOS/include/rtdef.h
+cubemx\device.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdarg.h
+cubemx\device.o: ../Middlewares/Third_Party/RealThread_RTOS/include/rtservice.h
+cubemx\device.o: ../Middlewares/Third_Party/RealThread_RTOS/finsh/finsh_api.h
