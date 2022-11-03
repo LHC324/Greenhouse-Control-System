@@ -186,6 +186,10 @@
 
 ## 存在问题
 
+- **启动模式**：以汽化器出口压力`补压停止值`作为气站出口阀动作条件，导致出口阀提前关闭造成`汽化器`无法满足`补压启动条件`，进而气站停止运行。[2022/09/27修复]
+- ![bug1](Document/bug_01.jpg)
+- **在1问题发生时**，如果启动信号有效，则此时，出口阀处于打开状态(不影响气站工作)。
+
 ### 核心控制器部分
 
 - **WIIF模块** 云端参数上传和远程升级暂未实现。
@@ -204,6 +208,7 @@
 - **Stm32芯片烧机贴** https://www.amobbs.com/thread-5001725-1-1.html。
 - **shell_port.c** `if (HAL_UART_Transmit(&SHELL_TARGET_UART, (uint8_t *)data, len, 0xFFFF) != HAL_OK)`中`0xFFFFF`应该
   改为`0x100`,否则硬件有问题就会导致卡死。
+- **使用4-20ma电流由来**：https://mp.weixin.qq.com/s/4XIiPvDNZc4O5y1tUhjC4w
   
 ### 控制柜部分
   - +24V电源同为GND。

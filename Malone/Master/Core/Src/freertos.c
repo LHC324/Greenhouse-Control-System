@@ -1105,7 +1105,7 @@ void Control_Task(void const *argument)
 #endif
       /*The pressure of the storage tank is protected in the safe mode,
       as long as the outlet pressure conditions of the vaporizer are met here*/
-      if (Pcarburetor > ps->Param.PSvap_outlet_Start)
+      if (Pcarburetor > ps->Param.PSvap_outlet_stop)/*Bugfix: Trigger gas station to stop working*/
       {
 #if (USING_USERTIMER0)
         SoftTimer_IsTrue(&timer[0U]); //#######

@@ -374,20 +374,30 @@ static void Dwin_PageChange(pDwinHandle pd, uint16_t page)
  */
 static void Dwin_Poll(pDwinHandle pd)
 // void Dwin_Poll(pDwinHandle pd)
-{ /*检查帧头是否符合要求*/
+{ 
+#define DWIN_MIN_FRAME_LEN 5U // 3个前导码+2个crc16
+	/*检查帧头是否符合要求*/
 	if ((pd->Uart.pRbuf[0] == 0x5A) && (pd->Uart.pRbuf[1] == 0xA5))
 	{
 		uint16_t addr = Get_Data(pd, 4U, DW_WORD);
+		if (*pd->Uart.pRxCount < DWIN_MIN_FRAME_LEN)
+			return;
+		/*检查CRC是否正确*/
+		uint16_t crc16 = Get_Crc16(&pd->Uart.pRbuf[3U], *pd->Uart.pRxCount - 5U, 0xFFFF);
+		crc16 = (crc16 >> 8U) | (crc16 << 8U);
 #if defined(USING_DEBUG)
 		// shellPrint(Shell_Object, "addr = 0x%x\r\n", addr);
 #endif
-		for (uint8_t i = 0; i < pd->Slave.Events_Size; i++)
+		if (crc16 == Get_Data(pd, *pd->Uart.pRxCount - 2U, DW_WORD))
 		{
-			if (pd->Slave.pMap[i].addr == addr)
+			for (uint8_t i = 0; i < pd->Slave.Events_Size; i++)
 			{
-				if (pd->Slave.pMap[i].event)
-					pd->Slave.pMap[i].event(pd, &i);
-				break;
+				if (pd->Slave.pMap[i].addr == addr)
+				{
+					if (pd->Slave.pMap[i].event)
+						pd->Slave.pMap[i].event(pd, &i);
+					break;
+				}
 			}
 		}
 	}
@@ -397,6 +407,7 @@ static void Dwin_Poll(pDwinHandle pd)
 #endif
 	memset(pd->Uart.pRbuf, 0x00, *pd->Uart.pRxCount);
 	*pd->Uart.pRxCount = 0U;
+	#undef DWIN_MIN_FRAME_LEN
 }
 
 /**

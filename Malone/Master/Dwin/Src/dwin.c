@@ -375,10 +375,14 @@ static void Dwin_PageChange(pDwinHandle pd, uint16_t page)
  */
 static void Dwin_Poll(pDwinHandle pd)
 // void Dwin_Poll(pDwinHandle pd)
-{ /*检查帧头是否符合要求*/
+{ 
+#define DWIN_MIN_FRAME_LEN 5U // 3个前导码+2个crc16
+	/*检查帧头是否符合要求*/
 	if ((pd->Uart.pRbuf[0] == 0x5A) && (pd->Uart.pRbuf[1] == 0xA5))
 	{
 		uint16_t addr = Get_Data(pd, 4U, DW_WORD);
+		if (*pd->Uart.pRxCount < DWIN_MIN_FRAME_LEN)
+			return;
 		/*检查CRC是否正确*/
 		uint16_t crc16 = Get_Crc16(&pd->Uart.pRbuf[3U], *pd->Uart.pRxCount - 5U, 0xFFFF);
 		crc16 = (crc16 >> 8U) | (crc16 << 8U);
@@ -404,6 +408,7 @@ static void Dwin_Poll(pDwinHandle pd)
 #endif
 	memset(pd->Uart.pRbuf, 0x00, *pd->Uart.pRxCount);
 	*pd->Uart.pRxCount = 0U;
+	#undef DWIN_MIN_FRAME_LEN
 }
 
 /**

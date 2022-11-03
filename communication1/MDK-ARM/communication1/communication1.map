@@ -2173,6 +2173,1119 @@ Removing Unused input sections from the image.
 
 ==============================================================================
 
+Image Stack Usage Information.
+
+Maximum stack usage for Image.
+
+Maximum Stack Usage for main 0x170 bytes.
+Call chain for maximum stack usage:
+main => MX_FREERTOS_Init => MX_Lora_Init => Create_ModObject => pvPortMalloc => vApplicationMallocFailedHook => shellPrint => vsnprintf
+
+Maximum stack usage per global function.
+
+Maximum Stack Usage for PendSV_Handler 0x40 bytes.
+Call chain for maximum stack usage:
+PendSV_Handler => vTaskSwitchContext => vApplicationStackOverflowHook => shellPrint => vsnprintf
+
+Maximum Stack Usage for __aeabi_fmul 0x10 bytes.
+Call chain for maximum stack usage:
+__aeabi_fmul
+
+Maximum Stack Usage for __aeabi_fdiv 0x10 bytes.
+Call chain for maximum stack usage:
+__aeabi_fdiv
+
+Maximum Stack Usage for __aeabi_i2f 0x14 bytes.
+Call chain for maximum stack usage:
+__aeabi_i2f => _float_epilogue
+
+Maximum Stack Usage for __aeabi_ui2f 0x14 bytes.
+Call chain for maximum stack usage:
+__aeabi_ui2f => _float_epilogue
+
+Maximum Stack Usage for _float_epilogue 0xc bytes.
+Call chain for maximum stack usage:
+_float_epilogue
+
+Maximum Stack Usage for Add_ListItem 0x58 bytes.
+Call chain for maximum stack usage:
+Add_ListItem => pvPortMalloc => vApplicationMallocFailedHook => shellPrint => vsnprintf
+
+Maximum Stack Usage for At_Handle 0xb8 bytes.
+Call chain for maximum stack usage:
+At_Handle => Free_Mode => Wait_Recv => shellPrint => vsnprintf
+
+Maximum Stack Usage for Cpu_Task 0x68 bytes.
+Call chain for maximum stack usage:
+Cpu_Task => osSemaphoreWait => xQueueSemaphoreTake => xTaskResumeAll => xTaskIncrementTick
+
+Maximum Stack Usage for DMA1_Channel2_3_IRQHandler 0x18 bytes.
+Call chain for maximum stack usage:
+DMA1_Channel2_3_IRQHandler => HAL_DMA_IRQHandler
+
+Maximum Stack Usage for DMA1_Channel4_5_IRQHandler 0x18 bytes.
+Call chain for maximum stack usage:
+DMA1_Channel4_5_IRQHandler => HAL_DMA_IRQHandler
+
+Maximum Stack Usage for EXTI4_15_IRQHandler 0x18 bytes.
+Call chain for maximum stack usage:
+EXTI4_15_IRQHandler => HAL_GPIO_EXTI_IRQHandler => HAL_GPIO_EXTI_Callback
+
+Maximum Stack Usage for Free_Mode 0xa0 bytes.
+Call chain for maximum stack usage:
+Free_Mode => Wait_Recv => shellPrint => vsnprintf
+
+Maximum Stack Usage for Get_AtCmd 0x8 bytes.
+Call chain for maximum stack usage:
+Get_AtCmd
+
+Maximum Stack Usage for Get_Crc16 0x10 bytes.
+Call chain for maximum stack usage:
+Get_Crc16
+
+Maximum Stack Usage for HAL_DMA_Abort 0xc bytes.
+Call chain for maximum stack usage:
+HAL_DMA_Abort
+
+Maximum Stack Usage for HAL_DMA_Abort_IT 0x10 bytes.
+Call chain for maximum stack usage:
+HAL_DMA_Abort_IT
+
+Maximum Stack Usage for HAL_DMA_IRQHandler 0x10 bytes.
+Call chain for maximum stack usage:
+HAL_DMA_IRQHandler
+
+Maximum Stack Usage for HAL_DMA_Init 0x24 bytes.
+Call chain for maximum stack usage:
+HAL_DMA_Init => DMA_CalcBaseAndBitshift => __aeabi_uidivmod
+
+Maximum Stack Usage for HAL_DMA_Start_IT 0x24 bytes.
+Call chain for maximum stack usage:
+HAL_DMA_Start_IT => DMA_SetConfig
+
+Maximum Stack Usage for HAL_GPIO_EXTI_Callback 0x8 bytes.
+Call chain for maximum stack usage:
+HAL_GPIO_EXTI_Callback
+
+Maximum Stack Usage for HAL_GPIO_EXTI_IRQHandler 0x10 bytes.
+Call chain for maximum stack usage:
+HAL_GPIO_EXTI_IRQHandler => HAL_GPIO_EXTI_Callback
+
+Maximum Stack Usage for HAL_GPIO_Init 0x18 bytes.
+Call chain for maximum stack usage:
+HAL_GPIO_Init
+
+Maximum Stack Usage for HAL_IWDG_Init 0x10 bytes.
+Call chain for maximum stack usage:
+HAL_IWDG_Init
+
+Maximum Stack Usage for HAL_Init 0x4c bytes.
+Call chain for maximum stack usage:
+HAL_Init => HAL_InitTick => HAL_TIM_Base_Init => TIM_Base_SetConfig
+
+Maximum Stack Usage for HAL_InitTick 0x44 bytes.
+Call chain for maximum stack usage:
+HAL_InitTick => HAL_TIM_Base_Init => TIM_Base_SetConfig
+
+Maximum Stack Usage for HAL_MspInit 0x10 bytes.
+Call chain for maximum stack usage:
+HAL_MspInit => HAL_NVIC_SetPriority
+
+Maximum Stack Usage for HAL_NVIC_SetPriority 0x8 bytes.
+Call chain for maximum stack usage:
+HAL_NVIC_SetPriority
+
+Maximum Stack Usage for HAL_RCCEx_PeriphCLKConfig 0x18 bytes.
+Call chain for maximum stack usage:
+HAL_RCCEx_PeriphCLKConfig
+
+Maximum Stack Usage for HAL_RCC_ClockConfig 0x78 bytes.
+Call chain for maximum stack usage:
+HAL_RCC_ClockConfig => HAL_RCC_GetSysClockFreq => __aeabi_uldivmod
+
+Maximum Stack Usage for HAL_RCC_GetClockConfig 0x8 bytes.
+Call chain for maximum stack usage:
+HAL_RCC_GetClockConfig
+
+Maximum Stack Usage for HAL_RCC_GetSysClockFreq 0x60 bytes.
+Call chain for maximum stack usage:
+HAL_RCC_GetSysClockFreq => __aeabi_uldivmod
+
+Maximum Stack Usage for HAL_RCC_OscConfig 0x20 bytes.
+Call chain for maximum stack usage:
+HAL_RCC_OscConfig
+
+Maximum Stack Usage for HAL_SUART_Receive 0x28 bytes.
+Call chain for maximum stack usage:
+HAL_SUART_Receive
+
+Maximum Stack Usage for HAL_SUART_Transmit 0x28 bytes.
+Call chain for maximum stack usage:
+HAL_SUART_Transmit
+
+Maximum Stack Usage for HAL_TIM_Base_Init 0x24 bytes.
+Call chain for maximum stack usage:
+HAL_TIM_Base_Init => TIM_Base_SetConfig
+
+Maximum Stack Usage for HAL_TIM_Base_MspInit 0x10 bytes.
+Call chain for maximum stack usage:
+HAL_TIM_Base_MspInit => HAL_NVIC_SetPriority
+
+Maximum Stack Usage for HAL_TIM_IRQHandler 0x28 bytes.
+Call chain for maximum stack usage:
+HAL_TIM_IRQHandler => HAL_TIM_PeriodElapsedCallback
+
+Maximum Stack Usage for HAL_TIM_PeriodElapsedCallback 0x18 bytes.
+Call chain for maximum stack usage:
+HAL_TIM_PeriodElapsedCallback
+
+Maximum Stack Usage for HAL_UART_DMAStop 0x24 bytes.
+Call chain for maximum stack usage:
+HAL_UART_DMAStop => HAL_DMA_Abort
+
+Maximum Stack Usage for HAL_UART_IRQHandler 0x28 bytes.
+Call chain for maximum stack usage:
+HAL_UART_IRQHandler => HAL_DMA_Abort_IT
+
+Maximum Stack Usage for HAL_UART_Init 0x78 bytes.
+Call chain for maximum stack usage:
+HAL_UART_Init => UART_SetConfig => HAL_RCC_GetSysClockFreq => __aeabi_uldivmod
+
+Maximum Stack Usage for HAL_UART_MspInit 0x54 bytes.
+Call chain for maximum stack usage:
+HAL_UART_MspInit => HAL_DMA_Init => DMA_CalcBaseAndBitshift => __aeabi_uidivmod
+
+Maximum Stack Usage for HAL_UART_Receive_DMA 0x4c bytes.
+Call chain for maximum stack usage:
+HAL_UART_Receive_DMA => UART_Start_Receive_DMA => HAL_DMA_Start_IT => DMA_SetConfig
+
+Maximum Stack Usage for HAL_UART_Transmit_DMA 0x3c bytes.
+Call chain for maximum stack usage:
+HAL_UART_Transmit_DMA => HAL_DMA_Start_IT => DMA_SetConfig
+
+Maximum Stack Usage for IWDG_Task 0x40 bytes.
+Call chain for maximum stack usage:
+IWDG_Task => osDelay => vTaskDelay => xTaskResumeAll => xTaskIncrementTick
+
+Maximum Stack Usage for Lora_Task 0x68 bytes.
+Call chain for maximum stack usage:
+Lora_Task => osSemaphoreWait => xQueueSemaphoreTake => xTaskResumeAll => xTaskIncrementTick
+
+Maximum Stack Usage for MX_DMA_Init 0x10 bytes.
+Call chain for maximum stack usage:
+MX_DMA_Init => HAL_NVIC_SetPriority
+
+Maximum Stack Usage for MX_FREERTOS_Init 0x170 bytes.
+Call chain for maximum stack usage:
+MX_FREERTOS_Init => MX_Lora_Init => Create_ModObject => pvPortMalloc => vApplicationMallocFailedHook => shellPrint => vsnprintf
+
+Maximum Stack Usage for MX_GPIO_Init 0x48 bytes.
+Call chain for maximum stack usage:
+MX_GPIO_Init => HAL_GPIO_Init
+
+Maximum Stack Usage for MX_IWDG_Init 0x18 bytes.
+Call chain for maximum stack usage:
+MX_IWDG_Init => HAL_IWDG_Init
+
+Maximum Stack Usage for MX_Lora_Init 0xd0 bytes.
+Call chain for maximum stack usage:
+MX_Lora_Init => Create_ModObject => pvPortMalloc => vApplicationMallocFailedHook => shellPrint => vsnprintf
+
+Maximum Stack Usage for MX_ModbusInit 0xb8 bytes.
+Call chain for maximum stack usage:
+MX_ModbusInit => Create_ModObject => pvPortMalloc => vApplicationMallocFailedHook => shellPrint => vsnprintf
+
+Maximum Stack Usage for MX_ShellInit 0x4c bytes.
+Call chain for maximum stack usage:
+MX_ShellInit => shellInit => shellSeekCommand => strncmp
+
+Maximum Stack Usage for MX_Suart_Init 0x2c bytes.
+Call chain for maximum stack usage:
+MX_Suart_Init => Get_BaudTable => __aeabi_ui2f => _float_epilogue
+
+Maximum Stack Usage for MX_TIM14_Init 0x2c bytes.
+Call chain for maximum stack usage:
+MX_TIM14_Init => HAL_TIM_Base_Init => TIM_Base_SetConfig
+
+Maximum Stack Usage for MX_TIM6_Init 0x2c bytes.
+Call chain for maximum stack usage:
+MX_TIM6_Init => HAL_TIM_Base_Init => TIM_Base_SetConfig
+
+Maximum Stack Usage for MX_USART1_UART_Init 0x80 bytes.
+Call chain for maximum stack usage:
+MX_USART1_UART_Init => HAL_UART_Init => UART_SetConfig => HAL_RCC_GetSysClockFreq => __aeabi_uldivmod
+
+Maximum Stack Usage for MX_USART2_UART_Init 0x80 bytes.
+Call chain for maximum stack usage:
+MX_USART2_UART_Init => HAL_UART_Init => UART_SetConfig => HAL_RCC_GetSysClockFreq => __aeabi_uldivmod
+
+Maximum Stack Usage for Remove_ListItem 0x50 bytes.
+Call chain for maximum stack usage:
+Remove_ListItem => vPortFree => xTaskResumeAll => xTaskIncrementTick
+
+Maximum Stack Usage for Shell_Task 0x60 bytes.
+Call chain for maximum stack usage:
+Shell_Task => shellTask => shellHandler => shellNormalInput => shellInsertByte => shellWritePrompt => shellWriteString
+
+Maximum Stack Usage for SysTick_Handler 0x20 bytes.
+Call chain for maximum stack usage:
+SysTick_Handler => xTaskIncrementTick
+
+Maximum Stack Usage for SystemClock_Config 0xd8 bytes.
+Call chain for maximum stack usage:
+SystemClock_Config => HAL_RCC_ClockConfig => HAL_RCC_GetSysClockFreq => __aeabi_uldivmod
+
+Maximum Stack Usage for TIM14_IRQHandler 0x30 bytes.
+Call chain for maximum stack usage:
+TIM14_IRQHandler => HAL_TIM_IRQHandler => HAL_TIM_PeriodElapsedCallback
+
+Maximum Stack Usage for TIM1_BRK_UP_TRG_COM_IRQHandler 0x30 bytes.
+Call chain for maximum stack usage:
+TIM1_BRK_UP_TRG_COM_IRQHandler => HAL_TIM_IRQHandler => HAL_TIM_PeriodElapsedCallback
+
+Maximum Stack Usage for TIM6_IRQHandler 0x30 bytes.
+Call chain for maximum stack usage:
+TIM6_IRQHandler => HAL_TIM_IRQHandler => HAL_TIM_PeriodElapsedCallback
+
+Maximum Stack Usage for TIM_Base_SetConfig 0x14 bytes.
+Call chain for maximum stack usage:
+TIM_Base_SetConfig
+
+Maximum Stack Usage for UART_AdvFeatureConfig 0x8 bytes.
+Call chain for maximum stack usage:
+UART_AdvFeatureConfig
+
+Maximum Stack Usage for UART_CheckIdleState 0x40 bytes.
+Call chain for maximum stack usage:
+UART_CheckIdleState => UART_WaitOnFlagUntilTimeout
+
+Maximum Stack Usage for UART_SetConfig 0x70 bytes.
+Call chain for maximum stack usage:
+UART_SetConfig => HAL_RCC_GetSysClockFreq => __aeabi_uldivmod
+
+Maximum Stack Usage for UART_Start_Receive_DMA 0x3c bytes.
+Call chain for maximum stack usage:
+UART_Start_Receive_DMA => HAL_DMA_Start_IT => DMA_SetConfig
+
+Maximum Stack Usage for UART_WaitOnFlagUntilTimeout 0x28 bytes.
+Call chain for maximum stack usage:
+UART_WaitOnFlagUntilTimeout
+
+Maximum Stack Usage for USART1_IRQHandler 0x30 bytes.
+Call chain for maximum stack usage:
+USART1_IRQHandler => HAL_UART_IRQHandler => HAL_DMA_Abort_IT
+
+Maximum Stack Usage for USART2_IRQHandler 0x30 bytes.
+Call chain for maximum stack usage:
+USART2_IRQHandler => HAL_UART_IRQHandler => HAL_DMA_Abort_IT
+
+Maximum Stack Usage for User_Shell_Read 0x30 bytes.
+Call chain for maximum stack usage:
+User_Shell_Read => HAL_SUART_Receive
+
+Maximum Stack Usage for User_Shell_Write 0x30 bytes.
+Call chain for maximum stack usage:
+User_Shell_Write => HAL_SUART_Transmit
+
+Maximum Stack Usage for Wait_Recv 0x58 bytes.
+Call chain for maximum stack usage:
+Wait_Recv => shellPrint => vsnprintf
+
+Maximum Stack Usage for __ARM_common_ll_muluu 0x18 bytes.
+Call chain for maximum stack usage:
+__ARM_common_ll_muluu
+
+Maximum Stack Usage for __ARM_common_switch8 0x8 bytes.
+Call chain for maximum stack usage:
+__ARM_common_switch8
+
+Maximum Stack Usage for hard_fault_handler_c 0x60 bytes.
+Call chain for maximum stack usage:
+hard_fault_handler_c => shellPrint => vsnprintf
+
+Maximum Stack Usage for main 0x170 bytes.
+Call chain for maximum stack usage:
+main => MX_FREERTOS_Init => MX_Lora_Init => Create_ModObject => pvPortMalloc => vApplicationMallocFailedHook => shellPrint => vsnprintf
+
+Maximum Stack Usage for osDelay 0x40 bytes.
+Call chain for maximum stack usage:
+osDelay => vTaskDelay => xTaskResumeAll => xTaskIncrementTick
+
+Maximum Stack Usage for osKernelStart 0x80 bytes.
+Call chain for maximum stack usage:
+osKernelStart => vTaskStartScheduler => xTaskCreateStatic => prvInitialiseNewTask => pxPortInitialiseStack
+
+Maximum Stack Usage for osMutexCreate 0x80 bytes.
+Call chain for maximum stack usage:
+osMutexCreate => xQueueCreateMutexStatic => prvInitialiseMutex => xQueueGenericSend => xTaskResumeAll => xTaskIncrementTick
+
+Maximum Stack Usage for osSemaphoreCreate 0x70 bytes.
+Call chain for maximum stack usage:
+osSemaphoreCreate => xQueueGenericSend => xTaskResumeAll => xTaskIncrementTick
+
+Maximum Stack Usage for osSemaphoreRelease 0x70 bytes.
+Call chain for maximum stack usage:
+osSemaphoreRelease => xQueueGenericSend => xTaskResumeAll => xTaskIncrementTick
+
+Maximum Stack Usage for osSemaphoreWait 0x68 bytes.
+Call chain for maximum stack usage:
+osSemaphoreWait => xQueueSemaphoreTake => xTaskResumeAll => xTaskIncrementTick
+
+Maximum Stack Usage for osThreadCreate 0xa0 bytes.
+Call chain for maximum stack usage:
+osThreadCreate => xTaskCreate => pvPortMalloc => vApplicationMallocFailedHook => shellPrint => vsnprintf
+
+Maximum Stack Usage for pvPortMalloc 0x48 bytes.
+Call chain for maximum stack usage:
+pvPortMalloc => vApplicationMallocFailedHook => shellPrint => vsnprintf
+
+Maximum Stack Usage for pxPortInitialiseStack 0x8 bytes.
+Call chain for maximum stack usage:
+pxPortInitialiseStack
+
+Maximum Stack Usage for shellBackspace 0x38 bytes.
+Call chain for maximum stack usage:
+shellBackspace => shellDeleteByte => shellDeleteCommandLine => shellWriteString
+
+Maximum Stack Usage for shellClear 0x10 bytes.
+Call chain for maximum stack usage:
+shellClear => shellWriteString
+
+Maximum Stack Usage for shellClearCommandLine 0x30 bytes.
+Call chain for maximum stack usage:
+shellClearCommandLine => shellDeleteCommandLine => shellWriteString
+
+Maximum Stack Usage for shellCmds 0x40 bytes.
+Call chain for maximum stack usage:
+shellCmds => shellListCommand => shellListItem => shellWriteString
+
+Maximum Stack Usage for shellDelete 0x38 bytes.
+Call chain for maximum stack usage:
+shellDelete => shellDeleteByte => shellDeleteCommandLine => shellWriteString
+
+Maximum Stack Usage for shellDeleteByte 0x30 bytes.
+Call chain for maximum stack usage:
+shellDeleteByte => shellDeleteCommandLine => shellWriteString
+
+Maximum Stack Usage for shellDeleteCommandLine 0x18 bytes.
+Call chain for maximum stack usage:
+shellDeleteCommandLine => shellWriteString
+
+Maximum Stack Usage for shellDown 0x48 bytes.
+Call chain for maximum stack usage:
+shellDown => shellHistory => shellClearCommandLine => shellDeleteCommandLine => shellWriteString
+
+Maximum Stack Usage for shellEnter 0xd4 bytes.
+Call chain for maximum stack usage:
+shellEnter => shellExec => shellRunCommand => shellExtRun => shellExtParsePara => shellSeekCommand => strncmp
+
+Maximum Stack Usage for shellExec 0xcc bytes.
+Call chain for maximum stack usage:
+shellExec => shellRunCommand => shellExtRun => shellExtParsePara => shellSeekCommand => strncmp
+
+Maximum Stack Usage for shellExecute 0xbc bytes.
+Call chain for maximum stack usage:
+shellExecute => shellExtRun => shellExtParsePara => shellSeekCommand => strncmp
+
+Maximum Stack Usage for shellExtParsePara 0x4c bytes.
+Call chain for maximum stack usage:
+shellExtParsePara => shellSeekCommand => strncmp
+
+Maximum Stack Usage for shellExtRun 0x9c bytes.
+Call chain for maximum stack usage:
+shellExtRun => shellExtParsePara => shellSeekCommand => strncmp
+
+Maximum Stack Usage for shellGetVarValue 0x10 bytes.
+Call chain for maximum stack usage:
+shellGetVarValue => __ARM_common_switch8
+
+Maximum Stack Usage for shellHandler 0x58 bytes.
+Call chain for maximum stack usage:
+shellHandler => shellNormalInput => shellInsertByte => shellWritePrompt => shellWriteString
+
+Maximum Stack Usage for shellHelp 0x4c bytes.
+Call chain for maximum stack usage:
+shellHelp => shellWriteCommandHelp => shellSeekCommand => strncmp
+
+Maximum Stack Usage for shellInit 0x44 bytes.
+Call chain for maximum stack usage:
+shellInit => shellSeekCommand => strncmp
+
+Maximum Stack Usage for shellInsertByte 0x28 bytes.
+Call chain for maximum stack usage:
+shellInsertByte => shellWritePrompt => shellWriteString
+
+Maximum Stack Usage for shellKeys 0x40 bytes.
+Call chain for maximum stack usage:
+shellKeys => shellListKey => shellListItem => shellWriteString
+
+Maximum Stack Usage for shellLeft 0x10 bytes.
+Call chain for maximum stack usage:
+shellLeft
+
+Maximum Stack Usage for shellListAll 0x40 bytes.
+Call chain for maximum stack usage:
+shellListAll => shellListUser => shellListItem => shellWriteString
+
+Maximum Stack Usage for shellListCommand 0x38 bytes.
+Call chain for maximum stack usage:
+shellListCommand => shellListItem => shellWriteString
+
+Maximum Stack Usage for shellListItem 0x20 bytes.
+Call chain for maximum stack usage:
+shellListItem => shellWriteString
+
+Maximum Stack Usage for shellListKey 0x38 bytes.
+Call chain for maximum stack usage:
+shellListKey => shellListItem => shellWriteString
+
+Maximum Stack Usage for shellListUser 0x38 bytes.
+Call chain for maximum stack usage:
+shellListUser => shellListItem => shellWriteString
+
+Maximum Stack Usage for shellListVar 0x38 bytes.
+Call chain for maximum stack usage:
+shellListVar => shellListItem => shellWriteString
+
+Maximum Stack Usage for shellNormalInput 0x30 bytes.
+Call chain for maximum stack usage:
+shellNormalInput => shellInsertByte => shellWritePrompt => shellWriteString
+
+Maximum Stack Usage for shellPrint 0x30 bytes.
+Call chain for maximum stack usage:
+shellPrint => vsnprintf
+
+Maximum Stack Usage for shellRight 0x8 bytes.
+Call chain for maximum stack usage:
+shellRight
+
+Maximum Stack Usage for shellRunCommand 0xb4 bytes.
+Call chain for maximum stack usage:
+shellRunCommand => shellExtRun => shellExtParsePara => shellSeekCommand => strncmp
+
+Maximum Stack Usage for shellSeekCommand 0x34 bytes.
+Call chain for maximum stack usage:
+shellSeekCommand => strncmp
+
+Maximum Stack Usage for shellSetVar 0x74 bytes.
+Call chain for maximum stack usage:
+shellSetVar => shellSetVarValue => shellShowVar => shellToDec => __aeabi_idivmod
+
+Maximum Stack Usage for shellSetVarValue 0x5c bytes.
+Call chain for maximum stack usage:
+shellSetVarValue => shellShowVar => shellToDec => __aeabi_idivmod
+
+Maximum Stack Usage for shellTab 0x7c bytes.
+Call chain for maximum stack usage:
+shellTab => shellWriteCommandHelp => shellSeekCommand => strncmp
+
+Maximum Stack Usage for shellTask 0x60 bytes.
+Call chain for maximum stack usage:
+shellTask => shellHandler => shellNormalInput => shellInsertByte => shellWritePrompt => shellWriteString
+
+Maximum Stack Usage for shellToDec 0x2c bytes.
+Call chain for maximum stack usage:
+shellToDec => __aeabi_idivmod
+
+Maximum Stack Usage for shellUp 0x48 bytes.
+Call chain for maximum stack usage:
+shellUp => shellHistory => shellClearCommandLine => shellDeleteCommandLine => shellWriteString
+
+Maximum Stack Usage for shellUsers 0x40 bytes.
+Call chain for maximum stack usage:
+shellUsers => shellListUser => shellListItem => shellWriteString
+
+Maximum Stack Usage for shellVars 0x40 bytes.
+Call chain for maximum stack usage:
+shellVars => shellListVar => shellListItem => shellWriteString
+
+Maximum Stack Usage for shellWriteString 0x8 bytes.
+Call chain for maximum stack usage:
+shellWriteString
+
+Maximum Stack Usage for userShellLock 0x8 bytes.
+Call chain for maximum stack usage:
+userShellLock
+
+Maximum Stack Usage for userShellUnlock 0x8 bytes.
+Call chain for maximum stack usage:
+userShellUnlock
+
+Maximum Stack Usage for vApplicationMallocFailedHook 0x30 bytes.
+Call chain for maximum stack usage:
+vApplicationMallocFailedHook => shellPrint => vsnprintf
+
+Maximum Stack Usage for vApplicationStackOverflowHook 0x38 bytes.
+Call chain for maximum stack usage:
+vApplicationStackOverflowHook => shellPrint => vsnprintf
+
+Maximum Stack Usage for vListInsert 0xc bytes.
+Call chain for maximum stack usage:
+vListInsert
+
+Maximum Stack Usage for vPortFree 0x40 bytes.
+Call chain for maximum stack usage:
+vPortFree => xTaskResumeAll => xTaskIncrementTick
+
+Maximum Stack Usage for vTaskDelay 0x38 bytes.
+Call chain for maximum stack usage:
+vTaskDelay => xTaskResumeAll => xTaskIncrementTick
+
+Maximum Stack Usage for vTaskPlaceOnEventList 0x2c bytes.
+Call chain for maximum stack usage:
+vTaskPlaceOnEventList => prvAddCurrentTaskToDelayedList => vListInsert
+
+Maximum Stack Usage for vTaskPriorityDisinheritAfterTimeout 0x10 bytes.
+Call chain for maximum stack usage:
+vTaskPriorityDisinheritAfterTimeout
+
+Maximum Stack Usage for vTaskStartScheduler 0x78 bytes.
+Call chain for maximum stack usage:
+vTaskStartScheduler => xTaskCreateStatic => prvInitialiseNewTask => pxPortInitialiseStack
+
+Maximum Stack Usage for vTaskSwitchContext 0x40 bytes.
+Call chain for maximum stack usage:
+vTaskSwitchContext => vApplicationStackOverflowHook => shellPrint => vsnprintf
+
+Maximum Stack Usage for xPortStartScheduler 0x1c bytes.
+Call chain for maximum stack usage:
+xPortStartScheduler => __aeabi_uidivmod
+
+Maximum Stack Usage for xQueueCreateMutex 0x70 bytes.
+Call chain for maximum stack usage:
+xQueueCreateMutex => prvInitialiseMutex => xQueueGenericSend => xTaskResumeAll => xTaskIncrementTick
+
+Maximum Stack Usage for xQueueCreateMutexStatic 0x78 bytes.
+Call chain for maximum stack usage:
+xQueueCreateMutexStatic => prvInitialiseMutex => xQueueGenericSend => xTaskResumeAll => xTaskIncrementTick
+
+Maximum Stack Usage for xQueueGenericCreate 0x60 bytes.
+Call chain for maximum stack usage:
+xQueueGenericCreate => pvPortMalloc => vApplicationMallocFailedHook => shellPrint => vsnprintf
+
+Maximum Stack Usage for xQueueGenericCreateStatic 0x40 bytes.
+Call chain for maximum stack usage:
+xQueueGenericCreateStatic => prvInitialiseNewQueue => xQueueGenericReset => xTaskRemoveFromEventList
+
+Maximum Stack Usage for xQueueGenericReset 0x20 bytes.
+Call chain for maximum stack usage:
+xQueueGenericReset => xTaskRemoveFromEventList
+
+Maximum Stack Usage for xQueueGenericSend 0x60 bytes.
+Call chain for maximum stack usage:
+xQueueGenericSend => xTaskResumeAll => xTaskIncrementTick
+
+Maximum Stack Usage for xQueueGiveFromISR 0x20 bytes.
+Call chain for maximum stack usage:
+xQueueGiveFromISR => xTaskRemoveFromEventList
+
+Maximum Stack Usage for xQueueReceiveFromISR 0x38 bytes.
+Call chain for maximum stack usage:
+xQueueReceiveFromISR => xTaskRemoveFromEventList
+
+Maximum Stack Usage for xQueueSemaphoreTake 0x58 bytes.
+Call chain for maximum stack usage:
+xQueueSemaphoreTake => xTaskResumeAll => xTaskIncrementTick
+
+Maximum Stack Usage for xTaskCheckForTimeOut 0x18 bytes.
+Call chain for maximum stack usage:
+xTaskCheckForTimeOut
+
+Maximum Stack Usage for xTaskCreate 0x80 bytes.
+Call chain for maximum stack usage:
+xTaskCreate => pvPortMalloc => vApplicationMallocFailedHook => shellPrint => vsnprintf
+
+Maximum Stack Usage for xTaskCreateStatic 0x58 bytes.
+Call chain for maximum stack usage:
+xTaskCreateStatic => prvInitialiseNewTask => pxPortInitialiseStack
+
+Maximum Stack Usage for xTaskIncrementTick 0x18 bytes.
+Call chain for maximum stack usage:
+xTaskIncrementTick
+
+Maximum Stack Usage for xTaskPriorityDisinherit 0x10 bytes.
+Call chain for maximum stack usage:
+xTaskPriorityDisinherit
+
+Maximum Stack Usage for xTaskPriorityInherit 0x10 bytes.
+Call chain for maximum stack usage:
+xTaskPriorityInherit
+
+Maximum Stack Usage for xTaskRemoveFromEventList 0x10 bytes.
+Call chain for maximum stack usage:
+xTaskRemoveFromEventList
+
+Maximum Stack Usage for xTaskResumeAll 0x30 bytes.
+Call chain for maximum stack usage:
+xTaskResumeAll => xTaskIncrementTick
+
+Stack Usage for functions.
+
+Stack Usage for __main unknown bytes.
+Stack Usage for _main_stk unknown bytes.
+Stack Usage for _main_scatterload unknown bytes.
+Stack Usage for __main_after_scatterload unknown bytes.
+Stack Usage for _main_clock unknown bytes.
+Stack Usage for _main_cpp_init unknown bytes.
+Stack Usage for _main_init unknown bytes.
+Stack Usage for __rt_final_cpp unknown bytes.
+Stack Usage for __rt_final_exit unknown bytes.
+Stack Usage for HardFault_Handler 0x0 bytes.
+Stack Usage for __asm___6_port_c_39a90d8d__prvPortStartFirstTask 0x0 bytes.
+Stack Usage for ulSetInterruptMaskFromISR 0x0 bytes.
+Stack Usage for vClearInterruptMaskFromISR 0x0 bytes.
+Stack Usage for PendSV_Handler 0x0 bytes.
+Stack Usage for Reset_Handler 0x0 bytes.
+Stack Usage for ADC1_IRQHandler 0x0 bytes.
+Stack Usage for DMA1_Channel1_IRQHandler 0x0 bytes.
+Stack Usage for EXTI0_1_IRQHandler 0x0 bytes.
+Stack Usage for EXTI2_3_IRQHandler 0x0 bytes.
+Stack Usage for FLASH_IRQHandler 0x0 bytes.
+Stack Usage for I2C1_IRQHandler 0x0 bytes.
+Stack Usage for I2C2_IRQHandler 0x0 bytes.
+Stack Usage for RCC_IRQHandler 0x0 bytes.
+Stack Usage for RTC_IRQHandler 0x0 bytes.
+Stack Usage for SPI1_IRQHandler 0x0 bytes.
+Stack Usage for SPI2_IRQHandler 0x0 bytes.
+Stack Usage for TIM15_IRQHandler 0x0 bytes.
+Stack Usage for TIM16_IRQHandler 0x0 bytes.
+Stack Usage for TIM17_IRQHandler 0x0 bytes.
+Stack Usage for TIM1_CC_IRQHandler 0x0 bytes.
+Stack Usage for TIM3_IRQHandler 0x0 bytes.
+Stack Usage for WWDG_IRQHandler 0x0 bytes.
+Stack Usage for __aeabi_uidiv 0xc bytes.
+Stack Usage for __aeabi_uidivmod 0xc bytes.
+Stack Usage for __aeabi_idiv 0x10 bytes.
+Stack Usage for __aeabi_idivmod 0x10 bytes.
+Stack Usage for __aeabi_uldivmod 0x30 bytes.
+Stack Usage for __aeabi_llsr 0x8 bytes.
+Stack Usage for _ll_ushift_r 0x8 bytes.
+Stack Usage for ___aeabi_memcpy8$ret 0x8 bytes.
+Stack Usage for __aeabi_memcpy 0x8 bytes.
+Stack Usage for __aeabi_memcpy4 0x8 bytes.
+Stack Usage for memcpy 0x8 bytes.
+Stack Usage for __aeabi_memset 0x0 bytes.
+Stack Usage for __aeabi_memset4 0x0 bytes.
+Stack Usage for __aeabi_memset8 0x0 bytes.
+Stack Usage for __aeabi_memclr 0x0 bytes.
+Stack Usage for __aeabi_memclr4 0x0 bytes.
+Stack Usage for __aeabi_memclr8 0x0 bytes.
+Stack Usage for _memset$wrapper 0x8 bytes.
+Stack Usage for strcat 0x0 bytes.
+Stack Usage for strstr 0xc bytes.
+Stack Usage for strlen 0x0 bytes.
+Stack Usage for strcmp 0x8 bytes.
+Stack Usage for strncmp 0xc bytes.
+Stack Usage for __aeabi_fmul 0x10 bytes.
+Stack Usage for __aeabi_fdiv 0x10 bytes.
+Stack Usage for __aeabi_i2f 0x8 bytes.
+Stack Usage for __aeabi_ui2f 0x8 bytes.
+Stack Usage for __aeabi_f2uiz 0x0 bytes.
+Stack Usage for __aeabi_llsl 0x8 bytes.
+Stack Usage for _ll_shift_l 0x8 bytes.
+Stack Usage for __I$use$fp 0x0 bytes.
+Stack Usage for _float_round 0x0 bytes.
+Stack Usage for _float_epilogue 0xc bytes.
+Stack Usage for __aeabi_dadd 0x30 bytes.
+Stack Usage for __aeabi_dsub 0x8 bytes.
+Stack Usage for __aeabi_drsub 0x8 bytes.
+Stack Usage for __aeabi_dmul 0x48 bytes.
+Stack Usage for __aeabi_ddiv 0x28 bytes.
+Stack Usage for __aeabi_d2ulz 0x8 bytes.
+Stack Usage for __aeabi_cdrcmple 0x0 bytes.
+Stack Usage for __scatterload 0x0 bytes.
+Stack Usage for __scatterload_rt2 0x0 bytes.
+Stack Usage for __aeabi_lasr 0x8 bytes.
+Stack Usage for _ll_sshift_r 0x8 bytes.
+Stack Usage for _double_round 0x8 bytes.
+Stack Usage for _double_epilogue 0x30 bytes.
+Stack Usage for __decompress unknown bytes.
+Stack Usage for __decompress1 unknown bytes.
+Stack Usage for Add_ListItem 0x10 bytes.
+Stack Usage for At_Handle 0x18 bytes.
+Stack Usage for Cpu_Task 0x0 bytes.
+Stack Usage for DMA1_Channel2_3_IRQHandler 0x8 bytes.
+Stack Usage for DMA1_Channel4_5_IRQHandler 0x8 bytes.
+Stack Usage for EXTI4_15_IRQHandler 0x8 bytes.
+Stack Usage for Error_Handler 0x0 bytes.
+Stack Usage for Find_ListItem 0x0 bytes.
+Stack Usage for Free_Mode 0x48 bytes.
+Stack Usage for Get_AtCmd 0x8 bytes.
+Stack Usage for Get_CardId 0x0 bytes.
+Stack Usage for Get_Crc16 0x10 bytes.
+Stack Usage for Get_OneDevice 0x0 bytes.
+Stack Usage for Get_ValidBits 0x0 bytes.
+Stack Usage for HAL_DMA_Abort 0xc bytes.
+Stack Usage for HAL_DMA_Abort_IT 0x10 bytes.
+Stack Usage for HAL_DMA_GetError 0x0 bytes.
+Stack Usage for HAL_DMA_IRQHandler 0x10 bytes.
+Stack Usage for HAL_DMA_Init 0x10 bytes.
+Stack Usage for HAL_DMA_Start_IT 0x18 bytes.
+Stack Usage for HAL_GPIO_EXTI_Callback 0x8 bytes.
+Stack Usage for HAL_GPIO_EXTI_IRQHandler 0x8 bytes.
+Stack Usage for HAL_GPIO_Init 0x18 bytes.
+Stack Usage for HAL_GPIO_ReadPin 0x0 bytes.
+Stack Usage for HAL_GPIO_WritePin 0x0 bytes.
+Stack Usage for HAL_GetTick 0x0 bytes.
+Stack Usage for HAL_IWDG_Init 0x10 bytes.
+Stack Usage for HAL_IWDG_Refresh 0x0 bytes.
+Stack Usage for HAL_IncTick 0x0 bytes.
+Stack Usage for HAL_Init 0x8 bytes.
+Stack Usage for HAL_InitTick 0x20 bytes.
+Stack Usage for HAL_MspInit 0x8 bytes.
+Stack Usage for HAL_NVIC_DisableIRQ 0x0 bytes.
+Stack Usage for HAL_NVIC_EnableIRQ 0x0 bytes.
+Stack Usage for HAL_NVIC_SetPriority 0x8 bytes.
+Stack Usage for HAL_RCCEx_PeriphCLKConfig 0x18 bytes.
+Stack Usage for HAL_RCC_ClockConfig 0x18 bytes.
+Stack Usage for HAL_RCC_GetClockConfig 0x8 bytes.
+Stack Usage for HAL_RCC_GetPCLK1Freq 0x0 bytes.
+Stack Usage for HAL_RCC_GetSysClockFreq 0x28 bytes.
+Stack Usage for HAL_RCC_OscConfig 0x20 bytes.
+Stack Usage for HAL_SUART_Receive 0x28 bytes.
+Stack Usage for HAL_SUART_Transmit 0x28 bytes.
+Stack Usage for HAL_TIMEx_BreakCallback 0x0 bytes.
+Stack Usage for HAL_TIMEx_CommutCallback 0x0 bytes.
+Stack Usage for HAL_TIM_Base_Init 0x10 bytes.
+Stack Usage for HAL_TIM_Base_MspInit 0x8 bytes.
+Stack Usage for HAL_TIM_Base_Start_IT 0x0 bytes.
+Stack Usage for HAL_TIM_Base_Stop_IT 0x0 bytes.
+Stack Usage for HAL_TIM_IC_CaptureCallback 0x0 bytes.
+Stack Usage for HAL_TIM_IRQHandler 0x10 bytes.
+Stack Usage for HAL_TIM_OC_DelayElapsedCallback 0x0 bytes.
+Stack Usage for HAL_TIM_PWM_PulseFinishedCallback 0x0 bytes.
+Stack Usage for HAL_TIM_PeriodElapsedCallback 0x18 bytes.
+Stack Usage for HAL_TIM_TriggerCallback 0x0 bytes.
+Stack Usage for HAL_UARTEx_RxEventCallback 0x0 bytes.
+Stack Usage for HAL_UART_DMAStop 0x18 bytes.
+Stack Usage for HAL_UART_ErrorCallback 0x0 bytes.
+Stack Usage for HAL_UART_IRQHandler 0x18 bytes.
+Stack Usage for HAL_UART_Init 0x8 bytes.
+Stack Usage for HAL_UART_MspInit 0x30 bytes.
+Stack Usage for HAL_UART_Receive_DMA 0x10 bytes.
+Stack Usage for HAL_UART_RxCpltCallback 0x0 bytes.
+Stack Usage for HAL_UART_RxHalfCpltCallback 0x0 bytes.
+Stack Usage for HAL_UART_Transmit_DMA 0x18 bytes.
+Stack Usage for HAL_UART_TxCpltCallback 0x0 bytes.
+Stack Usage for HAL_UART_TxHalfCpltCallback 0x0 bytes.
+Stack Usage for IWDG_Task 0x0 bytes.
+Stack Usage for Lora_Task 0x0 bytes.
+Stack Usage for MX_DMA_Init 0x8 bytes.
+Stack Usage for MX_FREERTOS_Init 0xa0 bytes.
+Stack Usage for MX_GPIO_Init 0x30 bytes.
+Stack Usage for MX_IWDG_Init 0x8 bytes.
+Stack Usage for MX_Lora_Init 0x70 bytes.
+Stack Usage for MX_ModbusInit 0x58 bytes.
+Stack Usage for MX_ShellInit 0x8 bytes.
+Stack Usage for MX_Suart_Init 0x8 bytes.
+Stack Usage for MX_TIM14_Init 0x8 bytes.
+Stack Usage for MX_TIM6_Init 0x8 bytes.
+Stack Usage for MX_USART1_UART_Init 0x8 bytes.
+Stack Usage for MX_USART2_UART_Init 0x8 bytes.
+Stack Usage for NMI_Handler 0x0 bytes.
+Stack Usage for Remove_ListItem 0x10 bytes.
+Stack Usage for SVC_Handler 0x0 bytes.
+Stack Usage for Shell_Task 0x0 bytes.
+Stack Usage for SysTick_Handler 0x8 bytes.
+Stack Usage for SystemClock_Config 0x60 bytes.
+Stack Usage for SystemInit 0x0 bytes.
+Stack Usage for TIM14_IRQHandler 0x8 bytes.
+Stack Usage for TIM1_BRK_UP_TRG_COM_IRQHandler 0x8 bytes.
+Stack Usage for TIM6_IRQHandler 0x8 bytes.
+Stack Usage for TIM_Base_SetConfig 0x14 bytes.
+Stack Usage for UART_AdvFeatureConfig 0x8 bytes.
+Stack Usage for UART_CheckIdleState 0x18 bytes.
+Stack Usage for UART_SetConfig 0x10 bytes.
+Stack Usage for UART_Start_Receive_DMA 0x18 bytes.
+Stack Usage for UART_WaitOnFlagUntilTimeout 0x28 bytes.
+Stack Usage for USART1_IRQHandler 0x8 bytes.
+Stack Usage for USART2_IRQHandler 0x8 bytes.
+Stack Usage for User_Shell_Read 0x8 bytes.
+Stack Usage for User_Shell_Write 0x8 bytes.
+Stack Usage for Wait_Recv 0x28 bytes.
+Stack Usage for __0vsnprintf 0x18 bytes.
+Stack Usage for __1vsnprintf 0x18 bytes.
+Stack Usage for __2vsnprintf 0x18 bytes.
+Stack Usage for __c89vsnprintf 0x18 bytes.
+Stack Usage for vsnprintf 0x18 bytes.
+Stack Usage for __ARM_clz 0x0 bytes.
+Stack Usage for __ARM_common_ll_muluu 0x18 bytes.
+Stack Usage for __ARM_common_switch8 0x8 bytes.
+Stack Usage for __scatterload_copy unknown bytes.
+Stack Usage for __scatterload_null unknown bytes.
+Stack Usage for __scatterload_zeroinit unknown bytes.
+Stack Usage for hard_fault_handler_c 0x30 bytes.
+Stack Usage for main 0x0 bytes.
+Stack Usage for osDelay 0x8 bytes.
+Stack Usage for osKernelStart 0x8 bytes.
+Stack Usage for osMutexCreate 0x8 bytes.
+Stack Usage for osRecursiveMutexRelease 0x0 bytes.
+Stack Usage for osRecursiveMutexWait 0x0 bytes.
+Stack Usage for osSemaphoreCreate 0x10 bytes.
+Stack Usage for osSemaphoreRelease 0x10 bytes.
+Stack Usage for osSemaphoreWait 0x10 bytes.
+Stack Usage for osThreadCreate 0x20 bytes.
+Stack Usage for pvPortMalloc 0x18 bytes.
+Stack Usage for pvTaskIncrementMutexHeldCount 0x0 bytes.
+Stack Usage for pxPortInitialiseStack 0x8 bytes.
+Stack Usage for shellBackspace 0x8 bytes.
+Stack Usage for shellCheckPermission 0x0 bytes.
+Stack Usage for shellClear 0x8 bytes.
+Stack Usage for shellClearCommandLine 0x18 bytes.
+Stack Usage for shellCmds 0x8 bytes.
+Stack Usage for shellDelete 0x8 bytes.
+Stack Usage for shellDeleteByte 0x18 bytes.
+Stack Usage for shellDeleteCommandLine 0x10 bytes.
+Stack Usage for shellDown 0x8 bytes.
+Stack Usage for shellEnter 0x8 bytes.
+Stack Usage for shellExec 0x18 bytes.
+Stack Usage for shellExecute 0x20 bytes.
+Stack Usage for shellExtParsePara 0x18 bytes.
+Stack Usage for shellExtRun 0x50 bytes.
+Stack Usage for shellGetCurrent 0x0 bytes.
+Stack Usage for shellGetVarValue 0x8 bytes.
+Stack Usage for shellHandler 0x28 bytes.
+Stack Usage for shellHelp 0x8 bytes.
+Stack Usage for shellInit 0x10 bytes.
+Stack Usage for shellInsertByte 0x18 bytes.
+Stack Usage for shellKeys 0x8 bytes.
+Stack Usage for shellLeft 0x10 bytes.
+Stack Usage for shellListAll 0x8 bytes.
+Stack Usage for shellListCommand 0x18 bytes.
+Stack Usage for shellListItem 0x18 bytes.
+Stack Usage for shellListKey 0x18 bytes.
+Stack Usage for shellListUser 0x18 bytes.
+Stack Usage for shellListVar 0x18 bytes.
+Stack Usage for shellNormalInput 0x8 bytes.
+Stack Usage for shellPrint 0x18 bytes.
+Stack Usage for shellRight 0x8 bytes.
+Stack Usage for shellRunCommand 0x18 bytes.
+Stack Usage for shellSeekCommand 0x28 bytes.
+Stack Usage for shellSetVar 0x18 bytes.
+Stack Usage for shellSetVarValue 0x10 bytes.
+Stack Usage for shellTab 0x38 bytes.
+Stack Usage for shellTask 0x8 bytes.
+Stack Usage for shellToDec 0x10 bytes.
+Stack Usage for shellToHex 0x0 bytes.
+Stack Usage for shellUp 0x8 bytes.
+Stack Usage for shellUsers 0x8 bytes.
+Stack Usage for shellVars 0x8 bytes.
+Stack Usage for shellWriteString 0x8 bytes.
+Stack Usage for userShellLock 0x8 bytes.
+Stack Usage for userShellUnlock 0x8 bytes.
+Stack Usage for uxListRemove 0x0 bytes.
+Stack Usage for vApplicationGetIdleTaskMemory 0x0 bytes.
+Stack Usage for vApplicationMallocFailedHook 0x0 bytes.
+Stack Usage for vApplicationStackOverflowHook 0x8 bytes.
+Stack Usage for vListInitialise 0x0 bytes.
+Stack Usage for vListInitialiseItem 0x0 bytes.
+Stack Usage for vListInsert 0xc bytes.
+Stack Usage for vListInsertEnd 0x0 bytes.
+Stack Usage for vPortEnterCritical 0x0 bytes.
+Stack Usage for vPortExitCritical 0x0 bytes.
+Stack Usage for vPortFree 0x10 bytes.
+Stack Usage for vPortYield 0x0 bytes.
+Stack Usage for vTaskDelay 0x8 bytes.
+Stack Usage for vTaskInternalSetTimeOutState 0x0 bytes.
+Stack Usage for vTaskMissedYield 0x0 bytes.
+Stack Usage for vTaskPlaceOnEventList 0x8 bytes.
+Stack Usage for vTaskPriorityDisinheritAfterTimeout 0x10 bytes.
+Stack Usage for vTaskStartScheduler 0x20 bytes.
+Stack Usage for vTaskSuspendAll 0x0 bytes.
+Stack Usage for vTaskSwitchContext 0x8 bytes.
+Stack Usage for xPortGetFreeHeapSize 0x0 bytes.
+Stack Usage for xPortGetMinimumEverFreeHeapSize 0x0 bytes.
+Stack Usage for xPortStartScheduler 0x10 bytes.
+Stack Usage for xQueueCreateMutex 0x8 bytes.
+Stack Usage for xQueueCreateMutexStatic 0x10 bytes.
+Stack Usage for xQueueGenericCreate 0x18 bytes.
+Stack Usage for xQueueGenericCreateStatic 0x18 bytes.
+Stack Usage for xQueueGenericReset 0x10 bytes.
+Stack Usage for xQueueGenericSend 0x30 bytes.
+Stack Usage for xQueueGiveFromISR 0x10 bytes.
+Stack Usage for xQueueReceiveFromISR 0x28 bytes.
+Stack Usage for xQueueSemaphoreTake 0x28 bytes.
+Stack Usage for xTaskCheckForTimeOut 0x18 bytes.
+Stack Usage for xTaskCreate 0x38 bytes.
+Stack Usage for xTaskCreateStatic 0x28 bytes.
+Stack Usage for xTaskGetSchedulerState 0x0 bytes.
+Stack Usage for xTaskIncrementTick 0x18 bytes.
+Stack Usage for xTaskPriorityDisinherit 0x10 bytes.
+Stack Usage for xTaskPriorityInherit 0x10 bytes.
+Stack Usage for xTaskRemoveFromEventList 0x10 bytes.
+Stack Usage for xTaskResumeAll 0x18 bytes.
+Stack Usage for Create_ModObject 0x18 bytes.
+Stack Usage for Modbus_46H 0x30 bytes.
+Stack Usage for Modbus_CallBack 0x0 bytes.
+Stack Usage for Modbus_Operatex 0x18 bytes.
+Stack Usage for Modbus_Poll 0x10 bytes.
+Stack Usage for Modbus_Send 0x10 bytes.
+Stack Usage for Modbus_TI_Recive 0x10 bytes.
+Stack Usage for Modus_ReadXCoil 0x20 bytes.
+Stack Usage for Modus_ReportSeverId 0x10 bytes.
+Stack Usage for Modus_WriteCoil 0x18 bytes.
+Stack Usage for Create_ModObject 0x18 bytes.
+Stack Usage for Get_Lora_Status 0x8 bytes.
+Stack Usage for Lora_CallBack 0x20 bytes.
+Stack Usage for Lora_Check_InputCoilState 0x10 bytes.
+Stack Usage for Lora_MakeFrame 0x28 bytes.
+Stack Usage for Lora_Recive_Poll 0x20 bytes.
+Stack Usage for Lora_Send 0x8 bytes.
+Stack Usage for Lora_TI_Recive 0x10 bytes.
+Stack Usage for Lora_Tansmit_Poll 0x18 bytes.
+Stack Usage for Set_Lora_FactoryMode 0x8 bytes.
+Stack Usage for Get_BaudTable 0x10 bytes.
+Stack Usage for Config_Mode 0x28 bytes.
+Stack Usage for shellGetCommandDesc 0x0 bytes.
+Stack Usage for shellGetCommandName 0x4 bytes.
+Stack Usage for shellHistory 0x10 bytes.
+Stack Usage for shellHistoryAdd 0x10 bytes.
+Stack Usage for shellParserParam 0x10 bytes.
+Stack Usage for shellRemoveParamQuotes 0x18 bytes.
+Stack Usage for shellSetUser 0x10 bytes.
+Stack Usage for shellShowVar 0x20 bytes.
+Stack Usage for shellStringCompare 0xc bytes.
+Stack Usage for shellStringCopy 0x0 bytes.
+Stack Usage for shellWriteCommandHelp 0x10 bytes.
+Stack Usage for shellWritePrompt 0x8 bytes.
+Stack Usage for shellWriteReturnValue 0x20 bytes.
+Stack Usage for shellExtParseChar 0x0 bytes.
+Stack Usage for shellExtParseNumber 0x18 bytes.
+Stack Usage for DMA_CalcBaseAndBitshift 0x8 bytes.
+Stack Usage for DMA_SetConfig 0xc bytes.
+Stack Usage for __NVIC_SetPriority 0x0 bytes.
+Stack Usage for UART_DMAAbortOnError 0x8 bytes.
+Stack Usage for UART_DMAError 0x10 bytes.
+Stack Usage for UART_DMAReceiveCplt 0x8 bytes.
+Stack Usage for UART_DMARxHalfCplt 0x8 bytes.
+Stack Usage for UART_DMATransmitCplt 0x8 bytes.
+Stack Usage for UART_DMATxHalfCplt 0x8 bytes.
+Stack Usage for UART_EndRxTransfer 0x8 bytes.
+Stack Usage for UART_EndTxTransfer 0x8 bytes.
+Stack Usage for prvCopyDataFromQueue 0x8 bytes.
+Stack Usage for prvCopyDataToQueue 0x18 bytes.
+Stack Usage for prvInitialiseMutex 0x8 bytes.
+Stack Usage for prvInitialiseNewQueue 0x8 bytes.
+Stack Usage for prvIsQueueEmpty 0x8 bytes.
+Stack Usage for prvUnlockQueue 0x18 bytes.
+Stack Usage for prvAddCurrentTaskToDelayedList 0x18 bytes.
+Stack Usage for prvAddNewTaskToReadyList 0x18 bytes.
+Stack Usage for prvDeleteTCB 0x8 bytes.
+Stack Usage for prvIdleTask 0x0 bytes.
+Stack Usage for prvInitialiseNewTask 0x28 bytes.
+Stack Usage for prvResetNextTaskUnblockTime 0x0 bytes.
+Stack Usage for inHandlerMode 0x0 bytes.
+Stack Usage for makeFreeRtosPriority 0x0 bytes.
+Stack Usage for prvHeapInit 0x0 bytes.
+Stack Usage for prvInsertBlockIntoFreeList 0xc bytes.
+Stack Usage for prvTaskExitError 0x0 bytes.
+Stack Usage for _fp_digits 0x40 bytes.
+Stack Usage for _printf_core 0x80 bytes.
+Stack Usage for _printf_post_padding 0x18 bytes.
+Stack Usage for _printf_pre_padding 0x28 bytes.
+Stack Usage for _snputc 0x0 bytes.
+
+Potential Stack Usage Inaccuracies.
+
+Mutually recursive functions.
+
+ * ADC1_IRQHandler => ADC1_IRQHandler
+ * NMI_Handler => NMI_Handler
+
+Untraceable function pointers.
+
+ * ADC1_IRQHandler from startup_stm32f030x8.o(.text) referenced from startup_stm32f030x8.o(RESET)
+ * At_Handle from at.o(i.At_Handle) referenced from at.o(shellCommand)
+ * Cpu_Task from freertos.o(i.Cpu_Task) referenced from freertos.o(.constdata)
+ * DMA1_Channel1_IRQHandler from startup_stm32f030x8.o(.text) referenced from startup_stm32f030x8.o(RESET)
+ * DMA1_Channel2_3_IRQHandler from stm32f0xx_it.o(i.DMA1_Channel2_3_IRQHandler) referenced from startup_stm32f030x8.o(RESET)
+ * DMA1_Channel4_5_IRQHandler from stm32f0xx_it.o(i.DMA1_Channel4_5_IRQHandler) referenced from startup_stm32f030x8.o(RESET)
+ * EXTI0_1_IRQHandler from startup_stm32f030x8.o(.text) referenced from startup_stm32f030x8.o(RESET)
+ * EXTI2_3_IRQHandler from startup_stm32f030x8.o(.text) referenced from startup_stm32f030x8.o(RESET)
+ * EXTI4_15_IRQHandler from stm32f0xx_it.o(i.EXTI4_15_IRQHandler) referenced from startup_stm32f030x8.o(RESET)
+ * FLASH_IRQHandler from startup_stm32f030x8.o(.text) referenced from startup_stm32f030x8.o(RESET)
+ * Get_Lora_Status from lora.o(i.Get_Lora_Status) referenced from lora.o(i.Create_ModObject)
+ * HardFault_Handler from stm32f0xx_it.o(.emb_text) referenced from startup_stm32f030x8.o(RESET)
+ * I2C1_IRQHandler from startup_stm32f030x8.o(.text) referenced from startup_stm32f030x8.o(RESET)
+ * I2C2_IRQHandler from startup_stm32f030x8.o(.text) referenced from startup_stm32f030x8.o(RESET)
+ * IWDG_Task from freertos.o(i.IWDG_Task) referenced from freertos.o(.constdata)
+ * Lora_CallBack from lora.o(i.Lora_CallBack) referenced from lora.o(i.Create_ModObject)
+ * Lora_Check_InputCoilState from lora.o(i.Lora_Check_InputCoilState) referenced from lora.o(i.Create_ModObject)
+ * Lora_MakeFrame from lora.o(i.Lora_MakeFrame) referenced from lora.o(i.Create_ModObject)
+ * Lora_Recive_Poll from lora.o(i.Lora_Recive_Poll) referenced from lora.o(i.Create_ModObject)
+ * Lora_Send from lora.o(i.Lora_Send) referenced from lora.o(i.Create_ModObject)
+ * Lora_TI_Recive from lora.o(i.Lora_TI_Recive) referenced from lora.o(i.Create_ModObject)
+ * Lora_Tansmit_Poll from lora.o(i.Lora_Tansmit_Poll) referenced from lora.o(i.Create_ModObject)
+ * Lora_Task from freertos.o(i.Lora_Task) referenced from freertos.o(.constdata)
+ * Modbus_46H from modbus.o(i.Modbus_46H) referenced from modbus.o(i.Create_ModObject)
+ * Modbus_CallBack from modbus.o(i.Modbus_CallBack) referenced from modbus.o(i.Create_ModObject)
+ * Modbus_Operatex from modbus.o(i.Modbus_Operatex) referenced from modbus.o(i.Create_ModObject)
+ * Modbus_Poll from modbus.o(i.Modbus_Poll) referenced from modbus.o(i.Create_ModObject)
+ * Modbus_Send from modbus.o(i.Modbus_Send) referenced from modbus.o(i.Create_ModObject)
+ * Modbus_TI_Recive from modbus.o(i.Modbus_TI_Recive) referenced from modbus.o(i.Create_ModObject)
+ * Modus_ReadXCoil from modbus.o(i.Modus_ReadXCoil) referenced from modbus.o(i.Create_ModObject)
+ * Modus_ReportSeverId from modbus.o(i.Modus_ReportSeverId) referenced from modbus.o(i.Create_ModObject)
+ * Modus_WriteCoil from modbus.o(i.Modus_WriteCoil) referenced from modbus.o(i.Create_ModObject)
+ * NMI_Handler from stm32f0xx_it.o(i.NMI_Handler) referenced from startup_stm32f030x8.o(RESET)
+ * PendSV_Handler from port.o(.emb_text) referenced from startup_stm32f030x8.o(RESET)
+ * RCC_IRQHandler from startup_stm32f030x8.o(.text) referenced from startup_stm32f030x8.o(RESET)
+ * RTC_IRQHandler from startup_stm32f030x8.o(.text) referenced from startup_stm32f030x8.o(RESET)
+ * Reset_Handler from startup_stm32f030x8.o(.text) referenced from startup_stm32f030x8.o(RESET)
+ * SPI1_IRQHandler from startup_stm32f030x8.o(.text) referenced from startup_stm32f030x8.o(RESET)
+ * SPI2_IRQHandler from startup_stm32f030x8.o(.text) referenced from startup_stm32f030x8.o(RESET)
+ * SVC_Handler from port.o(i.SVC_Handler) referenced from startup_stm32f030x8.o(RESET)
+ * Set_Lora_FactoryMode from lora.o(i.Set_Lora_FactoryMode) referenced from lora.o(i.Create_ModObject)
+ * Set_Lora_FactoryMode from lora.o(i.Set_Lora_FactoryMode) referenced from lora.o(shellCommand)
+ * Shell_Task from freertos.o(i.Shell_Task) referenced from freertos.o(.constdata)
+ * SysTick_Handler from port.o(i.SysTick_Handler) referenced from startup_stm32f030x8.o(RESET)
+ * SystemInit from system_stm32f0xx.o(i.SystemInit) referenced from startup_stm32f030x8.o(.text)
+ * TIM14_IRQHandler from stm32f0xx_it.o(i.TIM14_IRQHandler) referenced from startup_stm32f030x8.o(RESET)
+ * TIM15_IRQHandler from startup_stm32f030x8.o(.text) referenced from startup_stm32f030x8.o(RESET)
+ * TIM16_IRQHandler from startup_stm32f030x8.o(.text) referenced from startup_stm32f030x8.o(RESET)
+ * TIM17_IRQHandler from startup_stm32f030x8.o(.text) referenced from startup_stm32f030x8.o(RESET)
+ * TIM1_BRK_UP_TRG_COM_IRQHandler from stm32f0xx_it.o(i.TIM1_BRK_UP_TRG_COM_IRQHandler) referenced from startup_stm32f030x8.o(RESET)
+ * TIM1_CC_IRQHandler from startup_stm32f030x8.o(.text) referenced from startup_stm32f030x8.o(RESET)
+ * TIM3_IRQHandler from startup_stm32f030x8.o(.text) referenced from startup_stm32f030x8.o(RESET)
+ * TIM6_IRQHandler from stm32f0xx_it.o(i.TIM6_IRQHandler) referenced from startup_stm32f030x8.o(RESET)
+ * UART_DMAAbortOnError from stm32f0xx_hal_uart.o(i.UART_DMAAbortOnError) referenced from stm32f0xx_hal_uart.o(i.HAL_UART_IRQHandler)
+ * UART_DMAError from stm32f0xx_hal_uart.o(i.UART_DMAError) referenced from stm32f0xx_hal_uart.o(i.HAL_UART_Transmit_DMA)
+ * UART_DMAError from stm32f0xx_hal_uart.o(i.UART_DMAError) referenced from stm32f0xx_hal_uart.o(i.UART_Start_Receive_DMA)
+ * UART_DMAReceiveCplt from stm32f0xx_hal_uart.o(i.UART_DMAReceiveCplt) referenced from stm32f0xx_hal_uart.o(i.UART_Start_Receive_DMA)
+ * UART_DMARxHalfCplt from stm32f0xx_hal_uart.o(i.UART_DMARxHalfCplt) referenced from stm32f0xx_hal_uart.o(i.UART_Start_Receive_DMA)
+ * UART_DMATransmitCplt from stm32f0xx_hal_uart.o(i.UART_DMATransmitCplt) referenced from stm32f0xx_hal_uart.o(i.HAL_UART_Transmit_DMA)
+ * UART_DMATxHalfCplt from stm32f0xx_hal_uart.o(i.UART_DMATxHalfCplt) referenced from stm32f0xx_hal_uart.o(i.HAL_UART_Transmit_DMA)
+ * USART1_IRQHandler from stm32f0xx_it.o(i.USART1_IRQHandler) referenced from startup_stm32f030x8.o(RESET)
+ * USART2_IRQHandler from stm32f0xx_it.o(i.USART2_IRQHandler) referenced from startup_stm32f030x8.o(RESET)
+ * User_Shell_Read from shell_port.o(i.User_Shell_Read) referenced from shell_port.o(i.MX_ShellInit)
+ * User_Shell_Write from shell_port.o(i.User_Shell_Write) referenced from shell_port.o(i.MX_ShellInit)
+ * WWDG_IRQHandler from startup_stm32f030x8.o(.text) referenced from startup_stm32f030x8.o(RESET)
+ * __main from entry.o(.ARM.Collect$$$$00000000) referenced from startup_stm32f030x8.o(.text)
+ * _snputc from printfa.o(i._snputc) referenced from printfa.o(i.__0vsnprintf)
+ * hard_fault_handler_c from stm32f0xx_it.o(i.hard_fault_handler_c) referenced from stm32f0xx_it.o(.emb_text)
+ * main from main.o(i.main) referenced from entry9a.o(.ARM.Collect$$$$0000000B)
+ * prvIdleTask from tasks.o(i.prvIdleTask) referenced from tasks.o(i.vTaskStartScheduler)
+ * prvTaskExitError from port.o(i.prvTaskExitError) referenced from port.o(i.pxPortInitialiseStack)
+ * shellBackspace from shell.o(i.shellBackspace) referenced 2 times from shell.o(shellCommand)
+ * shellClear from shell.o(i.shellClear) referenced from shell.o(shellCommand)
+ * shellCmds from shell.o(i.shellCmds) referenced from shell.o(shellCommand)
+ * shellDelete from shell.o(i.shellDelete) referenced from shell.o(shellCommand)
+ * shellDown from shell.o(i.shellDown) referenced from shell.o(shellCommand)
+ * shellEnter from shell.o(i.shellEnter) referenced 2 times from shell.o(shellCommand)
+ * shellExecute from shell.o(i.shellExecute) referenced from shell.o(shellCommand)
+ * shellHelp from shell.o(i.shellHelp) referenced from shell.o(shellCommand)
+ * shellKeys from shell.o(i.shellKeys) referenced from shell.o(shellCommand)
+ * shellLeft from shell.o(i.shellLeft) referenced from shell.o(shellCommand)
+ * shellRight from shell.o(i.shellRight) referenced from shell.o(shellCommand)
+ * shellSetVar from shell.o(i.shellSetVar) referenced from shell.o(shellCommand)
+ * shellTab from shell.o(i.shellTab) referenced from shell.o(shellCommand)
+ * shellUp from shell.o(i.shellUp) referenced from shell.o(shellCommand)
+ * shellUsers from shell.o(i.shellUsers) referenced from shell.o(shellCommand)
+ * shellVars from shell.o(i.shellVars) referenced from shell.o(shellCommand)
+ * userShellLock from shell_port.o(i.userShellLock) referenced from shell_port.o(i.MX_ShellInit)
+ * userShellUnlock from shell_port.o(i.userShellUnlock) referenced from shell_port.o(i.MX_ShellInit)
+
+==============================================================================
+
 Image Symbol Table
 
     Local Symbols
